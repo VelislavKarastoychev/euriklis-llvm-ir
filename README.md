@@ -6,10 +6,11 @@ A TypeScript library for programmatically generating LLVM IR with support for mu
 
 - 🎯 **Type-safe LLVM IR generation** - Object-based constructors with full TypeScript types
 - 🔧 **Clean API** - No manual `%` prefix management, automatic value handling
-- 🎮 **GPU Support** - First-class support for CUDA/NVPTX, AMDGPU, and SPIR-V
+- 🎮 **Multi-GPU Support** - Production-ready for NVIDIA CUDA, AMD ROCm, and Intel GPUs
+- 🚀 **Complete Intrinsics** - Thread indexing, atomics, SIMD ops, barriers, fast math for all GPU vendors
 - 🌳 **Tree-based IR** - Proper parent/child hierarchy with CFG support for basic blocks
 - 💡 **IntelliSense** - Static constants for types, opcodes, and predicates
-- 🚀 **CUDA Built-ins** - All `threadIdx`, `blockIdx`, `blockDim`, `gridDim`, `__syncthreads()` intrinsics
+- ✅ **Verified** - All generated IR validated with llc compilation tests
 
 ## Installation
 
@@ -613,33 +614,78 @@ const structType = new StructType([
 const sharedPtr = new PointerType(3);  // ptr addrspace(3) - CUDA shared memory
 ```
 
-## Target Architectures
+## GPU Programming
 
-### x86-64 (Default)
+### Quick GPU Example
+
 ```typescript
-const codegen = new LLVMCodegen("module");
+import { NVVMCodegen, AMDGPUCodegen, SPIRVCodegen } from "@euriklis/llvm-ir";
+
+// NVIDIA CUDA
+const cuda = new NVVMCodegen("cuda_kernel");
+const tidCuda = NVVMCodegen.cuda.threadIdxX("tid");
+const syncCuda = NVVMCodegen.cuda.syncThreads();
+
+// AMD ROCm
+const rocm = new AMDGPUCodegen("rocm_kernel");
+const tidAmd = AMDGPUCodegen.rocm.workitemIdX("tid");
+const syncAmd = AMDGPUCodegen.rocm.barrier();
+
+// Intel GPU / OpenCL
+const opencl = new SPIRVCodegen("opencl_kernel");
+const tidIntel = SPIRVCodegen.opencl.getGlobalIdX("tid");  // Built-in global ID!
+const syncIntel = SPIRVCodegen.opencl.barrier();
 ```
 
-### NVIDIA CUDA (NVPTX)
+### Target Architectures
+
+#### x86-64 (Default)
+```typescript
+import { LLVMCodegen } from "@euriklis/llvm-ir";
+const codegen = new LLVMCodegen("module");
+// Target: x86_64-unknown-linux-gnu
+```
+
+#### NVIDIA CUDA (NVPTX)
 ```typescript
 import { NVVMCodegen } from "@euriklis/llvm-ir";
 const codegen = new NVVMCodegen("module");
 // Target: nvptx64-nvidia-cuda
+// Intrinsics: NVVMCodegen.cuda.*
 ```
 
-### AMD GPU (AMDGPU)
+#### AMD ROCm (AMDGPU)
 ```typescript
 import { AMDGPUCodegen } from "@euriklis/llvm-ir";
 const codegen = new AMDGPUCodegen("module");
 // Target: amdgcn-amd-amdhsa
+// Intrinsics: AMDGPUCodegen.rocm.*
 ```
 
-### SPIR-V (OpenCL/Vulkan)
+#### Intel GPU / OpenCL (SPIR-V)
 ```typescript
 import { SPIRVCodegen } from "@euriklis/llvm-ir";
 const codegen = new SPIRVCodegen("module");
 // Target: spir64-unknown-unknown
+// Intrinsics: SPIRVCodegen.opencl.*
 ```
+
+## GPU Feature Comparison
+
+| Feature | NVIDIA (NVPTX) | AMD (AMDGPU) | Intel (SPIR-V) |
+|---------|----------------|---------------|----------------|
+| **Thread Indexing** | `threadIdx` | `workitemId` | `get_local_id` |
+| **Block/Group ID** | `blockIdx` | `workgroupId` | `get_group_id` |
+| **Block/Group Size** | `blockDim` | (parameter) | `get_local_size` |
+| **Global ID Helper** | globalThreadId1D | globalThreadId1D | `get_global_id` (built-in) |
+| **SIMD Width** | Warp (32 threads) | Wavefront (64 threads) | Sub-group (8-32 threads) |
+| **SIMD Operations** | Vote, shuffle, ballot | Vote, shuffle, DPP | Broadcast, reduce |
+| **Synchronization** | `__syncthreads` | `barrier` | `barrier` |
+| **Atomics** | Full (LDS/global) | Full (LDS/global) | Full (local/global) |
+| **Math Intrinsics** | sqrt, sin, cos, fma, etc. | sqrt, sin, cos, fma, rcp | sqrt, sin, cos, fma |
+| **Address Spaces** | 0-5 | 0-6 | 0-4 (OpenCL) |
+
+All three dialects are **production-ready** with full intrinsic libraries and llc-validated IR generation.
 
 ## API Reference
 
@@ -656,6 +702,7 @@ const codegen = new SPIRVCodegen("module");
 
 - **`BinaryInst`** - Binary operations (add, mul, etc.)
 - **`ICmpInst`** - Integer comparison
+- **`FCmpInst`** - Floating-point comparison
 - **`LoadInst`** - Load from memory
 - **`StoreInst`** - Store to memory
 - **`AllocaInst`** - Stack allocation
@@ -663,6 +710,7 @@ const codegen = new SPIRVCodegen("module");
 - **`CallInst`** - Function call
 - **`RetInst`** - Return from function
 - **`BrInst`** - Branch (conditional/unconditional)
+- **`PhiInst`** - SSA phi node for control flow merging
 
 ### Types
 
@@ -682,10 +730,17 @@ const codegen = new SPIRVCodegen("module");
 
 ### Dialects
 
+#### NVIDIA CUDA (NVPTX)
 - **`NVVMCodegen`** - NVIDIA CUDA/NVPTX code generator
-- **`NVPTXIntrinsics`** - CUDA built-in functions (threadIdx, blockIdx, blockDim, gridDim, syncThreads)
-- **`AMDGPUCodegen`** - AMD GPU code generator
-- **`SPIRVCodegen`** - SPIR-V code generator
+- **`NVPTXIntrinsics`** - CUDA built-ins: threadIdx, blockIdx, blockDim, gridDim, warp operations, math intrinsics
+
+#### AMD ROCm (AMDGPU)
+- **`AMDGPUCodegen`** - AMD GPU/ROCm code generator
+- **`AMDGPUIntrinsics`** - HIP/ROCm built-ins: workitemId, workgroupId, wavefront operations, atomics, math intrinsics
+
+#### Intel GPU / OpenCL (SPIR-V)
+- **`SPIRVCodegen`** - SPIR-V/OpenCL code generator (Intel GPU, cross-vendor)
+- **`SPIRVIntrinsics`** - OpenCL built-ins: get_global_id, get_local_id, sub-group operations, barriers, atomics
 
 ## Architecture
 
@@ -698,14 +753,22 @@ This matches LLVM's actual IR structure and allows proper representation of loop
 
 ## Examples
 
-See the `src/example.ts` and `src/cuda-example.ts` files for complete working examples including:
+Complete working examples in the `src/` directory:
 
-- Basic arithmetic operations
-- Control flow with branches
-- CUDA kernels with thread indexing
+- **`example.ts`** - Basic x86-64 IR generation
+- **`cuda-example.ts`** - NVIDIA CUDA kernel basics
+- **`nvvm-complete-example.ts`** - Complete NVPTX with warp ops, math intrinsics
+- **`amdgpu-complete-example.ts`** - Complete AMD ROCm with wavefront ops, atomics
+- **`spirv-complete-example.ts`** - Complete Intel GPU/OpenCL with sub-group ops
+
+All examples demonstrate:
+- Thread/work-item indexing
+- Control flow and branches
 - Memory operations (load/store/GEP)
-- Thread synchronization with `__syncthreads()`
-- Matrix multiplication structure
+- Synchronization (barriers)
+- SIMD operations (warps/wavefronts/sub-groups)
+- Fast math intrinsics
+- Atomic operations
 
 ## Development
 
@@ -716,9 +779,15 @@ bun install
 # Build the package
 bun run build
 
+# Run tests (requires llc for integration tests)
+bun test
+
 # Run examples
-bun src/example.ts
-bun src/cuda-example.ts
+bun src/example.ts                     # x86-64 basics
+bun src/cuda-example.ts                # CUDA basics
+bun src/nvvm-complete-example.ts       # Complete NVIDIA GPU
+bun src/amdgpu-complete-example.ts     # Complete AMD GPU
+bun src/spirv-complete-example.ts      # Complete Intel GPU / OpenCL
 ```
 
 ## License
@@ -731,4 +800,4 @@ Velislav Simov Karastoychev <vskarastoychev@gmail.com>
 
 ## Repository
 
-https://github.com/euriklis/llvm-ir
+https://github.com/VelislavKarastoychev/euriklis-llvm-ir
