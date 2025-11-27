@@ -52,7 +52,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/euriklis/llvm-ir.git"
+    "url": "https://github.com/VelislavKarastoychev/euriklis-llvm-ir.git"
   },
   "devDependencies": {
     "@types/bun": "latest",
