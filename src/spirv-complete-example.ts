@@ -53,23 +53,23 @@ function exampleCompleteSPIRVKernel() {
   const globalId = SPIRVCodegen.opencl.getGlobalIdX("global.id");
   entry.addInstruction(globalId);
 
-  // Convert i64 to i32 for array indexing
-  const tid = new BinaryInst({
-    name: "tid",
-    opcode: BaseCodegen.opcodes.and,  // Truncate to 32 bits
+  // Convert n from i32 to i64 for comparison (LLVM requires matching types in icmp)
+  const nExt = new BinaryInst({
+    name: "n.ext",
+    opcode: BaseCodegen.opcodes.and,  // Zero-extend by masking
     type: BaseCodegen.types.i64,
-    lhs: globalId,
+    lhs: "n",
     rhs: 0xFFFFFFFF
   });
-  entry.addInstruction(tid);
+  entry.addInstruction(nExt);
 
-  // Bounds check
+  // Bounds check (both operands are i64)
   const cmp = new ICmpInst({
     name: "in_bounds",
     predicate: BaseCodegen.predicates.slt,
     type: BaseCodegen.types.i64,
-    lhs: tid,
-    rhs: "n"
+    lhs: globalId,
+    rhs: nExt
   });
   entry.addInstruction(cmp);
 
@@ -86,7 +86,7 @@ function exampleCompleteSPIRVKernel() {
     baseType: floatType,
     ptrType: BaseCodegen.types.ptr,
     pointer: "input",
-    indices: [{ type: BaseCodegen.types.i64, value: tid }]
+    indices: [{ type: BaseCodegen.types.i64, value: globalId }]
   });
   compute.addInstruction(ptrIn);
 
@@ -122,13 +122,9 @@ function exampleCompleteSPIRVKernel() {
   const subGroupSize = SPIRVCodegen.opencl.getSubGroupSize("sg.size");
   subGroupOps.addInstruction(subGroupSize);
 
-  // Broadcast value from lane 0 to all lanes in sub-group
-  const broadcast = SPIRVCodegen.opencl.subGroupBroadcastF32("broadcast_val", "val.in", 0);
-  subGroupOps.addInstruction(broadcast);
-
-  // Reduce (sum) across sub-group
-  const reduced = SPIRVCodegen.opencl.subGroupReduceAddF32("reduced_val", "val.in");
-  subGroupOps.addInstruction(reduced);
+  // Sub-group barrier
+  const subGroupBarrier = SPIRVCodegen.opencl.subGroupBarrier();
+  subGroupOps.addInstruction(subGroupBarrier);
 
   // Work-group barrier - wait for all work-items
   const barrier = SPIRVCodegen.opencl.barrier();
@@ -160,7 +156,7 @@ function exampleCompleteSPIRVKernel() {
     baseType: floatType,
     ptrType: BaseCodegen.types.ptr,
     pointer: "output",
-    indices: [{ type: BaseCodegen.types.i64, value: tid }]
+    indices: [{ type: BaseCodegen.types.i64, value: globalId }]
   });
   mathOps.addInstruction(ptrOut);
 
@@ -191,10 +187,10 @@ function exampleCompleteSPIRVKernel() {
   console.log(codegen.toString());
   console.log("\n✓ Kernel metadata: !opencl.kernels with isKernel=true");
   console.log("✓ Type safety: All parameters use LLVMType (not any)");
-  console.log("✓ OpenCL intrinsics: get_global_id, get_local_id, barrier");
-  console.log("✓ Sub-group ops: broadcast, reduce (Intel GPU specific)");
-  console.log("✓ Math intrinsics: sqrt, sin, cos, fma");
-  console.log("\nReady for Intel GPU / OpenCL / @euriklis/heterogeneous integration!");
+  console.log("✓ OpenCL intrinsics: get_global_id, get_local_id, barrier (real mangled names)");
+  console.log("✓ Sub-group ops: get_sub_group_local_id, get_sub_group_size, sub_group_barrier");
+  console.log("✓ Math intrinsics: sqrt, sin, cos, fma (standard LLVM intrinsics)");
+  console.log("\nReady for Intel GPU / OpenCL / llvm-spirv translation!");
 }
 
 // Run example
