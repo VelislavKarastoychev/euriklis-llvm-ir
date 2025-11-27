@@ -633,8 +633,17 @@ const syncAmd = AMDGPUCodegen.rocm.barrier();
 
 // Intel GPU / OpenCL
 const opencl = new SPIRVCodegen("opencl_kernel");
-const tidIntel = SPIRVCodegen.opencl.getGlobalIdX("tid");  // Built-in global ID!
+const globalId = SPIRVCodegen.opencl.getGlobalIdX("global.id");  // Returns i64!
 const syncIntel = SPIRVCodegen.opencl.barrier();
+
+// Important: get_global_id returns i64, use ZExtInst for i32→i64 conversions
+import { ZExtInst } from "@euriklis/llvm-ir";
+const nExt = new ZExtInst({
+  name: "n.ext",
+  sourceType: LLVMCodegen.types.i32,
+  value: "n",
+  targetType: LLVMCodegen.types.i64
+});
 ```
 
 ### Target Architectures
@@ -668,7 +677,15 @@ import { SPIRVCodegen } from "@euriklis/llvm-ir";
 const codegen = new SPIRVCodegen("module");
 // Target: spir64-unknown-unknown
 // Intrinsics: SPIRVCodegen.opencl.*
+// Features: Automatic external function declarations for OpenCL built-ins
 ```
+
+**SPIR-V Features:**
+- Automatic `declare spir_func` statements for all OpenCL intrinsics
+- Real OpenCL C++ mangled names (e.g., `_Z13get_global_idj`)
+- Standard LLVM math intrinsics (llvm.sqrt.f32, etc.)
+- Proper type conversions with `zext`/`sext` (get_global_id returns i64)
+- Ready for llvm-spirv translator
 
 ## GPU Feature Comparison
 
@@ -679,13 +696,13 @@ const codegen = new SPIRVCodegen("module");
 | **Block/Group Size** | `blockDim` | (parameter) | `get_local_size` |
 | **Global ID Helper** | globalThreadId1D | globalThreadId1D | `get_global_id` (built-in) |
 | **SIMD Width** | Warp (32 threads) | Wavefront (64 threads) | Sub-group (8-32 threads) |
-| **SIMD Operations** | Vote, shuffle, ballot | Vote, shuffle, DPP | Broadcast, reduce |
+| **SIMD Operations** | Vote, shuffle, ballot | Vote, shuffle, DPP | Sub-group query/barrier |
 | **Synchronization** | `__syncthreads` | `barrier` | `barrier` |
-| **Atomics** | Full (LDS/global) | Full (LDS/global) | Full (local/global) |
+| **Atomics** | Full (LDS/global) | Full (LDS/global) | Not yet implemented |
 | **Math Intrinsics** | sqrt, sin, cos, fma, etc. | sqrt, sin, cos, fma, rcp | sqrt, sin, cos, fma |
 | **Address Spaces** | 0-5 | 0-6 | 0-4 (OpenCL) |
 
-All three dialects are **production-ready** with full intrinsic libraries and llc-validated IR generation.
+All three dialects are **production-ready** with comprehensive intrinsic libraries and llc-validated IR generation.
 
 ## API Reference
 
@@ -739,8 +756,8 @@ All three dialects are **production-ready** with full intrinsic libraries and ll
 - **`AMDGPUIntrinsics`** - HIP/ROCm built-ins: workitemId, workgroupId, wavefront operations, atomics, math intrinsics
 
 #### Intel GPU / OpenCL (SPIR-V)
-- **`SPIRVCodegen`** - SPIR-V/OpenCL code generator (Intel GPU, cross-vendor)
-- **`SPIRVIntrinsics`** - OpenCL built-ins: get_global_id, get_local_id, sub-group operations, barriers, atomics
+- **`SPIRVCodegen`** - SPIR-V/OpenCL code generator with automatic external function declarations
+- **`SPIRVIntrinsics`** - OpenCL built-ins: get_global_id, get_local_id, get_group_id, sub-group operations (query/barrier), work-group barriers, math intrinsics
 
 ## Architecture
 

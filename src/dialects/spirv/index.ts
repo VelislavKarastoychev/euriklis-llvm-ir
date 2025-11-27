@@ -27,10 +27,54 @@ export class SPIRVCodegen extends LLVMCodegen {
   }
 
   /**
-   * Generate SPIR-V compatible LLVM IR with OpenCL kernel metadata
+   * Generate SPIR-V compatible LLVM IR with OpenCL kernel metadata and external function declarations
    */
   toString(): string {
-    let output = super.toString();
+    const baseOutput = super.toString();
+
+    // Extract external function declarations from the IR
+    // Look for all @_Z* and @llvm.* calls that need declarations
+    const externalFunctions = new Set<string>();
+    const callPattern = /call\s+(?:spir_func\s+)?(\w+)\s+@([_A-Za-z][_A-Za-z0-9.]*)\s*\(([^)]*)\)/g;
+
+    let match;
+    while ((match = callPattern.exec(baseOutput)) !== null) {
+      const [_, returnType, funcName, argsWithValues] = match;
+
+      // Add declaration for OpenCL builtins and LLVM intrinsics
+      if (funcName.startsWith('_Z') || funcName.startsWith('llvm.')) {
+        // Extract just the types from "type value, type value" format
+        const paramTypes = argsWithValues
+          .split(',')
+          .map(arg => {
+            const trimmed = arg.trim();
+            // Extract type (everything before the last space or %)
+            const typeMatch = trimmed.match(/^([\w<>]+(?:\s+[\w<>]+)*?)(?:\s+[%@]|\s+[-0-9])/);
+            return typeMatch ? typeMatch[1] : trimmed.split(/\s+/)[0];
+          })
+          .filter(t => t)
+          .join(', ');
+
+        externalFunctions.add(`declare ${funcName.startsWith('_Z') ? 'spir_func ' : ''}${returnType} @${funcName}(${paramTypes})`);
+      }
+    }
+
+    // Build final output with declarations before functions
+    let output = "";
+    const lines = baseOutput.split('\n');
+    let inFunctionDef = false;
+
+    for (const line of lines) {
+      // Insert declarations before first function definition
+      if (!inFunctionDef && line.startsWith('define ')) {
+        // Add all external function declarations
+        if (externalFunctions.size > 0) {
+          output += Array.from(externalFunctions).sort().join('\n') + '\n\n';
+        }
+        inFunctionDef = true;
+      }
+      output += line + '\n';
+    }
 
     // Collect all kernel functions
     const kernels = this.module.getChildren().filter(
@@ -40,8 +84,6 @@ export class SPIRVCodegen extends LLVMCodegen {
 
     // Add OpenCL kernel metadata if we have kernels
     if (kernels.length > 0) {
-      output += "\n";
-
       // Generate metadata for each kernel
       kernels.forEach((kernel, index) => {
         output += `!${index} = !{ptr @${kernel.getName()}, !"kernel", i32 1}\n`;

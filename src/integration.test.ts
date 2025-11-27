@@ -16,6 +16,7 @@ import {
   LoadInst,
   StoreInst,
   GetElementPtrInst,
+  ZExtInst,
   FloatType,
   i32,
   i64,
@@ -1168,13 +1169,12 @@ describe("SPIR-V/OpenCL/Intel GPU Integration Tests", () => {
     const globalId = SPIRVCodegen.opencl.getGlobalIdX("global.id");
     entry.addInstruction(globalId);
 
-    // Extend n from i32 to i64 for comparison
-    const nExt = new BinaryInst({
+    // Extend n from i32 to i64 for comparison using proper zext
+    const nExt = new ZExtInst({
       name: "n.ext",
-      opcode: LLVMCodegen.opcodes.and,
-      type: i64,
-      lhs: "n",
-      rhs: 0xFFFFFFFF
+      sourceType: i32,
+      value: "n",
+      targetType: i64
     });
     entry.addInstruction(nExt);
 
@@ -1272,16 +1272,18 @@ describe("SPIR-V/OpenCL/Intel GPU Integration Tests", () => {
     const ir = codegen.toString();
     expect(ir).toContain("_Z13get_global_idj"); // get_global_id mangled name
     expect(ir).toContain("target triple = \"spir64-unknown-unknown\"");
+    expect(ir).toContain("zext i32 %n to i64"); // Verify proper zext is used
 
-    // Verify IR is valid by parsing with llc (even though it won't compile to SPIR-V)
+    // Verify IR is valid by parsing with llc
     const tmpFile = `/tmp/spirv_test_${Date.now()}.ll`;
     await Bun.write(tmpFile, ir);
 
     try {
-      // Just verify the IR parses correctly - llc will accept valid IR even if target doesn't support it
-      const result = await $`llc ${tmpFile} -o /dev/null`.nothrow();
-      // IR is valid if llc can parse it (exit code 0 or 1 for unsupported target is ok)
-      expect(result.exitCode === 0 || result.exitCode === 1).toBe(true);
+      // Verify the IR is well-formed - llc should exit 0 for valid IR
+      // Note: We can't compile to SPIR-V with llc, but we can verify IR validity
+      // by targeting a generic architecture
+      await $`llc -march=x86-64 ${tmpFile} -o /dev/null`;
+      expect(true).toBe(true);
     } finally {
       await $`rm -f ${tmpFile}`;
     }

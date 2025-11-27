@@ -11,6 +11,7 @@ import {
   LoadInst,
   StoreInst,
   GetElementPtrInst,
+  ZExtInst,
   FloatType,
   LLVMCodegen as BaseCodegen,
 } from ".";
@@ -54,12 +55,11 @@ function exampleCompleteSPIRVKernel() {
   entry.addInstruction(globalId);
 
   // Convert n from i32 to i64 for comparison (LLVM requires matching types in icmp)
-  const nExt = new BinaryInst({
+  const nExt = new ZExtInst({
     name: "n.ext",
-    opcode: BaseCodegen.opcodes.and,  // Zero-extend by masking
-    type: BaseCodegen.types.i64,
-    lhs: "n",
-    rhs: 0xFFFFFFFF
+    sourceType: BaseCodegen.types.i32,
+    value: "n",
+    targetType: BaseCodegen.types.i64
   });
   entry.addInstruction(nExt);
 
