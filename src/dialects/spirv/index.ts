@@ -1,10 +1,15 @@
 import { LLVMCodegen } from "../../core/codegen";
+import { SPIRVIntrinsics } from "./intrinsics";
+import { LLVMFunction } from "../../core/module";
 
 /**
  * SPIR-V code generator
- * Targets OpenCL, Vulkan via SPIR-V intermediate representation
+ * Targets Intel GPUs, OpenCL, Vulkan via SPIR-V intermediate representation
  */
 export class SPIRVCodegen extends LLVMCodegen {
+  // Static reference to SPIR-V/OpenCL intrinsics for easy access
+  static readonly opencl = SPIRVIntrinsics;
+
   constructor(moduleName: string) {
     super(moduleName);
 
@@ -14,14 +19,45 @@ export class SPIRVCodegen extends LLVMCodegen {
   }
 
   /**
-   * Generate SPIR-V compatible LLVM IR
+   * Helper to mark a function as a kernel
+   * This generates the necessary !kernel metadata for OpenCL/SPIR-V
+   */
+  static markAsKernel(func: LLVMFunction): void {
+    func.setKernel(true);
+  }
+
+  /**
+   * Generate SPIR-V compatible LLVM IR with OpenCL kernel metadata
    */
   toString(): string {
     let output = super.toString();
 
-    // Add SPIR-V-specific metadata (e.g., OpenCL kernel metadata)
-    // This will be extended as needed
+    // Collect all kernel functions
+    const kernels = this.module.getChildren().filter(
+      (child): child is LLVMFunction =>
+        child instanceof LLVMFunction && child.isKernelFunction()
+    );
+
+    // Add OpenCL kernel metadata if we have kernels
+    if (kernels.length > 0) {
+      output += "\n";
+
+      // Generate metadata for each kernel
+      kernels.forEach((kernel, index) => {
+        output += `!${index} = !{ptr @${kernel.getName()}, !"kernel", i32 1}\n`;
+      });
+
+      // Add the opencl.kernels metadata node
+      const kernelRefs = kernels.map((_, i) => `!${i}`).join(", ");
+      output += `!opencl.kernels = !{${kernelRefs}}\n`;
+
+      // Add OpenCL version metadata
+      output += `!opencl.ocl.version = !{!${kernels.length}}\n`;
+      output += `!${kernels.length} = !{i32 2, i32 0}\n`;  // OpenCL 2.0
+    }
 
     return output;
   }
 }
+
+export { SPIRVIntrinsics };
