@@ -1,0 +1,64 @@
+{
+  "name": "@euriklis/llvm-ir",
+  "version": "0.1.0",
+  "description": "TypeScript LLVM IR builder with support for multiple target dialects (NVPTX, AMDGPU, SPIR-V)",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./dialects/nvptx": {
+      "import": "./dist/dialects/nvptx/index.js",
+      "types": "./dist/dialects/nvptx/index.d.ts"
+    },
+    "./dialects/amdgpu": {
+      "import": "./dist/dialects/amdgpu/index.js",
+      "types": "./dist/dialects/amdgpu/index.d.ts"
+    },
+    "./dialects/spirv": {
+      "import": "./dist/dialects/spirv/index.js",
+      "types": "./dist/dialects/spirv/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "bun build:tsc",
+    "build:tsc": "tsc",
+    "dev": "tsc --watch",
+    "test": "bun test",
+    "prepublishOnly": "bun run build"
+  },
+  "keywords": [
+    "llvm",
+    "llvm-ir",
+    "compiler",
+    "codegen",
+    "gpu",
+    "cuda",
+    "nvptx",
+    "amdgpu",
+    "spirv",
+    "opencl",
+    "typescript",
+    "code-generation"
+  ],
+  "author": "Velislav Simov Karastoychev <vskarastoychev@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/euriklis/llvm-ir.git"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
