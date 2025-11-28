@@ -1,16 +1,38 @@
 # @euriklis/llvm-ir
 
-A TypeScript library for programmatically generating LLVM IR with support for multiple GPU dialects (NVPTX/CUDA, AMDGPU, SPIR-V). Build LLVM IR using a clean, type-safe API with full IntelliSense support.
+**Generate LLVM IR for CPUs and GPUs from TypeScript**
+
+A type-safe, production-ready library for programmatically generating LLVM IR targeting x86-64, NVIDIA CUDA, AMD ROCm, and Intel GPUs. Perfect for building compilers, DSL code generators, and heterogeneous computing tools.
+
+```typescript
+import { NVVMCodegen, LLVMFunction, BasicBlock } from "@euriklis/llvm-ir";
+
+const codegen = new NVVMCodegen("my_kernel");
+const kernel = new LLVMFunction({ name: "vectorAdd", returnType: codegen.types.void });
+
+// Get CUDA thread ID - generates proper NVVM intrinsics
+const tid = NVVMCodegen.cuda.threadIdxX("tid");
+// Generates: %tid = call i32 @llvm.nvvm.read.ptx.sreg.tid.x()
+```
+
+## Why Use This?
+
+- ✅ **No manual IR string concatenation** - Type-safe API prevents syntax errors
+- ✅ **Multi-GPU from one API** - Switch between NVIDIA/AMD/Intel with one line
+- ✅ **Production-ready intrinsics** - All GPU built-ins validated with LLVM
+- ✅ **Full IntelliSense** - Auto-complete for types, opcodes, intrinsics
+- ✅ **Automatic value tracking** - No `%` prefix management needed
 
 ## Features
 
-- 🎯 **Type-safe LLVM IR generation** - Object-based constructors with full TypeScript types
-- 🔧 **Clean API** - No manual `%` prefix management, automatic value handling
-- 🎮 **Multi-GPU Support** - Production-ready for NVIDIA CUDA, AMD ROCm, and Intel GPUs
-- 🚀 **Complete Intrinsics** - Thread indexing, atomics, SIMD ops, barriers, fast math for all GPU vendors
-- 🌳 **Tree-based IR** - Proper parent/child hierarchy with CFG support for basic blocks
-- 💡 **IntelliSense** - Static constants for types, opcodes, and predicates
-- ✅ **Verified** - All generated IR validated with llc compilation tests
+| Feature | Support |
+|---------|---------|
+| **CPU** | x86-64 (default target) |
+| **NVIDIA GPU** | CUDA/NVPTX with warp ops, math, atomics |
+| **AMD GPU** | ROCm/AMDGPU with wavefront ops, atomics |
+| **Intel GPU** | SPIR-V/OpenCL with sub-groups, barriers |
+| **Type Safety** | Full TypeScript types + IntelliSense |
+| **Validation** | All IR verified with `llc` compiler |
 
 ## Installation
 
@@ -20,136 +42,115 @@ bun add @euriklis/llvm-ir
 
 ## Quick Start
 
+### CPU (x86-64)
+
 ```typescript
 import { LLVMCodegen, LLVMFunction, Parameter, BasicBlock, BinaryInst, RetInst } from "@euriklis/llvm-ir";
 
 const codegen = new LLVMCodegen("my_module");
-const module = codegen.getModule();
 
-// Create function: i32 @add(i32 %a, i32 %b)
 const addFunc = new LLVMFunction({
   name: "add",
   returnType: LLVMCodegen.types.i32
 });
 
-addFunc.addParameter(new Parameter({
-  type: LLVMCodegen.types.i32,
-  name: "a"
-}));
-
-addFunc.addParameter(new Parameter({
-  type: LLVMCodegen.types.i32,
-  name: "b"
-}));
+addFunc.addParameter(new Parameter({ type: LLVMCodegen.types.i32, name: "a" }));
+addFunc.addParameter(new Parameter({ type: LLVMCodegen.types.i32, name: "b" }));
 
 const entry = new BasicBlock("entry");
-
-// %result = add i32 %a, %b
-// Note: No % needed! Just use "a" and "b"
 entry.addInstruction(new BinaryInst({
   name: "result",
   opcode: LLVMCodegen.opcodes.add,
   type: LLVMCodegen.types.i32,
-  lhs: "a",  // Automatically becomes %a
-  rhs: "b"   // Automatically becomes %b
+  lhs: "a",  // No % needed - automatic!
+  rhs: "b"
 }));
-
-entry.setTerminator(new RetInst({
-  type: LLVMCodegen.types.i32,
-  value: "result"
-}));
+entry.setTerminator(new RetInst({ type: LLVMCodegen.types.i32, value: "result" }));
 
 addFunc.addBasicBlock(entry);
-module.addFunction(addFunc);
+codegen.getModule().addFunction(addFunc);
+
+console.log(codegen.toString());
+// Generates: define i32 @add(i32 %a, i32 %b) { ... }
+```
+
+### GPU (NVIDIA CUDA)
+
+```typescript
+import { NVVMCodegen, LLVMFunction, BasicBlock } from "@euriklis/llvm-ir";
+
+const codegen = new NVVMCodegen("cuda_kernel");
+const kernel = new LLVMFunction({
+  name: "myKernel",
+  returnType: LLVMCodegen.types.void
+});
+
+const entry = new BasicBlock("entry");
+
+// Get thread ID - generates NVVM intrinsic
+const tid = NVVMCodegen.cuda.threadIdxX("tid");
+entry.addInstruction(tid);
+// Generates: %tid = call i32 @llvm.nvvm.read.ptx.sreg.tid.x()
+
+// Barrier synchronization
+const sync = NVVMCodegen.cuda.syncThreads();
+entry.addInstruction(sync);
+// Generates: call void @llvm.nvvm.barrier0()
+
+entry.setTerminator(new RetInst({}));
+kernel.addBasicBlock(entry);
+codegen.getModule().addFunction(kernel);
 
 console.log(codegen.toString());
 ```
 
-**Output:**
-```llvm
-; ModuleID = 'my_module'
-source_filename = "my_module"
-target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"
-target triple = "x86_64-unknown-linux-gnu"
-
-define i32 @add(i32 %a, i32 %b) {
-entry:
-  %result = add i32 %a, %b
-  ret i32 %result
-}
-```
-
-## Core Concepts
-
-### 1. Tree Structure (IR Hierarchy)
-
-LLVM IR is organized as a **tree** with parent-child relationships:
-
-```
-Module (root)
-├── GlobalVariable
-├── Function
-│   ├── Parameter
-│   ├── Parameter
-│   ├── BasicBlock (entry)
-│   │   ├── Instruction
-│   │   ├── Instruction
-│   │   └── Terminator
-│   └── BasicBlock
-└── Function
-```
-
-Each node has:
-- **One parent** (or null for Module)
-- **Many children** (ordered array)
-
-### 2. Control Flow Graph (CFG)
-
-Basic blocks form a **graph** structure via branch instructions:
+### GPU (AMD ROCm)
 
 ```typescript
-const entry = new BasicBlock("entry");
-const thenBlock = new BasicBlock("then");
-const elseBlock = new BasicBlock("else");
+import { AMDGPUCodegen } from "@euriklis/llvm-ir";
 
-// Branch creates CFG edges
-entry.setTerminator(new BrInst({
-  condition: cmp,
-  conditionType: LLVMCodegen.types.i1,
-  target: thenBlock,      // Successor
-  falseTarget: elseBlock  // Successor
-}));
+const codegen = new AMDGPUCodegen("rocm_kernel");
+const witemId = AMDGPUCodegen.rocm.workitemIdX("tid");
+// Generates: %tid = call i32 @llvm.amdgcn.workitem.id.x()
 ```
 
-This creates cycles for loops, making it a **graph**, not a pure tree.
+### GPU (Intel / OpenCL)
 
-### 3. Value System (Automatic % Management)
+```typescript
+import { SPIRVCodegen, ZExtInst } from "@euriklis/llvm-ir";
 
-The library automatically handles LLVM's naming conventions:
+const codegen = new SPIRVCodegen("opencl_kernel");
+const globalId = SPIRVCodegen.opencl.getGlobalIdX("gid");
+// Generates: %gid = call i64 @_Z13get_global_idj(i32 0)
+// Note: Returns i64, use ZExtInst for i32→i64 conversions
+
+const barrier = SPIRVCodegen.opencl.barrier();
+// Generates: call void @_Z7barrierj(i32 1)
+```
+
+## Key Concepts
+
+### No Manual % Prefixes
+
+The library handles LLVM's value naming automatically:
 
 ```typescript
 // Variables → %variable
-lhs: "x"  // becomes %x
+lhs: "x"      // becomes %x
 
 // Constants → no prefix
-rhs: 2    // stays as 2
+rhs: 42       // stays as 42
 
-// Instructions → extract %name
-const mul = new BinaryInst({ name: "mul", ... });
-lhs: mul  // automatically uses %mul
+// Instructions → auto-reference
+const mul = new BinaryInst({ name: "result", ... });
+lhs: mul      // uses %result
 ```
 
-**Value Types:**
-- `LocalValue` - Local SSA values with `%` prefix
-- `ConstantValue` - Literal constants (no prefix)
-- `GlobalValue` - Globals with `@` prefix
+### Object-Based API
 
-### 4. Object-Based API
-
-All constructors use named parameters for clarity:
+All constructors use named parameters:
 
 ```typescript
-// ✅ Good - clear what each parameter means
 new BinaryInst({
   name: "result",
   opcode: LLVMCodegen.opcodes.add,
@@ -157,535 +158,196 @@ new BinaryInst({
   lhs: "a",
   rhs: "b"
 });
-
-// ❌ Bad - hard to remember order
-new BinaryInst("result", "add", "i32", "%a", "%b");
+// Clear and type-safe!
 ```
 
-## Instructions
+### Module Structure
 
-### Binary Operations
+```
+Module
+├── Function
+│   ├── Parameter
+│   └── BasicBlock
+│       ├── Instruction
+│       └── Terminator (return/branch)
+└── GlobalVariable
+```
+
+## Common Patterns
+
+### Arithmetic & Logic
 
 ```typescript
-const add = new BinaryInst({
-  name: "sum",
-  opcode: LLVMCodegen.opcodes.add,  // Integer operations
+// Binary operations
+new BinaryInst({
+  name: "result",
+  opcode: LLVMCodegen.opcodes.add,  // add, sub, mul, div, and, or, xor
   type: LLVMCodegen.types.i32,
-  lhs: "x",
-  rhs: 10
-});
-
-const fadd = new BinaryInst({
-  name: "fsum",
-  opcode: LLVMCodegen.opcodes.fadd,  // Float operations
-  type: LLVMCodegen.types.float,
   lhs: "a",
   rhs: "b"
 });
-```
 
-**Available opcodes:**
-- Integer: `add`, `sub`, `mul`, `udiv`, `sdiv`, `urem`, `srem`
-- Float: `fadd`, `fsub`, `fmul`, `fdiv`, `frem`
-- Bitwise: `shl`, `lshr`, `ashr`, `and`, `or`, `xor`
-
-### Comparisons
-
-```typescript
-const cmp = new ICmpInst({
+// Comparisons
+new ICmpInst({
   name: "cmp",
-  predicate: LLVMCodegen.predicates.slt,  // signed less than
+  predicate: LLVMCodegen.predicates.slt,  // eq, ne, slt, sgt, etc.
   type: LLVMCodegen.types.i32,
   lhs: "x",
   rhs: 0
 });
 ```
 
-**Predicates:** `eq`, `ne`, `ugt`, `uge`, `ult`, `ule`, `sgt`, `sge`, `slt`, `sle`
+### Memory Access
 
-### Memory Operations
-
-#### Load
 ```typescript
-const load = new LoadInst({
-  name: "value",
-  type: LLVMCodegen.types.float,
-  pointerType: LLVMCodegen.types.ptr,
-  pointer: "ptr",
-  align: 4
-});
-```
+// Load
+new LoadInst({ name: "val", type: floatType, pointer: "ptr", align: 4 });
 
-#### Store
-```typescript
-const store = new StoreInst({
-  valueType: LLVMCodegen.types.float,
-  value: "result",
-  pointerType: LLVMCodegen.types.ptr,
-  pointer: "ptr",
-  align: 4
-});
-```
+// Store
+new StoreInst({ value: "result", pointer: "ptr", align: 4 });
 
-#### Alloca (Stack Allocation)
-```typescript
-const alloca = new AllocaInst({
-  name: "local",
-  type: LLVMCodegen.types.i32,
-  align: 4
-});
-```
-
-#### GetElementPtr (Array Indexing)
-```typescript
-const gep = new GetElementPtrInst({
+// Array indexing
+new GetElementPtrInst({
   name: "ptr",
   baseType: floatType,
-  ptrType: LLVMCodegen.types.ptr,
   pointer: "array",
-  indices: [
-    { type: LLVMCodegen.types.i32, value: idx }
-  ]
+  indices: [{ type: i32, value: "idx" }]
 });
 ```
 
 ### Control Flow
 
-#### Return
 ```typescript
-// Return void
-entry.setTerminator(new RetInst({}));
+// Conditional branch
+new BrInst({ condition: "cmp", target: trueBlock, falseTarget: falseBlock });
 
-// Return value
-entry.setTerminator(new RetInst({
-  type: LLVMCodegen.types.i32,
-  value: "result"
-}));
+// Return
+new RetInst({ type: i32, value: "result" });
 ```
 
-#### Branch
-```typescript
-// Unconditional
-block.setTerminator(new BrInst({ target: nextBlock }));
+## GPU Intrinsics Reference
 
-// Conditional
-block.setTerminator(new BrInst({
-  condition: cmp,
-  conditionType: LLVMCodegen.types.i1,
-  target: trueBlock,
-  falseTarget: falseBlock
-}));
-```
-
-### Function Calls
+### NVIDIA CUDA (NVVMCodegen.cuda.*)
 
 ```typescript
-const call = new CallInst({
-  name: "result",
-  returnType: LLVMCodegen.types.i32,
-  functionName: "my_function",
-  args: [
-    { type: LLVMCodegen.types.i32, value: "x" },
-    { type: LLVMCodegen.types.float, value: 3.14 }
-  ]
-});
+// Thread & Block IDs
+threadIdxX/Y/Z(name)    // Thread index within block
+blockIdxX/Y/Z(name)     // Block index within grid
+blockDimX/Y/Z(name)     // Block dimensions
+gridDimX/Y/Z(name)      // Grid dimensions
+
+// Synchronization
+syncThreads()           // __syncthreads() barrier
+
+// Warp Operations
+warpAll/Any/Ballot(name, mask, predicate)
+warpShuffleIdxF32/I32(name, mask, value, srcLane)
+
+// Math
+sqrtf/rsqrtf/sinf/cosf/fmaf(name, ...)
 ```
 
-## CUDA/NVPTX Support
-
-Generate GPU kernels with full CUDA built-in support:
+### AMD ROCm (AMDGPUCodegen.rocm.*)
 
 ```typescript
-import { NVVMCodegen, LLVMFunction, Parameter, BasicBlock } from "@euriklis/llvm-ir";
+// Work-Item & Group IDs
+workitemIdX/Y/Z(name)   // Work-item ID (like threadIdx)
+workgroupIdX/Y/Z(name)  // Work-group ID (like blockIdx)
 
-const codegen = new NVVMCodegen("cuda_kernel");
-const module = codegen.getModule();
+// Synchronization
+barrier()               // Work-group barrier
 
-const kernel = new LLVMFunction({
-  name: "vectorAdd",
-  returnType: LLVMCodegen.types.void
-});
+// Wavefront Operations
+ballot(name, predicate)
+readlaneI32(name, value, lane)
 
-kernel.addParameter(new Parameter({ type: LLVMCodegen.types.ptr, name: "a" }));
-kernel.addParameter(new Parameter({ type: LLVMCodegen.types.ptr, name: "b" }));
-kernel.addParameter(new Parameter({ type: LLVMCodegen.types.ptr, name: "c" }));
+// Atomics
+dsAddI32/F32(name, ptr, value, ordering)
 
-const entry = new BasicBlock("entry");
-
-// Get CUDA thread/block indices
-const tidx = NVVMCodegen.cuda.threadIdxX("tid.x");
-const bidx = NVVMCodegen.cuda.blockIdxX("bid.x");
-const bdim = NVVMCodegen.cuda.blockDimX("bdim.x");
-
-entry.addInstruction(tidx);
-entry.addInstruction(bidx);
-entry.addInstruction(bdim);
-
-// Calculate global index: blockIdx.x * blockDim.x + threadIdx.x
-const offset = new BinaryInst({
-  name: "offset",
-  opcode: LLVMCodegen.opcodes.mul,
-  type: LLVMCodegen.types.i32,
-  lhs: bidx,
-  rhs: bdim
-});
-entry.addInstruction(offset);
-
-const idx = new BinaryInst({
-  name: "idx",
-  opcode: LLVMCodegen.opcodes.add,
-  type: LLVMCodegen.types.i32,
-  lhs: offset,
-  rhs: tidx
-});
-entry.addInstruction(idx);
-
-// ... rest of kernel implementation
-
-entry.setTerminator(new RetInst({}));
-kernel.addBasicBlock(entry);
-module.addFunction(kernel);
-
-console.log(codegen.toString());
+// Math
+sqrtf/rsqrtf/sinf/cosf/fmaf/rcpf(name, ...)
 ```
 
-### CUDA Intrinsics
-
-All CUDA built-in variables are available via `NVVMCodegen.cuda.*`:
-
-**Thread Indexing:**
-```typescript
-NVVMCodegen.cuda.threadIdxX(name)  // threadIdx.x
-NVVMCodegen.cuda.threadIdxY(name)  // threadIdx.y
-NVVMCodegen.cuda.threadIdxZ(name)  // threadIdx.z
-```
-
-**Block Indexing:**
-```typescript
-NVVMCodegen.cuda.blockIdxX(name)   // blockIdx.x
-NVVMCodegen.cuda.blockIdxY(name)   // blockIdx.y
-NVVMCodegen.cuda.blockIdxZ(name)   // blockIdx.z
-```
-
-**Block Dimensions:**
-```typescript
-NVVMCodegen.cuda.blockDimX(name)   // blockDim.x
-NVVMCodegen.cuda.blockDimY(name)   // blockDim.y
-NVVMCodegen.cuda.blockDimZ(name)   // blockDim.z
-```
-
-**Grid Dimensions:**
-```typescript
-NVVMCodegen.cuda.gridDimX(name)    // gridDim.x
-NVVMCodegen.cuda.gridDimY(name)    // gridDim.y
-NVVMCodegen.cuda.gridDimZ(name)    // gridDim.z
-```
-
-**Synchronization:**
-```typescript
-NVVMCodegen.cuda.syncThreads()     // __syncthreads() - barrier synchronization
-```
-
-These generate proper LLVM intrinsic calls:
-```llvm
-%tid.x = call i32 @llvm.nvvm.read.ptx.sreg.tid.x()
-%bid.x = call i32 @llvm.nvvm.read.ptx.sreg.ctaid.x()
-%bdim.x = call i32 @llvm.nvvm.read.ptx.sreg.ntid.x()
-call void @llvm.nvvm.barrier0()  ; __syncthreads()
-```
-
-**Example with shared memory synchronization:**
-```typescript
-const entry = new BasicBlock("entry");
-
-// Get thread index
-const tidx = NVVMCodegen.cuda.threadIdxX("tid.x");
-entry.addInstruction(tidx);
-
-// Load from global memory to shared memory
-// ... (load operations) ...
-
-// Synchronize all threads in the block
-const sync = NVVMCodegen.cuda.syncThreads();
-entry.addInstruction(sync);
-
-// Now all threads can safely read from shared memory
-// ... (use shared memory) ...
-```
-
-## Complete Example: CUDA Vector Addition
+### Intel GPU / OpenCL (SPIRVCodegen.opencl.*)
 
 ```typescript
-import {
-  NVVMCodegen,
-  LLVMFunction,
-  Parameter,
-  BasicBlock,
-  BinaryInst,
-  ICmpInst,
-  BrInst,
-  GetElementPtrInst,
-  LoadInst,
-  StoreInst,
-  RetInst,
-  FloatType
-} from "@euriklis/llvm-ir";
+// Work-Item & Group IDs
+getGlobalIdX/Y/Z(name)  // Global work-item ID (i64)
+getLocalIdX/Y/Z(name)   // Local work-item ID (threadIdx)
+getGroupIdX/Y/Z(name)   // Work-group ID (blockIdx)
+getLocalSizeX/Y/Z(name) // Work-group size (blockDim)
 
-const codegen = new NVVMCodegen("vector_add");
-const module = codegen.getModule();
-const floatType = new FloatType("float");
+// Synchronization
+barrier()               // Work-group barrier
 
-// void vectorAdd(float* a, float* b, float* c, int n)
-const kernel = new LLVMFunction({
-  name: "vectorAdd",
-  returnType: LLVMCodegen.types.void
-});
+// Sub-Groups (Intel extension)
+getSubGroupLocalId(name)
+getSubGroupSize(name)
+subGroupBarrier()
 
-kernel.addParameter(new Parameter({ type: LLVMCodegen.types.ptr, name: "a" }));
-kernel.addParameter(new Parameter({ type: LLVMCodegen.types.ptr, name: "b" }));
-kernel.addParameter(new Parameter({ type: LLVMCodegen.types.ptr, name: "c" }));
-kernel.addParameter(new Parameter({ type: LLVMCodegen.types.i32, name: "n" }));
-
-const entry = new BasicBlock("entry");
-const compute = new BasicBlock("compute");
-const exit = new BasicBlock("exit");
-
-// === Calculate global thread ID ===
-const tidx = NVVMCodegen.cuda.threadIdxX("tid.x");
-const bidx = NVVMCodegen.cuda.blockIdxX("bid.x");
-const bdim = NVVMCodegen.cuda.blockDimX("bdim.x");
-entry.addInstruction(tidx);
-entry.addInstruction(bidx);
-entry.addInstruction(bdim);
-
-const offset = new BinaryInst({
-  name: "offset",
-  opcode: LLVMCodegen.opcodes.mul,
-  type: LLVMCodegen.types.i32,
-  lhs: bidx,
-  rhs: bdim
-});
-entry.addInstruction(offset);
-
-const idx = new BinaryInst({
-  name: "idx",
-  opcode: LLVMCodegen.opcodes.add,
-  type: LLVMCodegen.types.i32,
-  lhs: offset,
-  rhs: tidx
-});
-entry.addInstruction(idx);
-
-// === Bounds check ===
-const cmp = new ICmpInst({
-  name: "cmp",
-  predicate: LLVMCodegen.predicates.slt,
-  type: LLVMCodegen.types.i32,
-  lhs: idx,
-  rhs: "n"
-});
-entry.addInstruction(cmp);
-
-entry.setTerminator(new BrInst({
-  condition: cmp,
-  conditionType: LLVMCodegen.types.i1,
-  target: compute,
-  falseTarget: exit
-}));
-
-// === Load and compute ===
-const ptrA = new GetElementPtrInst({
-  name: "ptr.a",
-  baseType: floatType,
-  ptrType: LLVMCodegen.types.ptr,
-  pointer: "a",
-  indices: [{ type: LLVMCodegen.types.i32, value: idx }]
-});
-compute.addInstruction(ptrA);
-
-const valA = new LoadInst({
-  name: "val.a",
-  type: floatType,
-  pointerType: LLVMCodegen.types.ptr,
-  pointer: ptrA,
-  align: 4
-});
-compute.addInstruction(valA);
-
-const ptrB = new GetElementPtrInst({
-  name: "ptr.b",
-  baseType: floatType,
-  ptrType: LLVMCodegen.types.ptr,
-  pointer: "b",
-  indices: [{ type: LLVMCodegen.types.i32, value: idx }]
-});
-compute.addInstruction(ptrB);
-
-const valB = new LoadInst({
-  name: "val.b",
-  type: floatType,
-  pointerType: LLVMCodegen.types.ptr,
-  pointer: ptrB,
-  align: 4
-});
-compute.addInstruction(valB);
-
-const result = new BinaryInst({
-  name: "result",
-  opcode: LLVMCodegen.opcodes.fadd,
-  type: floatType,
-  lhs: valA,
-  rhs: valB
-});
-compute.addInstruction(result);
-
-const ptrC = new GetElementPtrInst({
-  name: "ptr.c",
-  baseType: floatType,
-  ptrType: LLVMCodegen.types.ptr,
-  pointer: "c",
-  indices: [{ type: LLVMCodegen.types.i32, value: idx }]
-});
-compute.addInstruction(ptrC);
-
-const store = new StoreInst({
-  valueType: floatType,
-  value: result,
-  pointerType: LLVMCodegen.types.ptr,
-  pointer: ptrC,
-  align: 4
-});
-compute.addInstruction(store);
-
-compute.setTerminator(new BrInst({ target: exit }));
-
-// === Exit ===
-exit.setTerminator(new RetInst({}));
-
-kernel.addBasicBlock(entry);
-kernel.addBasicBlock(compute);
-kernel.addBasicBlock(exit);
-module.addFunction(kernel);
-
-console.log(codegen.toString());
+// Math
+sqrtf/sinf/cosf/fmaf(name, ...)
 ```
+
+**Important:** OpenCL functions return `i64` types. Use `ZExtInst` for i32→i64 conversions.
+
+## Use Cases
+
+Perfect for building:
+
+- **Domain-Specific Language (DSL) compilers** - Generate optimized GPU code from your custom language
+- **JIT compilers** - Runtime code generation for heterogeneous computing
+- **Auto-differentation tools** - Generate gradient kernels for machine learning
+- **Tensor compilers** - Optimize linear algebra operations across GPUs
+- **Code transformation tools** - Modify or optimize existing LLVM IR
+- **Research projects** - Experiment with LLVM backends and GPU programming models
+
+## Complete Examples
+
+Full working examples in the repository:
+
+- **[example.ts](src/example.ts)** - Basic CPU IR generation
+- **[cuda-example.ts](src/cuda-example.ts)** - NVIDIA CUDA kernel basics
+- **[nvvm-complete-example.ts](src/nvvm-complete-example.ts)** - Complete CUDA with warp ops, shared memory
+- **[amdgpu-complete-example.ts](src/amdgpu-complete-example.ts)** - Complete AMD ROCm with wavefront ops
+- **[spirv-complete-example.ts](src/spirv-complete-example.ts)** - Complete Intel GPU/OpenCL with sub-groups
+
+Each example demonstrates thread indexing, control flow, memory operations, barriers, SIMD operations, and math intrinsics.
 
 ## Type System
 
-### Built-in Types
-
-Access via `LLVMCodegen.types.*`:
-
 ```typescript
-LLVMCodegen.types.void   // void
-LLVMCodegen.types.i1     // i1
-LLVMCodegen.types.i8     // i8
-LLVMCodegen.types.i16    // i16
-LLVMCodegen.types.i32    // i32
-LLVMCodegen.types.i64    // i64
-LLVMCodegen.types.i128   // i128
-LLVMCodegen.types.float  // float
-LLVMCodegen.types.double // double
-LLVMCodegen.types.ptr    // ptr (opaque pointer)
+// Built-in types (LLVMCodegen.types.*)
+void, i1, i8, i16, i32, i64, i128, float, double, ptr
+
+// Custom types
+new IntType(256)                           // i256
+new FloatType("half")                      // half precision
+new ArrayType(i32, 10)                     // [10 x i32]
+new StructType([i32, float])               // { i32, float }
+new PointerType(3)                         // ptr addrspace(3) - CUDA shared memory
 ```
 
-### Custom Types
+## GPU Targets
+
+Switch GPU vendor with one line:
 
 ```typescript
-import { IntType, FloatType, PointerType, ArrayType, StructType } from "@euriklis/llvm-ir";
-
-// Custom integer width
-const i256 = new IntType(256);
-
-// Float types
-const half = new FloatType("half");
-const fp128 = new FloatType("fp128");
-
-// Array type
-const arrayType = new ArrayType(LLVMCodegen.types.i32, 10);  // [10 x i32]
-
-// Struct type
-const structType = new StructType([
-  LLVMCodegen.types.i32,
-  LLVMCodegen.types.float
-]);  // { i32, float }
-
-// Pointer with address space
-const sharedPtr = new PointerType(3);  // ptr addrspace(3) - CUDA shared memory
-```
-
-## GPU Programming
-
-### Quick GPU Example
-
-```typescript
-import { NVVMCodegen, AMDGPUCodegen, SPIRVCodegen } from "@euriklis/llvm-ir";
-
 // NVIDIA CUDA
-const cuda = new NVVMCodegen("cuda_kernel");
-const tidCuda = NVVMCodegen.cuda.threadIdxX("tid");
-const syncCuda = NVVMCodegen.cuda.syncThreads();
+import { NVVMCodegen } from "@euriklis/llvm-ir";
+const cuda = new NVVMCodegen("module");
+// Access: NVVMCodegen.cuda.*
 
 // AMD ROCm
-const rocm = new AMDGPUCodegen("rocm_kernel");
-const tidAmd = AMDGPUCodegen.rocm.workitemIdX("tid");
-const syncAmd = AMDGPUCodegen.rocm.barrier();
+import { AMDGPUCodegen } from "@euriklis/llvm-ir";
+const rocm = new AMDGPUCodegen("module");
+// Access: AMDGPUCodegen.rocm.*
 
 // Intel GPU / OpenCL
-const opencl = new SPIRVCodegen("opencl_kernel");
-const globalId = SPIRVCodegen.opencl.getGlobalIdX("global.id");  // Returns i64!
-const syncIntel = SPIRVCodegen.opencl.barrier();
-
-// Important: get_global_id returns i64, use ZExtInst for i32→i64 conversions
-import { ZExtInst } from "@euriklis/llvm-ir";
-const nExt = new ZExtInst({
-  name: "n.ext",
-  sourceType: LLVMCodegen.types.i32,
-  value: "n",
-  targetType: LLVMCodegen.types.i64
-});
-```
-
-### Target Architectures
-
-#### x86-64 (Default)
-```typescript
-import { LLVMCodegen } from "@euriklis/llvm-ir";
-const codegen = new LLVMCodegen("module");
-// Target: x86_64-unknown-linux-gnu
-```
-
-#### NVIDIA CUDA (NVPTX)
-```typescript
-import { NVVMCodegen } from "@euriklis/llvm-ir";
-const codegen = new NVVMCodegen("module");
-// Target: nvptx64-nvidia-cuda
-// Intrinsics: NVVMCodegen.cuda.*
-```
-
-#### AMD ROCm (AMDGPU)
-```typescript
-import { AMDGPUCodegen } from "@euriklis/llvm-ir";
-const codegen = new AMDGPUCodegen("module");
-// Target: amdgcn-amd-amdhsa
-// Intrinsics: AMDGPUCodegen.rocm.*
-```
-
-#### Intel GPU / OpenCL (SPIR-V)
-```typescript
 import { SPIRVCodegen } from "@euriklis/llvm-ir";
-const codegen = new SPIRVCodegen("module");
-// Target: spir64-unknown-unknown
-// Intrinsics: SPIRVCodegen.opencl.*
-// Features: Automatic external function declarations for OpenCL built-ins
+const intel = new SPIRVCodegen("module");
+// Access: SPIRVCodegen.opencl.*
 ```
-
-**SPIR-V Features:**
-- Automatic `declare spir_func` statements for all OpenCL intrinsics
-- Real OpenCL C++ mangled names (e.g., `_Z13get_global_idj`)
-- Standard LLVM math intrinsics (llvm.sqrt.f32, etc.)
-- Proper type conversions with `zext`/`sext` (get_global_id returns i64)
-- Ready for llvm-spirv translator
 
 ## GPU Feature Comparison
 
@@ -704,88 +366,53 @@ const codegen = new SPIRVCodegen("module");
 
 All three dialects are **production-ready** with comprehensive intrinsic libraries and llc-validated IR generation.
 
-## API Reference
+## API Quick Reference
 
 ### Core Classes
 
-- **`LLVMCodegen`** - Base code generator with target configuration
-- **`Module`** - Top-level IR container
-- **`LLVMFunction`** - Function definition
-- **`Parameter`** - Function parameter
-- **`BasicBlock`** - Container for instructions with CFG edges
-- **`GlobalVariable`** - Global variable declaration
+| Class | Description |
+|-------|-------------|
+| `LLVMCodegen` | Base IR generator (x86-64) |
+| `NVVMCodegen` | NVIDIA CUDA IR generator |
+| `AMDGPUCodegen` | AMD ROCm IR generator |
+| `SPIRVCodegen` | Intel GPU/OpenCL IR generator |
+| `LLVMFunction` | Function definition |
+| `BasicBlock` | Code block with instructions |
+| `Parameter` | Function parameter |
 
-### Instructions
+### Common Instructions
 
-- **`BinaryInst`** - Binary operations (add, mul, etc.)
-- **`ICmpInst`** - Integer comparison
-- **`FCmpInst`** - Floating-point comparison
-- **`LoadInst`** - Load from memory
-- **`StoreInst`** - Store to memory
-- **`AllocaInst`** - Stack allocation
-- **`GetElementPtrInst`** - Pointer arithmetic / array indexing
-- **`CallInst`** - Function call
-- **`RetInst`** - Return from function
-- **`BrInst`** - Branch (conditional/unconditional)
-- **`PhiInst`** - SSA phi node for control flow merging
+| Instruction | Purpose |
+|-------------|---------|
+| `BinaryInst` | add, sub, mul, div, and, or, xor |
+| `ICmpInst` / `FCmpInst` | Integer/float comparisons |
+| `LoadInst` / `StoreInst` | Memory operations |
+| `GetElementPtrInst` | Array indexing |
+| `CallInst` | Function calls |
+| `RetInst` | Return from function |
+| `BrInst` | Conditional/unconditional branches |
+| `PhiInst` | SSA phi nodes |
+| `ZExtInst` / `SExtInst` | Type conversions |
 
-### Types
+### GPU Intrinsics
 
-- **`IntType`** - Integer types (i1, i8, i32, etc.)
-- **`FloatType`** - Floating-point types (float, double)
-- **`PointerType`** - Pointer types
-- **`ArrayType`** - Array types
-- **`VectorType`** - SIMD vector types
-- **`StructType`** - Struct types
-- **`FunctionType`** - Function signature types
+Access via static properties:
 
-### Values
+```typescript
+// NVIDIA
+NVVMCodegen.cuda.threadIdxX(name)
+NVVMCodegen.cuda.syncThreads()
 
-- **`LocalValue`** - Local SSA value with `%` prefix
-- **`ConstantValue`** - Constant literal
-- **`GlobalValue`** - Global with `@` prefix
+// AMD
+AMDGPUCodegen.rocm.workitemIdX(name)
+AMDGPUCodegen.rocm.barrier()
 
-### Dialects
+// Intel
+SPIRVCodegen.opencl.getGlobalIdX(name)
+SPIRVCodegen.opencl.barrier()
+```
 
-#### NVIDIA CUDA (NVPTX)
-- **`NVVMCodegen`** - NVIDIA CUDA/NVPTX code generator
-- **`NVPTXIntrinsics`** - CUDA built-ins: threadIdx, blockIdx, blockDim, gridDim, warp operations, math intrinsics
-
-#### AMD ROCm (AMDGPU)
-- **`AMDGPUCodegen`** - AMD GPU/ROCm code generator
-- **`AMDGPUIntrinsics`** - HIP/ROCm built-ins: workitemId, workgroupId, wavefront operations, atomics, math intrinsics
-
-#### Intel GPU / OpenCL (SPIR-V)
-- **`SPIRVCodegen`** - SPIR-V/OpenCL code generator with automatic external function declarations
-- **`SPIRVIntrinsics`** - OpenCL built-ins: get_global_id, get_local_id, get_group_id, sub-group operations (query/barrier), work-group barriers, math intrinsics
-
-## Architecture
-
-The library uses a **hybrid tree/graph structure**:
-
-1. **Tree (containment)**: Module → Functions → BasicBlocks → Instructions
-2. **Graph (control flow)**: BasicBlocks connect via branch instructions
-
-This matches LLVM's actual IR structure and allows proper representation of loops and complex control flow.
-
-## Examples
-
-Complete working examples in the `src/` directory:
-
-- **`example.ts`** - Basic x86-64 IR generation
-- **`cuda-example.ts`** - NVIDIA CUDA kernel basics
-- **`nvvm-complete-example.ts`** - Complete NVPTX with warp ops, math intrinsics
-- **`amdgpu-complete-example.ts`** - Complete AMD ROCm with wavefront ops, atomics
-- **`spirv-complete-example.ts`** - Complete Intel GPU/OpenCL with sub-group ops
-
-All examples demonstrate:
-- Thread/work-item indexing
-- Control flow and branches
-- Memory operations (load/store/GEP)
-- Synchronization (barriers)
-- SIMD operations (warps/wavefronts/sub-groups)
-- Fast math intrinsics
-- Atomic operations
+See [complete examples](src/) for detailed usage.
 
 ## Development
 
@@ -793,19 +420,48 @@ All examples demonstrate:
 # Install dependencies
 bun install
 
-# Build the package
-bun run build
-
-# Run tests (requires llc for integration tests)
+# Run tests (requires llc for validation)
 bun test
 
 # Run examples
-bun src/example.ts                     # x86-64 basics
-bun src/cuda-example.ts                # CUDA basics
-bun src/nvvm-complete-example.ts       # Complete NVIDIA GPU
-bun src/amdgpu-complete-example.ts     # Complete AMD GPU
-bun src/spirv-complete-example.ts      # Complete Intel GPU / OpenCL
+bun src/example.ts                     # CPU
+bun src/cuda-example.ts                # NVIDIA
+bun src/amdgpu-complete-example.ts     # AMD
+bun src/spirv-complete-example.ts      # Intel
 ```
+
+## Requirements
+
+- **Runtime**: Bun or Node.js 18+
+- **Testing**: LLVM tools (`llc`) for IR validation (optional)
+
+Install LLVM:
+```bash
+# Ubuntu/Debian
+sudo apt install llvm
+
+# macOS
+brew install llvm
+
+# Arch Linux
+sudo pacman -S llvm
+```
+
+## Contributing
+
+Contributions welcome! Areas for improvement:
+
+- Additional GPU intrinsics (atomics for SPIR-V, texture ops, etc.)
+- More target architectures (WebAssembly, ARM, RISC-V)
+- IR optimization passes
+- Better error messages and validation
+- Documentation improvements
+
+## Support
+
+- 📖 [Examples](src/) - Complete working code
+- 🐛 [Issues](https://github.com/VelislavKarastoychev/euriklis-llvm-ir/issues) - Bug reports and feature requests
+- 📧 Email: vskarastoychev@gmail.com
 
 ## License
 
@@ -813,8 +469,10 @@ MIT
 
 ## Author
 
-Velislav Simov Karastoychev <vskarastoychev@gmail.com>
-
-## Repository
-
+**Velislav Karastoychev**
+vskarastoychev@gmail.com
 https://github.com/VelislavKarastoychev/euriklis-llvm-ir
+
+---
+
+**Built with TypeScript. Powered by LLVM. Ready for heterogeneous computing.** 🚀
