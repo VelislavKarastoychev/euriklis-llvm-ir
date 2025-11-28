@@ -1,7 +1,7 @@
 {
   "name": "@euriklis/llvm-ir",
   "version": "0.1.0",
-  "description": "TypeScript LLVM IR builder with support for multiple target dialects (NVPTX, AMDGPU, SPIR-V)",
+  "description": "TypeScript LLVM IR builder with support for multiple architectures (GPU: CUDA, AMD, Intel; CPU: x86-64, ARM, RISC-V; Web: WebAssembly)",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -22,6 +22,18 @@
     "./dialects/spirv": {
       "import": "./dist/dialects/spirv/index.js",
       "types": "./dist/dialects/spirv/index.d.ts"
+    },
+    "./dialects/arm": {
+      "import": "./dist/dialects/arm/index.js",
+      "types": "./dist/dialects/arm/index.d.ts"
+    },
+    "./dialects/riscv": {
+      "import": "./dist/dialects/riscv/index.js",
+      "types": "./dist/dialects/riscv/index.d.ts"
+    },
+    "./dialects/wasm": {
+      "import": "./dist/dialects/wasm/index.js",
+      "types": "./dist/dialects/wasm/index.d.ts"
     }
   },
   "files": [
@@ -45,8 +57,15 @@
     "amdgpu",
     "spirv",
     "opencl",
+    "arm",
+    "aarch64",
+    "riscv",
+    "wasm",
+    "webassembly",
+    "x86-64",
     "typescript",
-    "code-generation"
+    "code-generation",
+    "multi-architecture"
   ],
   "author": "Velislav Simov Karastoychev <vskarastoychev@gmail.com>",
   "license": "MIT",
