@@ -5,6 +5,9 @@ import {
   NVVMCodegen,
   AMDGPUCodegen,
   SPIRVCodegen,
+  ARMCodegen,
+  RISCVCodegen,
+  WASMCodegen,
   LLVMFunction,
   Parameter,
   BasicBlock,
@@ -1510,5 +1513,170 @@ describe("SPIR-V/OpenCL/Intel GPU Integration Tests", () => {
     expect(ir).toContain("_Z22get_sub_group_local_idv");
     expect(ir).toContain("_Z18get_sub_group_sizev");
     expect(ir).toContain("_Z17sub_group_barrierj");
+  });
+
+  test("ARM/AArch64 function compiles with llc", async () => {
+    // Check if llc is available
+    try {
+      await $`which llc`.quiet();
+    } catch {
+      console.log("Skipping test: llc not found");
+      return;
+    }
+
+    const codegen = new ARMCodegen("arm_test");
+    const module = codegen.getModule();
+
+    // Create simple add function
+    const addFunc = new LLVMFunction({
+      name: "add",
+      returnType: i32
+    });
+    addFunc.addParameter(new Parameter({ type: i32, name: "a" }));
+    addFunc.addParameter(new Parameter({ type: i32, name: "b" }));
+
+    const entry = new BasicBlock("entry");
+    entry.addInstruction(new BinaryInst({
+      name: "result",
+      opcode: LLVMCodegen.opcodes.add,
+      type: i32,
+      lhs: "a",
+      rhs: "b"
+    }));
+    entry.setTerminator(new RetInst({
+      type: i32,
+      value: "result"
+    }));
+
+    addFunc.addBasicBlock(entry);
+    module.addFunction(addFunc);
+
+    const ir = codegen.toString();
+
+    // Verify ARM target triple
+    expect(ir).toContain('target triple = "aarch64-unknown-linux-gnu"');
+
+    // Write IR to temp file
+    const tmpFile = `/tmp/test_arm_${Date.now()}.ll`;
+    await Bun.write(tmpFile, ir);
+
+    // Compile with llc
+    try {
+      await $`llc ${tmpFile} -o /dev/null`;
+      expect(true).toBe(true); // If we got here, it compiled successfully
+    } finally {
+      // Cleanup
+      await $`rm -f ${tmpFile}`;
+    }
+  });
+
+  test("RISC-V function compiles with llc", async () => {
+    // Check if llc is available
+    try {
+      await $`which llc`.quiet();
+    } catch {
+      console.log("Skipping test: llc not found");
+      return;
+    }
+
+    const codegen = new RISCVCodegen("riscv_test");
+    const module = codegen.getModule();
+
+    // Create simple add function
+    const addFunc = new LLVMFunction({
+      name: "add",
+      returnType: i32
+    });
+    addFunc.addParameter(new Parameter({ type: i32, name: "a" }));
+    addFunc.addParameter(new Parameter({ type: i32, name: "b" }));
+
+    const entry = new BasicBlock("entry");
+    entry.addInstruction(new BinaryInst({
+      name: "result",
+      opcode: LLVMCodegen.opcodes.add,
+      type: i32,
+      lhs: "a",
+      rhs: "b"
+    }));
+    entry.setTerminator(new RetInst({
+      type: i32,
+      value: "result"
+    }));
+
+    addFunc.addBasicBlock(entry);
+    module.addFunction(addFunc);
+
+    const ir = codegen.toString();
+
+    // Verify RISC-V target triple
+    expect(ir).toContain('target triple = "riscv64-unknown-linux-gnu"');
+
+    // Write IR to temp file
+    const tmpFile = `/tmp/test_riscv_${Date.now()}.ll`;
+    await Bun.write(tmpFile, ir);
+
+    // Compile with llc
+    try {
+      await $`llc ${tmpFile} -o /dev/null`;
+      expect(true).toBe(true); // If we got here, it compiled successfully
+    } finally {
+      // Cleanup
+      await $`rm -f ${tmpFile}`;
+    }
+  });
+
+  test("WebAssembly function compiles with llc", async () => {
+    // Check if llc is available
+    try {
+      await $`which llc`.quiet();
+    } catch {
+      console.log("Skipping test: llc not found");
+      return;
+    }
+
+    const codegen = new WASMCodegen("wasm_test");
+    const module = codegen.getModule();
+
+    // Create simple add function
+    const addFunc = new LLVMFunction({
+      name: "add",
+      returnType: i32
+    });
+    addFunc.addParameter(new Parameter({ type: i32, name: "a" }));
+    addFunc.addParameter(new Parameter({ type: i32, name: "b" }));
+
+    const entry = new BasicBlock("entry");
+    entry.addInstruction(new BinaryInst({
+      name: "result",
+      opcode: LLVMCodegen.opcodes.add,
+      type: i32,
+      lhs: "a",
+      rhs: "b"
+    }));
+    entry.setTerminator(new RetInst({
+      type: i32,
+      value: "result"
+    }));
+
+    addFunc.addBasicBlock(entry);
+    module.addFunction(addFunc);
+
+    const ir = codegen.toString();
+
+    // Verify WebAssembly target triple
+    expect(ir).toContain('target triple = "wasm32-unknown-unknown"');
+
+    // Write IR to temp file
+    const tmpFile = `/tmp/test_wasm_${Date.now()}.ll`;
+    await Bun.write(tmpFile, ir);
+
+    // Compile with llc
+    try {
+      await $`llc ${tmpFile} -o /dev/null`;
+      expect(true).toBe(true); // If we got here, it compiled successfully
+    } finally {
+      // Cleanup
+      await $`rm -f ${tmpFile}`;
+    }
   });
 });
