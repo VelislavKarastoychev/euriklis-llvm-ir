@@ -2,7 +2,7 @@
 
 **Generate LLVM IR for CPUs and GPUs from TypeScript**
 
-A type-safe, production-ready library for programmatically generating LLVM IR targeting x86-64, NVIDIA CUDA, AMD ROCm, and Intel GPUs. Perfect for building compilers, DSL code generators, and heterogeneous computing tools.
+A type-safe, production-ready library for programmatically generating LLVM IR targeting multiple architectures: **GPU** (NVIDIA CUDA, AMD ROCm, Intel), **CPU** (x86-64, ARM/AArch64, RISC-V), and **Web** (WebAssembly). Perfect for building compilers, DSL code generators, and heterogeneous computing tools.
 
 ```typescript
 import { NVVMCodegen, LLVMFunction, BasicBlock } from "@euriklis/llvm-ir";
@@ -27,10 +27,11 @@ const tid = NVVMCodegen.cuda.threadIdxX("tid");
 
 | Feature | Support |
 |---------|---------|
-| **CPU** | x86-64 (default target) |
+| **CPU** | x86-64, ARM/AArch64, RISC-V |
 | **NVIDIA GPU** | CUDA/NVPTX with warp ops, math, atomics |
 | **AMD GPU** | ROCm/AMDGPU with wavefront ops, atomics |
 | **Intel GPU** | SPIR-V/OpenCL with sub-groups, barriers |
+| **WebAssembly** | WASM32/WASM64 for browsers and WASI |
 | **Type Safety** | Full TypeScript types + IntelliSense |
 | **Validation** | All IR verified with `llc` compiler |
 
@@ -452,7 +453,7 @@ sudo pacman -S llvm
 Contributions welcome! Areas for improvement:
 
 - Additional GPU intrinsics (atomics for SPIR-V, texture ops, etc.)
-- More target architectures (WebAssembly, ARM, RISC-V)
+- Architecture-specific optimizations (NEON for ARM, AVX for x86)
 - IR optimization passes
 - Better error messages and validation
 - Documentation improvements
