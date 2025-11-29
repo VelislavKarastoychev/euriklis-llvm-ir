@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2025.10.5)  29 NOV 2025 20:20
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2025.10.5)  29 NOV 2025 21:22
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -478,7 +478,7 @@ Package: enumitem 2019/06/20 v3.9 Customized lists
 \enit@count@id=\count313
 \enitdp@description=\count314
 )
-Package hyperref Info: Option `colorlinks' set `true' on input line 53.
+Package hyperref Info: Option `colorlinks' set `true' on input line 62.
  (/usr/share/texlive/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 File: l3backend-pdftex.def 2024-01-04 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count315
@@ -486,24 +486,24 @@ File: l3backend-pdftex.def 2024-01-04 L3 backend support: PDF output (pdfTeX)
 ) (./handbook.aux)
 \openout1 = `handbook.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -539,7 +539,7 @@ LaTeX Font Info:    ... okay on input line 55.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-Package hyperref Info: Link coloring ON on input line 55.
+Package hyperref Info: Link coloring ON on input line 64.
 (./handbook.out) (./handbook.out)
 \@outlinefile=\write4
 \openout4 = `handbook.out'.
@@ -564,38 +564,69 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 48
  (/usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 ))
+<typescript.png, id=374, 256.96pt x 256.96pt>
+File: typescript.png Graphic file (type png)
+<use typescript.png>
+Package pdftex.def Info: typescript.png  used on input line 102.
+(pdftex.def)             Requested size: 56.9055pt x 56.90385pt.
+<LLVM_logo.png, id=376, 200.24812pt x 125.46875pt>
+File: LLVM_logo.png Graphic file (type png)
+<use LLVM_logo.png>
+Package pdftex.def Info: LLVM_logo.png  used on input line 105.
+(pdftex.def)             Requested size: 56.9055pt x 35.65366pt.
+<Nvidia_logo.svg.png, id=377, 704.6325pt x 518.93875pt>
+File: Nvidia_logo.svg.png Graphic file (type png)
+<use Nvidia_logo.svg.png>
+Package pdftex.def Info: Nvidia_logo.svg.png  used on input line 111.
+(pdftex.def)             Requested size: 39.83368pt x 29.32959pt.
+<amd-logo-wallpaper.jpg, id=378, 271.0125pt x 165.61874pt>
+File: amd-logo-wallpaper.jpg Graphic file (type jpg)
+<use amd-logo-wallpaper.jpg>
+Package pdftex.def Info: amd-logo-wallpaper.jpg  used on input line 114.
+(pdftex.def)             Requested size: 39.83368pt x 24.34135pt.
+<spirv.png, id=379, 319.1925pt x 159.59625pt>
+File: spirv.png Graphic file (type png)
+<use spirv.png>
+Package pdftex.def Info: spirv.png  used on input line 117.
+(pdftex.def)             Requested size: 39.83368pt x 19.91537pt.
+<ARM.png, id=380, 386.44376pt x 131.49126pt>
+File: ARM.png Graphic file (type png)
+<use ARM.png>
+Package pdftex.def Info: ARM.png  used on input line 120.
+(pdftex.def)             Requested size: 39.83368pt x 13.55318pt.
+
 
 LaTeX Font Warning: Font shape `T1/cmr/m/n' in size <40> not available
-(Font)              size <35.83> substituted on input line 127.
+(Font)              size <35.83> substituted on input line 139.
 
 
 LaTeX Font Warning: Font shape `T1/cmr/bx/n' in size <40> not available
-(Font)              size <35.83> substituted on input line 127.
+(Font)              size <35.83> substituted on input line 139.
 
 [1
 
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-<465218720_8763616726992194_1789456364342463852_n.jpg, id=384, 1084.05pt x 1084.05pt>
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map} <./typescript.png> <./LLVM_logo.png> <./Nvidia_logo.svg.png> <./amd-logo-wallpaper.jpg> <./spirv.png> <./ARM.png>]
+<465218720_8763616726992194_1789456364342463852_n.jpg, id=394, 1084.05pt x 1084.05pt>
 File: 465218720_8763616726992194_1789456364342463852_n.jpg Graphic file (type jpg)
 <use 465218720_8763616726992194_1789456364342463852_n.jpg>
-Package pdftex.def Info: 465218720_8763616726992194_1789456364342463852_n.jpg  used on input line 168.
-(pdftex.def)             Requested size: 79.6678pt x 79.66266pt.
-LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 181.
+Package pdftex.def Info: 465218720_8763616726992194_1789456364342463852_n.jpg  used on input line 176.
+(pdftex.def)             Requested size: 17.07182pt x 17.07056pt.
+LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 188.
  (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
 File: t1cmtt.fd 2023/04/13 v2.5m Standard LaTeX font definitions
 )
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 182.
+(Font)              <12> on input line 189.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 182.
+(Font)              <8> on input line 189.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 182.
+(Font)              <6> on input line 189.
 
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.190 \frontmatter
+l.197 \frontmatter
                    [1 <./465218720_8763616726992194_1789456364342463852_n.jpg>] [1
 
 
@@ -612,35 +643,35 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.209 \part{Introduction}
+l.216 \part{Introduction}
                           [1
 
 
 ]
 Chapter 1.
 
-Overfull \hbox (5.87697pt too wide) in paragraph at lines 216--217
+Overfull \hbox (5.87697pt too wide) in paragraph at lines 223--224
 []\T1/cmr/m/n/10.95 LLVM solves this by in-tro-duc-ing an \T1/cmr/bx/n/10.95 in-ter-me-di-ate rep-re-sen-ta-tion (IR)\T1/cmr/m/n/10.95 ^^Va sta-ble, language-
  []
 
 [2
 
 ]
-Overfull \hbox (1.49792pt too wide) in paragraph at lines 270--271
+Overfull \hbox (1.49792pt too wide) in paragraph at lines 277--278
 \T1/cmr/m/n/10.95 LLVM or-ga-nizes code into \T1/cmr/bx/n/10.95 ba-sic blocks\T1/cmr/m/n/10.95 ^^Vstraight-line se-quences of in-struc-tions with no branches
  []
 
 [3] [4]
 Chapter 2.
 
-Overfull \hbox (13.74855pt too wide) in paragraph at lines 366--367
+Overfull \hbox (13.74855pt too wide) in paragraph at lines 373--374
 []\T1/cmr/m/n/10.95 These work-loads hit JavaScript's per-for-mance ceil-ing. While V8, Spi-der-Mon-key, and JavaScript-
  []
 
 [5
 
 ]
-Overfull \hbox (10.42888pt too wide) in paragraph at lines 429--430
+Overfull \hbox (10.42888pt too wide) in paragraph at lines 436--437
 \T1/cmr/m/n/10.95 LLVM pro-vides a com-pre-hen-sive C API (\T1/cmtt/m/n/10.95 llvm-c\T1/cmr/m/n/10.95 ), and sev-eral Node.js bind-ings ex-ist (\T1/cmtt/m/n/10.95 llvm-node\T1/cmr/m/n/10.95 [[]],
  []
 
@@ -675,32 +706,32 @@ Overfull \hbox (14.57593pt too wide) has occurred while \output is active
  []
 
 [23]
-Underfull \hbox (badness 10000) in paragraph at lines 1198--1198
+Underfull \hbox (badness 10000) in paragraph at lines 1205--1205
 []|\T1/cmr/bx/n/10.95 NVIDIA
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1198--1198
+Underfull \hbox (badness 10000) in paragraph at lines 1205--1205
 []|\T1/cmr/bx/n/10.95 AMD
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1206--1206
+Underfull \hbox (badness 10000) in paragraph at lines 1213--1213
 []|\T1/cmtt/m/n/10.95 blockIdx *
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1206--1206
+Underfull \hbox (badness 10000) in paragraph at lines 1213--1213
 \T1/cmtt/m/n/10.95 blockDim +
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1212--1212
+Underfull \hbox (badness 10000) in paragraph at lines 1219--1219
 []|\T1/cmtt/m/n/10.95 __shared__ \T1/cmr/m/n/10.95 (addr
  []
 
 
-Overfull \hbox (6.83627pt too wide) in paragraph at lines 1216--1217
+Overfull \hbox (6.83627pt too wide) in paragraph at lines 1223--1224
 []\T1/cmr/m/n/10.95 All three di-alects are production-ready with com-pre-hen-sive in-trin-sic li-braries and \T1/cmtt/m/n/10.95 llc\T1/cmr/m/n/10.95 -validated
  []
 
@@ -714,144 +745,144 @@ Overfull \hbox (14.57593pt too wide) has occurred while \output is active
 ]
 Chapter 7.
 
-Underfull \hbox (badness 10000) in paragraph at lines 1231--1231
+Underfull \hbox (badness 10000) in paragraph at lines 1238--1238
 []|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1233--1233
+Underfull \hbox (badness 10000) in paragraph at lines 1240--1240
 []|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1235--1235
+Underfull \hbox (badness 10000) in paragraph at lines 1242--1242
 []|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1237--1237
+Underfull \hbox (badness 10000) in paragraph at lines 1244--1244
 []|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1239--1239
+Underfull \hbox (badness 10000) in paragraph at lines 1246--1246
 []|\T1/cmr/m/n/10.95 Division (un-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1239--1239
+Underfull \hbox (badness 10000) in paragraph at lines 1246--1246
 []|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1241--1241
+Underfull \hbox (badness 10000) in paragraph at lines 1248--1248
 []|\T1/cmr/m/n/10.95 Remainder
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1241--1241
+Underfull \hbox (badness 10000) in paragraph at lines 1248--1248
 []|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1243--1243
+Underfull \hbox (badness 10000) in paragraph at lines 1250--1250
 []|\T1/cmr/m/n/10.95 Remainder (un-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1243--1243
+Underfull \hbox (badness 10000) in paragraph at lines 1250--1250
 []|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1252--1252
+Underfull \hbox (badness 10000) in paragraph at lines 1259--1259
 []|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1254--1254
+Underfull \hbox (badness 10000) in paragraph at lines 1261--1261
 []|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1256--1256
+Underfull \hbox (badness 10000) in paragraph at lines 1263--1263
 []|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1258--1258
+Underfull \hbox (badness 10000) in paragraph at lines 1265--1265
 []|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1260--1260
+Underfull \hbox (badness 10000) in paragraph at lines 1267--1267
 []|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1270--1270
+Underfull \hbox (badness 10000) in paragraph at lines 1277--1277
 []|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1274--1274
+Underfull \hbox (badness 10000) in paragraph at lines 1281--1281
 []|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1276--1276
+Underfull \hbox (badness 10000) in paragraph at lines 1283--1283
 []|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1278--1278
+Underfull \hbox (badness 10000) in paragraph at lines 1285--1285
 []|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1280--1280
+Underfull \hbox (badness 10000) in paragraph at lines 1287--1287
 []|\T1/cmr/m/n/10.95 Arithmetic shift
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1280--1280
+Underfull \hbox (badness 10000) in paragraph at lines 1287--1287
 []|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
  []
 
 [26
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 1305--1305
+Underfull \hbox (badness 10000) in paragraph at lines 1312--1312
 []|\T1/cmr/m/n/10.95 Unsigned
  []
 
 
-Underfull \hbox (badness 6910) in paragraph at lines 1309--1309
+Underfull \hbox (badness 6910) in paragraph at lines 1316--1316
 []|\T1/cmr/m/n/10.95 Unsigned less/e-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1324--1324
+Underfull \hbox (badness 10000) in paragraph at lines 1331--1331
 []|\T1/cmr/m/n/10.95 Ordered
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1328--1328
+Underfull \hbox (badness 10000) in paragraph at lines 1335--1335
 []|\T1/cmr/m/n/10.95 Ordered less/e-
  []
 
 [27] [28]
-Underfull \hbox (badness 10000) in paragraph at lines 1463--1464
+Underfull \hbox (badness 10000) in paragraph at lines 1470--1471
 []|\T1/cmtt/m/n/10.95 %r = fptrunc double %a to
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1465--1466
+Underfull \hbox (badness 10000) in paragraph at lines 1472--1473
 []|\T1/cmtt/m/n/10.95 %r = fpext float %a to
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1467--1468
+Underfull \hbox (badness 10000) in paragraph at lines 1474--1475
 []|\T1/cmtt/m/n/10.95 %r = bitcast i32 %a to
  []
 
@@ -860,7 +891,7 @@ Chapter 8.
 [32
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 1676--1676
+Underfull \hbox (badness 10000) in paragraph at lines 1683--1683
 []|\T1/cmr/m/n/10.95 Shared (CU-D-
  []
 
@@ -873,12 +904,12 @@ Chapter 9.
 ]
 Chapter 10.
 
-Underfull \hbox (badness 7613) in paragraph at lines 2027--2027
+Underfull \hbox (badness 7613) in paragraph at lines 2034--2034
 []|\T1/cmr/m/n/10.95 500 GB/s - 1
  []
 
 
-Underfull \hbox (badness 7613) in paragraph at lines 2031--2031
+Underfull \hbox (badness 7613) in paragraph at lines 2038--2038
 []|\T1/cmr/m/n/10.95 500 GB/s - 2
  []
 
@@ -889,32 +920,32 @@ Chapter 11.
 [47
 
 ] [48] [49]
-Underfull \hbox (badness 10000) in paragraph at lines 2492--2493
+Underfull \hbox (badness 10000) in paragraph at lines 2499--2500
 []\T1/cmr/m/n/10.95 Apple Inc. \T1/cmr/m/it/10.95 Metal Shad-ing Lan-guage Spec-i-fi-ca-tion, Ver-sion 4\T1/cmr/m/n/10.95 . Ap-ple De-vel-
  []
 
 
-Underfull \hbox (badness 4872) in paragraph at lines 2492--2493
+Underfull \hbox (badness 4872) in paragraph at lines 2499--2500
 \T1/cmr/m/n/10.95 oper Doc-u-men-ta-tion, 2025. Avail-able at: [][]$\T1/cmtt/m/n/10.95 https : / / developer . apple . com / metal /
  []
 
 
-Underfull \hbox (badness 1430) in paragraph at lines 2495--2496
+Underfull \hbox (badness 1430) in paragraph at lines 2502--2503
 []\T1/cmr/m/n/10.95 Apple Inc. \T1/cmr/m/it/10.95 Metal Doc-u-men-ta-tion\T1/cmr/m/n/10.95 . Ap-ple De-vel-oper, 2024. Avail-able at: [][]$\T1/cmtt/m/n/10.95 https : / /
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2504--2505
+Underfull \hbox (badness 10000) in paragraph at lines 2511--2512
 []\T1/cmr/m/n/10.95 SamoZ256. \T1/cmr/m/it/10.95 Break-ing down Metal's in-ter-me-di-ate rep-re-sen-ta-tion for-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2504--2505
+Underfull \hbox (badness 10000) in paragraph at lines 2511--2512
 \T1/cmr/m/it/10.95 mat\T1/cmr/m/n/10.95 . Medium, 2024. Avail-able at: [][]$\T1/cmtt/m/n/10.95 https : / / medium . com / @samuliak /
  []
 
 
-Underfull \hbox (badness 3439) in paragraph at lines 2507--2508
+Underfull \hbox (badness 3439) in paragraph at lines 2514--2515
 []\T1/cmr/m/n/10.95 Apple Inc. \T1/cmr/m/it/10.95 Metal Pro-gram-ming Guide\T1/cmr/m/n/10.95 . Ap-ple De-vel-oper Doc-u-men-ta-tion Archive,
  []
 
@@ -935,19 +966,18 @@ Package rerunfilecheck Info: File `handbook.out' has not changed.
 (rerunfilecheck)             Checksum: B6E7DAAD8D1CEAE198882909F255D7C9;15750.
  ) 
 Here is how much of TeX's memory you used:
- 25314 strings out of 476182
- 461691 string characters out of 5795595
+ 25358 strings out of 476182
+ 462658 string characters out of 5795595
  2258975 words of memory out of 5000000
- 45576 multiletter control sequences out of 15000+600000
- 578610 words of font info for 73 fonts, out of 8000000 for 9000
+ 45622 multiletter control sequences out of 15000+600000
+ 577057 words of font info for 71 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  84i,6n,87p,562b,1996s stack positions out of 10000i,1000n,20000p,200000b,200000s
- </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcbx1095.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti1095.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1000.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1095.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx2074.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsl1095.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbi1095.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1200.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1095.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1095.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx2488.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1200.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1200.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1728.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1440.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1440.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx3583.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti1728.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1000.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1095.600pk></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
-amsfonts/cm/cmsy10.pfb>
-Output written on handbook.pdf (56 pages, 572382 bytes).
+ </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcbx1095.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti1095.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1000.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1095.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx2074.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsl1095.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbi1095.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1200.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1095.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1095.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx2488.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1200.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1200.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1095.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1440.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1440.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx3583.600pk> </home/euriklis/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti1728.600pk></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb>
+Output written on handbook.pdf (56 pages, 718728 bytes).
 PDF statistics:
- 3073 PDF objects out of 3580 (max. 8388607)
- 2231 compressed objects within 23 object streams
+ 3059 PDF objects out of 3580 (max. 8388607)
+ 2224 compressed objects within 23 object streams
  1356 named destinations out of 1440 (max. 500000)
- 800 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 830 words of extra memory for PDF output out of 10000 (max. 10000000)
 
