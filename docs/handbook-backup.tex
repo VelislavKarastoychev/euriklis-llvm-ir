@@ -1,0 +1,2856 @@
+
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\definecolor{codebg}{RGB}{248,248,248}
+\lstdefinestyle{ts}{%
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codebg},
+  keywordstyle=\color{blue!60!black},
+  commentstyle=\color{green!40!black},
+  stringstyle=\color{orange!60!black},
+  frame=single,
+  framerule=0.2pt,
+  breaklines=true,
+  showstringspaces=false
+}
+\lstdefinestyle{ir}{%
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codebg},
+  frame=single,
+  framerule=0.2pt,
+  breaklines=true,
+  showstringspaces=false
+}
+\title{\textbf{@euriklis/llvm-ir Handbook}\\LLVM for CPUs and GPUs from TypeScript}
+\author{Velislav Karastoychev}
+\date{\today}
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+\section{What is LLVM IR and Why Is It Useful?}
+
+\subsection{The Compiler Problem}
+Traditional compilers are monolithic: each language needs its own complete toolchain targeting every architecture. If you have \(M\) languages and \(N\) architectures, you need \(M \times N\) implementations. This becomes unsustainable as both language diversity and hardware complexity grow.
+
+LLVM solves this by introducing an \textbf{intermediate representation (IR)}—a stable, language-independent, architecture-independent format that sits between high-level source code and low-level machine code. Instead of \(M \times N\) implementations, you need \(M\) front-ends (languages → IR) and \(N\) back-ends (IR → machine code), requiring only \(M + N\) components.
+
+\subsection{What is LLVM IR?}
+LLVM IR is a low-level programming language that resembles assembly but with several critical differences:
+
+\begin{itemize}[noitemsep]
+  \item \textbf{Strongly typed}: Every value has an explicit type (\texttt{i32}, \texttt{float}, \texttt{ptr}, etc.)
+  \item \textbf{Static Single Assignment (SSA)}: Each variable is assigned exactly once
+  \item \textbf{Infinite registers}: No register allocation—that's the backend's job
+  \item \textbf{Architecture-independent}: The same IR works for x86, ARM, GPUs, WebAssembly
+  \item \textbf{Human-readable and machine-parsable}: Text format for debugging, bitcode for production
+\end{itemize}
+
+Here's a simple LLVM IR function:
+\begin{lstlisting}[style=ir]
+define i32 @add(i32 %a, i32 %b) {
+entry:
+  %sum = add i32 %a, %b
+  ret i32 %sum
+}
+\end{lstlisting}
+
+This defines a function named \texttt{add} that takes two \texttt{i32} (32-bit integers) and returns their sum. Notice:
+\begin{itemize}[noitemsep]
+  \item \texttt{@add} is the function name (global symbols use \texttt{@})
+  \item \texttt{\%a}, \texttt{\%b}, \texttt{\%sum} are local values (SSA variables use \texttt{\%})
+  \item \texttt{entry:} is a \textbf{basic block} label
+  \item \texttt{ret} is a \textbf{terminator instruction}
+\end{itemize}
+
+\subsection{Static Single Assignment (SSA) Form}
+SSA is fundamental to LLVM's design. In SSA, every variable is assigned \emph{exactly once} and defined \emph{before} use. This makes data flow explicit and enables powerful optimizations.
+
+\textbf{Non-SSA code} (traditional):
+\begin{lstlisting}[style=ts]
+int x = 5;      // x defined
+x = x + 1;      // x redefined
+x = x * 2;      // x redefined again
+return x;
+\end{lstlisting}
+
+\textbf{SSA form} (LLVM IR):
+\begin{lstlisting}[style=ir]
+%x1 = add i32 5, 1      ; %x1 = 6
+%x2 = mul i32 %x1, 2    ; %x2 = 12
+ret i32 %x2
+\end{lstlisting}
+
+Each version of \texttt{x} gets a unique name (\texttt{\%x1}, \texttt{\%x2}). This makes it trivial to track dependencies: \texttt{\%x2} depends on \texttt{\%x1}, which depends on the constant \texttt{5}.
+
+\subsection{Control Flow and Basic Blocks}
+LLVM organizes code into \textbf{basic blocks}—straight-line sequences of instructions with no branches except at the end. Every basic block must end with a \textbf{terminator instruction} (\texttt{ret}, \texttt{br}, \texttt{switch}).
+
+Here's an if-statement in IR:
+\begin{lstlisting}[style=ir]
+define i32 @max(i32 %a, i32 %b) {
+entry:
+  %cmp = icmp sgt i32 %a, %b    ; signed greater-than comparison
+  br i1 %cmp, label %then, label %else
+
+then:
+  ret i32 %a
+
+else:
+  ret i32 %b
+}
+\end{lstlisting}
+
+The control flow graph (CFG) has three basic blocks:
+\begin{itemize}[noitemsep]
+  \item \texttt{entry}: Compare and branch
+  \item \texttt{then}: Return \texttt{\%a}
+  \item \texttt{else}: Return \texttt{\%b}
+\end{itemize}
+
+\subsection{The PHI Instruction}
+Control flow convergence requires special handling in SSA. Consider:
+\begin{lstlisting}[style=ts]
+let x;
+if (condition) {
+  x = 1;
+} else {
+  x = 2;
+}
+// What is the value of x here?
+\end{lstlisting}
+
+In SSA, \texttt{x} has two different definitions depending on which branch was taken. LLVM uses the \textbf{phi instruction} to merge these:
+
+\begin{lstlisting}[style=ir]
+define i32 @example(i1 %condition) {
+entry:
+  br i1 %condition, label %then, label %else
+
+then:
+  br label %merge
+
+else:
+  br label %merge
+
+merge:
+  %x = phi i32 [ 1, %then ], [ 2, %else ]
+  ret i32 %x
+}
+\end{lstlisting}
+
+The phi instruction says: "\texttt{\%x} is \texttt{1} if we came from \texttt{\%then}, or \texttt{2} if we came from \texttt{\%else}." This maintains SSA form while expressing control flow.
+
+\subsection{Modules, Functions, and Targets}
+An LLVM \textbf{module} is a compilation unit containing:
+\begin{itemize}[noitemsep]
+  \item \textbf{Target triple}: Architecture specification (e.g., \texttt{x86\_64-unknown-linux-gnu})
+  \item \textbf{Data layout}: Memory layout rules (pointer sizes, alignment, endianness)
+  \item \textbf{Functions}: The actual code
+  \item \textbf{Global variables}: Module-level data
+  \item \textbf{Metadata}: Debug info, optimization hints, architecture-specific annotations
+\end{itemize}
+
+The \textbf{target triple} tells LLVM which backend to use. Examples:
+\begin{lstlisting}[style=ir]
+target triple = "x86_64-unknown-linux-gnu"      ; x86-64 CPU
+target triple = "aarch64-unknown-linux-gnu"     ; ARM64 CPU
+target triple = "nvptx64-nvidia-cuda"           ; NVIDIA GPU
+target triple = "amdgcn-amd-amdhsa"             ; AMD GPU
+target triple = "wasm32-unknown-unknown"        ; WebAssembly
+\end{lstlisting}
+
+The \textbf{data layout} specifies low-level details:
+\begin{lstlisting}[style=ir]
+target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
+\end{lstlisting}
+
+This encodes: endianness (\texttt{e} = little-endian), pointer sizes, integer alignments, etc.
+
+\subsection{Why LLVM IR Is Useful}
+LLVM IR's design enables:
+
+\begin{enumerate}[noitemsep]
+  \item \textbf{Optimization}: SSA form makes data flow explicit, enabling dead code elimination, constant folding, loop optimization, and vectorization.
+  \item \textbf{Portability}: Write IR once, compile to any architecture—x86, ARM, GPUs, WebAssembly.
+  \item \textbf{Interoperability}: Mix code from different languages (Rust, C++, Swift) in one module.
+  \item \textbf{Tooling}: LLVM provides \texttt{llc} (compiler), \texttt{opt} (optimizer), \texttt{llvm-dis} (disassembler), and more.
+  \item \textbf{JIT compilation}: Generate and execute code at runtime (used by Julia, JavaScript JITs).
+\end{enumerate}
+
+In summary: LLVM IR is a typed, SSA-based, architecture-independent intermediate language that sits at the heart of modern compiler infrastructure. Understanding IR is understanding how compilers work.
+
+\section{Why LLVM for the TypeScript and JavaScript Ecosystem?}
+
+\subsection{The Rise of Performance-Critical JavaScript}
+JavaScript has evolved far beyond simple webpage scripting. Modern applications demand high performance:
+
+\begin{itemize}[noitemsep]
+  \item \textbf{Scientific computing}: TensorFlow.js, numerical libraries, simulations
+  \item \textbf{Game engines}: Three.js, Babylon.js, physics engines
+  \item \textbf{Data processing}: Analytics, real-time streaming, ETL pipelines
+  \item \textbf{Cryptocurrency}: Blockchain validation, mining, cryptography
+  \item \textbf{Machine learning}: Training and inference in browsers and Node.js
+  \item \textbf{DSLs and compilers}: Building domain-specific languages that compile to native code
+\end{itemize}
+
+These workloads hit JavaScript's performance ceiling. While V8, SpiderMonkey, and JavaScriptCore have sophisticated JIT compilers, they're optimized for general-purpose JavaScript, not specialized numeric or GPU workloads.
+
+\subsection{Why Not Just Use C++ or Rust?}
+Existing solutions require context-switching between languages:
+
+\begin{enumerate}[noitemsep]
+  \item Write performance-critical code in C++/Rust
+  \item Compile with emscripten/wasm-bindgen to WebAssembly
+  \item Bind to JavaScript with FFI
+  \item Debug across language boundaries
+\end{enumerate}
+
+This workflow has friction:
+\begin{itemize}[noitemsep]
+  \item \textbf{Separate toolchains}: npm + cargo/cmake + wasm-pack
+  \item \textbf{Build complexity}: native compilation per platform
+  \item \textbf{Type mismatches}: JavaScript objects $\leftrightarrow$ C structs
+  \item \textbf{Limited GPU access}: WebGPU is new; CUDA requires native code
+\end{itemize}
+
+\subsection{LLVM as the Universal Backend}
+LLVM provides a \emph{universal code generation backend}:
+
+\begin{enumerate}[noitemsep]
+  \item Write your algorithm once in TypeScript
+  \item Generate LLVM IR programmatically
+  \item Compile to \textbf{any target}: x86-64, ARM, GPUs, WebAssembly
+  \item Get LLVM's optimizations for free
+\end{enumerate}
+
+This enables:
+\begin{itemize}[noitemsep]
+  \item \textbf{DSL compilers}: Build languages that compile directly to optimized machine code
+  \item \textbf{GPU computing from JavaScript}: Generate CUDA/ROCm/OpenCL without leaving TypeScript
+  \item \textbf{Heterogeneous computing}: Same codebase targets CPUs and GPUs
+  \item \textbf{Ahead-of-time compilation}: Generate native binaries from JavaScript tooling
+\end{itemize}
+
+\subsection{Use Cases in the JavaScript Ecosystem}
+
+\textbf{1. Scientific Libraries}
+
+NumPy-style libraries could generate optimized kernels per architecture:
+\begin{lstlisting}[style=ts]
+const matrixMultiply = generateKernel("matmul", targetArch);
+// Compiles to SSE/AVX on x86, NEON on ARM, CUDA on GPUs
+\end{lstlisting}
+
+\textbf{2. Game Engines}
+
+Physics engines could JIT-compile collision detection:
+\begin{lstlisting}[style=ts]
+const collisionKernel = compilePhysics(sceneGraph);
+// Generates optimized SIMD code for the player's CPU
+\end{lstlisting}
+
+\textbf{3. Machine Learning}
+
+Training loops could compile to GPU kernels:
+\begin{lstlisting}[style=ts]
+const backprop = compileToGPU(neuralNet);
+// Generates CUDA for NVIDIA, ROCm for AMD, Metal for Apple
+\end{lstlisting}
+
+\textbf{4. Blockchain and Cryptography}
+
+Hashing and signature verification compiled to native:
+\begin{lstlisting}[style=ts]
+const sha256 = compileHash("sha256", "x86-64");
+// Generates assembly-level optimized hash
+\end{lstlisting}
+
+\subsection{Why a TypeScript API Instead of C Bindings?}
+
+LLVM provides a comprehensive C API (\texttt{llvm-c}), and several Node.js bindings exist (\texttt{llvm-node}\cite{llvmnode}, \texttt{llvm-bindings}\cite{llvmbindings}, \texttt{node-llvmc}\cite{nodellvmc}). However, FFI bindings have inherent limitations:
+
+\begin{enumerate}[noitemsep]
+  \item \textbf{Native dependencies}: Require compiling against specific LLVM versions
+  \begin{itemize}[noitemsep]
+    \item Must match system LLVM version (14, 15, 16, 17, 18...)
+    \item Native builds fail across platforms (Windows, macOS, Linux, ARM)
+    \item \texttt{node-gyp} failures frustrate users
+  \end{itemize}
+
+  \item \textbf{Manual memory management}: C API uses raw pointers
+  \begin{lstlisting}[style=ts]
+// FFI binding style - error-prone
+const builder = LLVMCreateBuilder();
+const func = LLVMAddFunction(module, "add", funcType);
+const bb = LLVMAppendBasicBlock(func, "entry");
+LLVMPositionBuilderAtEnd(builder, bb);
+// Forget to dispose? Memory leak!
+LLVMDisposeBuilder(builder);
+  \end{lstlisting}
+
+  \item \textbf{Low-level API surface}: Mirrors C exactly
+  \begin{itemize}[noitemsep]
+    \item No TypeScript type safety
+    \item No IntelliSense/autocomplete
+    \item Easy to pass wrong pointer types
+  \end{itemize}
+
+  \item \textbf{No GPU helpers}: C API has no concept of CUDA kernels, thread intrinsics, or ROCm metadata
+
+  \item \textbf{Version lock-in}: LLVM C API changes between versions, breaking bindings
+\end{enumerate}
+
+\subsection{@euriklis/llvm-ir Design Philosophy}
+
+Instead of binding to the C API, we \textbf{reimplement the IR builder in pure TypeScript}:
+
+\begin{itemize}[noitemsep]
+  \item \textbf{Zero native dependencies}: Runs anywhere Node.js/Bun runs
+  \item \textbf{Type-safe API}: Full TypeScript types with IntelliSense
+  \item \textbf{Memory-safe}: Garbage collector handles lifetimes
+  \item \textbf{Architecture-aware}: First-class GPU support (CUDA, ROCm, SPIR-V)
+  \item \textbf{Higher-level abstractions}: Object-oriented instruction building
+  \item \textbf{Validation built-in}: Catch errors before generating IR
+\end{itemize}
+
+Compare the API styles:
+
+\textbf{C API binding (low-level):}
+\begin{lstlisting}[style=ts]
+const ctx = LLVMContextCreate();
+const mod = LLVMModuleCreateWithNameInContext("test", ctx);
+const i32 = LLVMInt32TypeInContext(ctx);
+const funcType = LLVMFunctionType(i32, [i32, i32], 2, false);
+const func = LLVMAddFunction(mod, "add", funcType);
+// ... 20 more lines of pointer juggling
+\end{lstlisting}
+
+\textbf{@euriklis/llvm-ir (high-level):}
+\begin{lstlisting}[style=ts]
+const codegen = new LLVMCodegen("test");
+const func = new LLVMFunction({
+  name: "add",
+  returnType: LLVMCodegen.types.i32
+});
+func.addParameter(new Parameter({ type: i32, name: "a" }));
+func.addParameter(new Parameter({ type: i32, name: "b" }));
+// Clean, typed, safe
+\end{lstlisting}
+
+\subsection{Trade-offs}
+
+Our approach trades \textbf{runtime code generation} for \textbf{developer ergonomics}:
+
+\begin{itemize}[noitemsep]
+  \item \textbf{Pro}: No native dependencies—runs in browsers, Deno, Bun, Node.js
+  \item \textbf{Pro}: Full TypeScript type safety and tooling
+  \item \textbf{Pro}: Architecture-aware abstractions (GPU intrinsics, threading models)
+  \item \textbf{Con}: Generates IR text, not in-memory bitcode (fast enough for build-time codegen)
+  \item \textbf{Con}: Cannot use LLVM's JIT directly (but can shell out to \texttt{llc})
+\end{itemize}
+
+For \emph{build-time code generation} (DSL compilers, ahead-of-time optimization), text IR is perfect. For \emph{runtime JIT}, native bindings may be better—but require platform-specific builds.
+
+\subsection{Summary}
+
+JavaScript's performance demands have outgrown pure-JS solutions. LLVM provides a universal backend for native code generation across CPUs, GPUs, and WebAssembly. A pure TypeScript implementation removes native dependencies while providing architecture-aware abstractions that the C API lacks. This makes LLVM accessible to the entire JavaScript ecosystem—from Node.js tools to browser-based compilers.
+
+\section{Getting Started}
+To consume the library inside your own project, add it as a dependency:
+\begin{lstlisting}[style=ts]
+bun add @euriklis/llvm-ir
+# or: npm install @euriklis/llvm-ir
+\end{lstlisting}
+The published package only ships the compiled \texttt{dist/} output plus type declarations—tests and internal scripts stay in the GitHub repo, so an install remains lightweight. Configure your own \texttt{tsconfig.json} (for example, \texttt{target: "ES2022"}, \texttt{module: "ESNext"}, \texttt{rootDir: "src"}) so TypeScript understands the provided declarations. Create a script such as \texttt{src/generate.ts}, import the codegen classes shown below, and run it with \texttt{bun run src/generate.ts} or \texttt{ts-node src/generate.ts} to print LLVM IR or write it to disk.
+
+When contributing to this repository itself, clone it, run \texttt{bun install}, and use the provided scripts:
+\begin{lstlisting}[style=ts]
+bun run build   # compiles src/ -> dist/
+bun test        # runs unit + integration tests (invokes `llc` if available)
+\end{lstlisting}
+If you are only a consumer, you simply import the classes you need; there is no requirement (or possibility) to run the repository tests from your \texttt{node\_modules} copy.
+
+\section{Implementing TypeScript Functions as LLVM IR}
+This section provides a comprehensive guide to translating TypeScript functions into LLVM IR using @euriklis/llvm-ir. We'll build up complexity progressively, from simple arithmetic to control flow, loops, and memory operations.
+
+\subsection{Example 1: Simple Arithmetic}
+
+\textbf{TypeScript intent:}
+\begin{lstlisting}[style=ts]
+function add(a: number, b: number): number {
+  return a + b;
+}
+\end{lstlisting}
+
+\textbf{Step-by-step IR construction:}
+
+\textbf{Step 1: Create the codegen and module}
+\begin{lstlisting}[style=ts]
+import { LLVMCodegen, LLVMFunction, Parameter, BasicBlock,
+         BinaryInst, RetInst } from "@euriklis/llvm-ir";
+
+const codegen = new LLVMCodegen("add_module");
+// This creates a module with x86-64 target triple
+\end{lstlisting}
+
+\textbf{Step 2: Define the function signature}
+\begin{lstlisting}[style=ts]
+const addFunc = new LLVMFunction({
+  name: "add",
+  returnType: LLVMCodegen.types.i32  // Returns 32-bit integer
+});
+\end{lstlisting}
+
+\textbf{Step 3: Add parameters}
+\begin{lstlisting}[style=ts]
+addFunc.addParameter(new Parameter({
+  type: LLVMCodegen.types.i32,
+  name: "a"
+}));
+addFunc.addParameter(new Parameter({
+  type: LLVMCodegen.types.i32,
+  name: "b"
+}));
+// Function signature is now: i32 @add(i32 %a, i32 %b)
+\end{lstlisting}
+
+\textbf{Step 4: Create the entry basic block}
+\begin{lstlisting}[style=ts]
+const entry = new BasicBlock("entry");
+// Every function needs at least one basic block
+\end{lstlisting}
+
+\textbf{Step 5: Add the addition instruction}
+\begin{lstlisting}[style=ts]
+entry.addInstruction(new BinaryInst({
+  name: "sum",           // Result stored in %sum
+  opcode: LLVMCodegen.opcodes.add,  // Integer addition
+  type: LLVMCodegen.types.i32,
+  lhs: "a",              // Left operand (parameter)
+  rhs: "b"               // Right operand (parameter)
+}));
+// Generates: %sum = add i32 %a, %b
+\end{lstlisting}
+
+\textbf{Step 6: Add the return terminator}
+\begin{lstlisting}[style=ts]
+entry.setTerminator(new RetInst({
+  type: LLVMCodegen.types.i32,
+  value: "sum"           // Return the %sum value
+}));
+// Generates: ret i32 %sum
+\end{lstlisting}
+
+\textbf{Step 7: Assemble and emit}
+\begin{lstlisting}[style=ts]
+addFunc.addBasicBlock(entry);
+codegen.getModule().addFunction(addFunc);
+console.log(codegen.toString());
+\end{lstlisting}
+
+\textbf{Generated LLVM IR:}
+\begin{lstlisting}[style=ir]
+; ModuleID = 'add_module'
+source_filename = "add_module"
+target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64..."
+target triple = "x86_64-unknown-linux-gnu"
+
+define i32 @add(i32 %a, i32 %b) {
+entry:
+  %sum = add i32 %a, %b
+  ret i32 %sum
+}
+\end{lstlisting}
+
+\subsection{Example 2: Conditional Logic (if-else)}
+
+\textbf{TypeScript intent:}
+\begin{lstlisting}[style=ts]
+function max(a: number, b: number): number {
+  if (a > b) {
+    return a;
+  } else {
+    return b;
+  }
+}
+\end{lstlisting}
+
+\textbf{IR construction:}
+\begin{lstlisting}[style=ts]
+import { ICmpInst, BrInst } from "@euriklis/llvm-ir";
+
+const maxFunc = new LLVMFunction({
+  name: "max",
+  returnType: LLVMCodegen.types.i32
+});
+maxFunc.addParameter(new Parameter({ type: i32, name: "a" }));
+maxFunc.addParameter(new Parameter({ type: i32, name: "b" }));
+
+// Three basic blocks: entry, then, else
+const entry = new BasicBlock("entry");
+const thenBlock = new BasicBlock("then");
+const elseBlock = new BasicBlock("else");
+
+// Entry: compare a > b
+entry.addInstruction(new ICmpInst({
+  name: "cmp",
+  predicate: LLVMCodegen.predicates.sgt,  // signed greater-than
+  type: LLVMCodegen.types.i32,
+  lhs: "a",
+  rhs: "b"
+}));
+// Branch based on comparison
+entry.setTerminator(new BrInst({
+  condition: "cmp",
+  conditionType: LLVMCodegen.types.i1,
+  target: thenBlock,
+  falseTarget: elseBlock
+}));
+
+// Then block: return a
+thenBlock.setTerminator(new RetInst({
+  type: i32,
+  value: "a"
+}));
+
+// Else block: return b
+elseBlock.setTerminator(new RetInst({
+  type: i32,
+  value: "b"
+}));
+
+maxFunc.addBasicBlock(entry);
+maxFunc.addBasicBlock(thenBlock);
+maxFunc.addBasicBlock(elseBlock);
+\end{lstlisting}
+
+\textbf{Generated IR:}
+\begin{lstlisting}[style=ir]
+define i32 @max(i32 %a, i32 %b) {
+entry:
+  %cmp = icmp sgt i32 %a, %b
+  br i1 %cmp, label %then, label %else
+
+then:
+  ret i32 %a
+
+else:
+  ret i32 %b
+}
+\end{lstlisting}
+
+\subsection{Example 3: Loops with PHI Nodes}
+
+\textbf{TypeScript intent:}
+\begin{lstlisting}[style=ts]
+function sumArray(arr: number[], n: number): number {
+  let sum = 0;
+  for (let i = 0; i < n; i++) {
+    sum += arr[i];
+  }
+  return sum;
+}
+\end{lstlisting}
+
+\textbf{IR construction:}
+\begin{lstlisting}[style=ts]
+import { PhiInst, GetElementPtrInst, LoadInst } from "@euriklis/llvm-ir";
+
+const sumFunc = new LLVMFunction({
+  name: "sumArray",
+  returnType: i32
+});
+sumFunc.addParameter(new Parameter({ type: ptr, name: "arr" }));
+sumFunc.addParameter(new Parameter({ type: i32, name: "n" }));
+
+const entry = new BasicBlock("entry");
+const loop = new BasicBlock("loop");
+const body = new BasicBlock("loop_body");
+const exit = new BasicBlock("exit");
+
+// Entry: jump to loop
+entry.setTerminator(new BrInst({ target: loop }));
+
+// Loop header: PHI nodes for i and sum
+const iPhi = new PhiInst({
+  name: "i",
+  type: i32,
+  incomingValues: [
+    { value: 0, block: entry },       // i starts at 0
+    { value: "i_next", block: body }  // i increments in body
+  ]
+});
+loop.addInstruction(iPhi);
+
+const sumPhi = new PhiInst({
+  name: "sum",
+  type: i32,
+  incomingValues: [
+    { value: 0, block: entry },       // sum starts at 0
+    { value: "sum_next", block: body } // sum accumulates in body
+  ]
+});
+loop.addInstruction(sumPhi);
+
+// Compare i < n
+loop.addInstruction(new ICmpInst({
+  name: "cmp",
+  predicate: LLVMCodegen.predicates.slt,
+  type: i32,
+  lhs: iPhi,
+  rhs: "n"
+}));
+loop.setTerminator(new BrInst({
+  condition: "cmp",
+  conditionType: LLVMCodegen.types.i1,
+  target: body,
+  falseTarget: exit
+}));
+
+// Body: load arr[i], add to sum, increment i
+const ptr = new GetElementPtrInst({
+  name: "ptr",
+  baseType: i32,
+  ptrType: ptr,
+  pointer: "arr",
+  indices: [{ type: i32, value: iPhi }]
+});
+body.addInstruction(ptr);
+
+const val = new LoadInst({
+  name: "val",
+  type: i32,
+  pointerType: ptr,
+  pointer: ptr,
+  align: 4
+});
+body.addInstruction(val);
+
+const sumNext = new BinaryInst({
+  name: "sum_next",
+  opcode: LLVMCodegen.opcodes.add,
+  type: i32,
+  lhs: sumPhi,
+  rhs: val
+});
+body.addInstruction(sumNext);
+
+const iNext = new BinaryInst({
+  name: "i_next",
+  opcode: LLVMCodegen.opcodes.add,
+  type: i32,
+  lhs: iPhi,
+  rhs: 1
+});
+body.addInstruction(iNext);
+
+body.setTerminator(new BrInst({ target: loop }));
+
+// Exit: return sum
+exit.setTerminator(new RetInst({
+  type: i32,
+  value: sumPhi
+}));
+
+sumFunc.addBasicBlock(entry);
+sumFunc.addBasicBlock(loop);
+sumFunc.addBasicBlock(body);
+sumFunc.addBasicBlock(exit);
+\end{lstlisting}
+
+\textbf{Generated IR:}
+\begin{lstlisting}[style=ir]
+define i32 @sumArray(ptr %arr, i32 %n) {
+entry:
+  br label %loop
+
+loop:
+  %i = phi i32 [ 0, %entry ], [ %i_next, %loop_body ]
+  %sum = phi i32 [ 0, %entry ], [ %sum_next, %loop_body ]
+  %cmp = icmp slt i32 %i, %n
+  br i1 %cmp, label %loop_body, label %exit
+
+loop_body:
+  %ptr = getelementptr inbounds i32, ptr %arr, i32 %i
+  %val = load i32, ptr %ptr, align 4
+  %sum_next = add i32 %sum, %val
+  %i_next = add i32 %i, 1
+  br label %loop
+
+exit:
+  ret i32 %sum
+}
+\end{lstlisting}
+
+\subsection{Key Patterns Summary}
+
+\begin{enumerate}[noitemsep]
+  \item \textbf{Every function needs at least one basic block}
+  \item \textbf{Every basic block must end with a terminator} (\texttt{ret}, \texttt{br})
+  \item \textbf{Use PHI nodes for variables that change across loop iterations}
+  \item \textbf{Use GetElementPtrInst for array indexing}
+  \item \textbf{Use LoadInst/StoreInst for memory operations}
+  \item \textbf{Use ICmpInst for integer comparisons, FCmpInst for floats}
+\end{enumerate}
+
+With these primitives, you can model any sequential algorithm targeting CPUs.
+
+\section{Compiling LLVM IR for Different CPU Architectures}
+
+Once you've generated LLVM IR, you need to compile it to machine code. LLVM's toolchain handles this through the \texttt{llc} (LLVM static compiler) command.
+
+\subsection{The llc Compiler}
+
+\texttt{llc} is LLVM's static compiler that converts IR to assembly or object files:
+
+\begin{lstlisting}[style=ts]
+llc input.ll -o output.s          # Generate assembly
+llc input.ll -filetype=obj -o output.o  # Generate object file
+\end{lstlisting}
+
+\subsection{Targeting Different Architectures}
+
+The key is the \textbf{target triple} in your IR. Simply change the codegen class:
+
+\textbf{x86-64 (Intel/AMD CPUs):}
+\begin{lstlisting}[style=ts]
+import { LLVMCodegen } from "@euriklis/llvm-ir";
+const codegen = new LLVMCodegen("module");
+// Generates: target triple = "x86_64-unknown-linux-gnu"
+\end{lstlisting}
+
+Compile with:
+\begin{lstlisting}[style=ts]
+llc module.ll -march=x86-64 -o module.s
+\end{lstlisting}
+
+\textbf{ARM/AArch64 (Mobile, Apple Silicon, AWS Graviton):}
+\begin{lstlisting}[style=ts]
+import { ARMCodegen } from "@euriklis/llvm-ir/dialects/arm";
+const codegen = new ARMCodegen("module");
+// Generates: target triple = "aarch64-unknown-linux-gnu"
+\end{lstlisting}
+
+Compile with:
+\begin{lstlisting}[style=ts]
+llc module.ll -march=aarch64 -o module.s
+\end{lstlisting}
+
+\textbf{RISC-V (Embedded, Research):}
+\begin{lstlisting}[style=ts]
+import { RISCVCodegen } from "@euriklis/llvm-ir/dialects/riscv";
+const codegen = new RISCVCodegen("module");
+// Generates: target triple = "riscv64-unknown-linux-gnu"
+\end{lstlisting}
+
+Compile with:
+\begin{lstlisting}[style=ts]
+llc module.ll -march=riscv64 -o module.s
+\end{lstlisting}
+
+\textbf{WebAssembly (Browsers, WASI):}
+\begin{lstlisting}[style=ts]
+import { WASMCodegen } from "@euriklis/llvm-ir/dialects/wasm";
+const codegen = new WASMCodegen("module");
+// Generates: target triple = "wasm32-unknown-unknown"
+\end{lstlisting}
+
+Compile with:
+\begin{lstlisting}[style=ts]
+llc module.ll -march=wasm32 -o module.wasm
+\end{lstlisting}
+
+\subsection{Complete Workflow Example}
+
+Let's compile the same \texttt{add} function for all CPU architectures:
+
+\textbf{Step 1: Generate IR for each architecture}
+\begin{lstlisting}[style=ts]
+import { LLVMCodegen, ARMCodegen, RISCVCodegen, WASMCodegen,
+         LLVMFunction, Parameter, BasicBlock, BinaryInst, RetInst } from "@euriklis/llvm-ir";
+
+function generateAddFunction(codegen: LLVMCodegen, filename: string) {
+  const addFunc = new LLVMFunction({
+    name: "add",
+    returnType: LLVMCodegen.types.i32
+  });
+  addFunc.addParameter(new Parameter({ type: i32, name: "a" }));
+  addFunc.addParameter(new Parameter({ type: i32, name: "b" }));
+
+  const entry = new BasicBlock("entry");
+  entry.addInstruction(new BinaryInst({
+    name: "sum",
+    opcode: LLVMCodegen.opcodes.add,
+    type: i32,
+    lhs: "a",
+    rhs: "b"
+  }));
+  entry.setTerminator(new RetInst({ type: i32, value: "sum" }));
+
+  addFunc.addBasicBlock(entry);
+  codegen.getModule().addFunction(addFunc);
+
+  // Write to file
+  await Bun.write(filename, codegen.toString());
+}
+
+// Generate for all architectures
+await generateAddFunction(new LLVMCodegen("add"), "add_x86.ll");
+await generateAddFunction(new ARMCodegen("add"), "add_arm.ll");
+await generateAddFunction(new RISCVCodegen("add"), "add_riscv.ll");
+await generateAddFunction(new WASMCodegen("add"), "add_wasm.ll");
+\end{lstlisting}
+
+\textbf{Step 2: Compile each IR file}
+\begin{lstlisting}[style=ts]
+llc add_x86.ll -o add_x86.s          # x86-64 assembly
+llc add_arm.ll -o add_arm.s          # ARM assembly
+llc add_riscv.ll -o add_riscv.s      # RISC-V assembly
+llc add_wasm.ll -o add.wasm          # WebAssembly binary
+\end{lstlisting}
+
+\textbf{Step 3: Inspect the generated assembly}
+
+\textbf{x86-64 output (add\_x86.s):}
+\begin{lstlisting}[style=ir]
+add:
+  leal    (%rdi,%rsi), %eax
+  retq
+\end{lstlisting}
+
+\textbf{ARM output (add\_arm.s):}
+\begin{lstlisting}[style=ir]
+add:
+  add     w0, w0, w1
+  ret
+\end{lstlisting}
+
+\textbf{RISC-V output (add\_riscv.s):}
+\begin{lstlisting}[style=ir]
+add:
+  addw    a0, a0, a1
+  ret
+\end{lstlisting}
+
+\subsection{Architecture Differences}
+
+Each architecture has different:
+\begin{itemize}[noitemsep]
+  \item \textbf{Instruction sets}: x86 (CISC), ARM/RISC-V (RISC)
+  \item \textbf{Register conventions}: x86 uses \texttt{rdi}/\texttt{rsi}, ARM uses \texttt{w0}/\texttt{w1}
+  \item \textbf{Calling conventions}: How parameters are passed
+  \item \textbf{Pointer sizes}: 32-bit vs 64-bit
+\end{itemize}
+
+But the \textbf{LLVM IR is identical}! LLVM's backends handle all architecture-specific details.
+
+\subsection{Optimization Levels}
+
+\texttt{llc} supports optimization:
+\begin{lstlisting}[style=ts]
+llc module.ll -O0 -o debug.s      # No optimization
+llc module.ll -O1 -o fast.s       # Basic optimization
+llc module.ll -O2 -o faster.s     # Moderate optimization
+llc module.ll -O3 -o fastest.s    # Aggressive optimization
+\end{lstlisting}
+
+You can also run the optimizer separately:
+\begin{lstlisting}[style=ts]
+opt module.ll -O3 -S -o optimized.ll  # Optimize IR
+llc optimized.ll -o optimized.s        # Then compile
+\end{lstlisting}
+
+\subsection{Summary}
+
+The same TypeScript code generates IR that compiles to any CPU architecture. The workflow is:
+
+\begin{enumerate}[noitemsep]
+  \item Choose codegen class (LLVMCodegen, ARMCodegen, RISCVCodegen, WASMCodegen)
+  \item Generate IR with @euriklis/llvm-ir
+  \item Compile with \texttt{llc}
+  \item Link with system linker (\texttt{ld}, \texttt{wasm-ld})
+\end{enumerate}
+
+This is how modern compilers work—TypeScript becomes LLVM IR becomes machine code.
+
+\section{GPU Programming: Same Function Across All Architectures}
+
+GPU programming differs fundamentally from CPU programming. Instead of loops, GPUs use \textbf{automatic parallelism}—thousands of threads execute the same kernel simultaneously, each with a unique thread ID.
+
+LLVM targets GPUs through three main dialects:
+\begin{itemize}[noitemsep]
+  \item \textbf{NVPTX}: NVIDIA CUDA (GeForce, Tesla, A100)
+  \item \textbf{AMDGPU}: AMD ROCm (Radeon, MI series)
+  \item \textbf{SPIR-V}: Intel/OpenCL (Intel GPUs, cross-vendor)
+\end{itemize}
+
+This section implements the \textbf{same vector addition function} across all three architectures, highlighting the differences in thread intrinsics and metadata.
+
+\subsection{The Algorithm}
+
+\textbf{CPU version (for reference):}
+\begin{lstlisting}[style=ts]
+function vectorAdd(a: float[], b: float[], result: float[], n: number) {
+  for (let i = 0; i < n; i++) {
+    result[i] = a[i] + b[i];
+  }
+}
+\end{lstlisting}
+
+\textbf{GPU version (conceptual):}
+\begin{lstlisting}[style=ts]
+function vectorAddGPU(a: float[], b: float[], result: float[], n: number) {
+  const idx = threadIdx.x + blockIdx.x * blockDim.x;  // Global thread ID
+  if (idx < n) {
+    result[idx] = a[idx] + b[idx];  // Each thread processes ONE element
+  }
+}
+// No loop! GPU launches 1000s of threads in parallel
+\end{lstlisting}
+
+Key difference: CPU uses \textbf{explicit loops}, GPU uses \textbf{implicit parallelism} via thread IDs.
+
+\subsection{Implementation 1: NVIDIA CUDA (NVVMCodegen)}
+
+\begin{lstlisting}[style=ts]
+import { NVVMCodegen, LLVMFunction, Parameter, BasicBlock,
+         BinaryInst, ICmpInst, BrInst, LoadInst, StoreInst,
+         GetElementPtrInst, RetInst, FloatType } from "@euriklis/llvm-ir";
+
+const codegen = new NVVMCodegen("vector_add_cuda");
+const floatType = new FloatType("float");
+
+const kernel = new LLVMFunction({
+  name: "vectorAdd",
+  returnType: NVVMCodegen.types.void
+});
+kernel.addParameter(new Parameter({ type: ptr, name: "a" }));
+kernel.addParameter(new Parameter({ type: ptr, name: "b" }));
+kernel.addParameter(new Parameter({ type: ptr, name: "result" }));
+kernel.addParameter(new Parameter({ type: i32, name: "n" }));
+
+const entry = new BasicBlock("entry");
+const compute = new BasicBlock("compute");
+const exit = new BasicBlock("exit");
+
+// Step 1: Get CUDA thread indices
+const tid = NVVMCodegen.cuda.threadIdxX("tid");
+const bid = NVVMCodegen.cuda.blockIdxX("bid");
+const bdim = NVVMCodegen.cuda.blockDimX("bdim");
+entry.addInstruction(tid);
+entry.addInstruction(bid);
+entry.addInstruction(bdim);
+
+// Step 2: Calculate global thread index
+const blockOffset = new BinaryInst({
+  name: "block_offset",
+  opcode: NVVMCodegen.opcodes.mul,
+  type: i32,
+  lhs: bid,
+  rhs: bdim
+});
+entry.addInstruction(blockOffset);
+
+const idx = new BinaryInst({
+  name: "idx",
+  opcode: NVVMCodegen.opcodes.add,
+  type: i32,
+  lhs: blockOffset,
+  rhs: tid
+});
+entry.addInstruction(idx);
+
+// Step 3: Bounds check
+const cmp = new ICmpInst({
+  name: "in_bounds",
+  predicate: NVVMCodegen.predicates.slt,
+  type: i32,
+  lhs: idx,
+  rhs: "n"
+});
+entry.addInstruction(cmp);
+
+entry.setTerminator(new BrInst({
+  condition: cmp,
+  conditionType: NVVMCodegen.types.i1,
+  target: compute,
+  falseTarget: exit
+}));
+
+// Step 4: Load a[idx]
+const ptrA = new GetElementPtrInst({
+  name: "ptr_a",
+  baseType: floatType,
+  ptrType: ptr,
+  pointer: "a",
+  indices: [{ type: i32, value: idx }]
+});
+compute.addInstruction(ptrA);
+
+const valA = new LoadInst({
+  name: "val_a",
+  type: floatType,
+  pointerType: ptr,
+  pointer: ptrA,
+  align: 4
+});
+compute.addInstruction(valA);
+
+// Step 5: Load b[idx]
+const ptrB = new GetElementPtrInst({
+  name: "ptr_b",
+  baseType: floatType,
+  ptrType: ptr,
+  pointer: "b",
+  indices: [{ type: i32, value: idx }]
+});
+compute.addInstruction(ptrB);
+
+const valB = new LoadInst({
+  name: "val_b",
+  type: floatType,
+  pointerType: ptr,
+  pointer: ptrB,
+  align: 4
+});
+compute.addInstruction(valB);
+
+// Step 6: Add
+const sum = new BinaryInst({
+  name: "sum",
+  opcode: NVVMCodegen.opcodes.fadd,
+  type: floatType,
+  lhs: valA,
+  rhs: valB
+});
+compute.addInstruction(sum);
+
+// Step 7: Store result[idx]
+const ptrResult = new GetElementPtrInst({
+  name: "ptr_result",
+  baseType: floatType,
+  ptrType: ptr,
+  pointer: "result",
+  indices: [{ type: i32, value: idx }]
+});
+compute.addInstruction(ptrResult);
+
+const store = new StoreInst({
+  valueType: floatType,
+  value: sum,
+  pointerType: ptr,
+  pointer: ptrResult,
+  align: 4
+});
+compute.addInstruction(store);
+
+compute.setTerminator(new BrInst({ target: exit }));
+exit.setTerminator(new RetInst({}));
+
+kernel.addBasicBlock(entry);
+kernel.addBasicBlock(compute);
+kernel.addBasicBlock(exit);
+codegen.getModule().addFunction(kernel);
+\end{lstlisting}
+
+\textbf{Generated CUDA IR (key intrinsics):}
+\begin{lstlisting}[style=ir]
+%tid = call i32 @llvm.nvvm.read.ptx.sreg.tid.x()
+%bid = call i32 @llvm.nvvm.read.ptx.sreg.ctaid.x()
+%bdim = call i32 @llvm.nvvm.read.ptx.sreg.ntid.x()
+%block_offset = mul i32 %bid, %bdim
+%idx = add i32 %block_offset, %tid
+\end{lstlisting}
+
+\subsection{Implementation 2: AMD ROCm (AMDGPUCodegen)}
+
+\textbf{Same algorithm, different intrinsics:}
+
+\begin{lstlisting}[style=ts]
+import { AMDGPUCodegen } from "@euriklis/llvm-ir/dialects/amdgpu";
+
+const codegen = new AMDGPUCodegen("vector_add_rocm");
+// ... same setup as CUDA ...
+
+// ONLY THIS CHANGES:
+const tid = AMDGPUCodegen.rocm.workitemIdX("tid");
+const bid = AMDGPUCodegen.rocm.workgroupIdX("bid");
+const bdim = AMDGPUCodegen.rocm.workgroupSizeX("bdim");
+
+// Rest is IDENTICAL to CUDA version
+\end{lstlisting}
+
+\textbf{Generated AMD IR (key intrinsics):}
+\begin{lstlisting}[style=ir]
+%tid = call i32 @llvm.amdgcn.workitem.id.x()
+%bid = call i32 @llvm.amdgcn.workgroup.id.x()
+%bdim = call i32 @llvm.amdgcn.workgroup.size.x()
+%block_offset = mul i32 %bid, %bdim
+%idx = add i32 %block_offset, %tid
+\end{lstlisting}
+
+\subsection{Implementation 3: Intel GPU / OpenCL (SPIRVCodegen)}
+
+\textbf{Same algorithm, OpenCL-style intrinsics:}
+
+\begin{lstlisting}[style=ts]
+import { SPIRVCodegen } from "@euriklis/llvm-ir/dialects/spirv";
+
+const codegen = new SPIRVCodegen("vector_add_opencl");
+// ... same setup as CUDA ...
+
+// ONLY THIS CHANGES:
+const tid = SPIRVCodegen.opencl.getLocalIdX("tid");
+const bid = SPIRVCodegen.opencl.getGroupIdX("bid");
+const bdim = SPIRVCodegen.opencl.getLocalSizeX("bdim");
+
+// Rest is IDENTICAL to CUDA version
+\end{lstlisting}
+
+\textbf{Generated SPIR-V IR (key intrinsics):}
+\begin{lstlisting}[style=ir]
+%tid = call i64 @_Z12get_local_idj(i32 0)
+%tid.i32 = trunc i64 %tid to i32
+%bid = call i64 @_Z12get_group_idj(i32 0)
+%bid.i32 = trunc i64 %bid to i32
+%bdim = call i64 @_Z14get_local_sizej(i32 0)
+%bdim.i32 = trunc i64 %bdim to i32
+\end{lstlisting}
+
+\subsection{Architecture Comparison Table}
+
+\begin{center}
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Concept} & \textbf{NVIDIA (CUDA)} & \textbf{AMD (ROCm)} & \textbf{Intel (OpenCL)} \\
+\hline
+Thread ID & \texttt{threadIdx.x} & \texttt{workitem\_id.x} & \texttt{get\_local\_id(0)} \\
+Block ID & \texttt{blockIdx.x} & \texttt{workgroup\_id.x} & \texttt{get\_group\_id(0)} \\
+Block Size & \texttt{blockDim.x} & \texttt{workgroup\_size.x} & \texttt{get\_local\_size(0)} \\
+IR Intrinsic & \texttt{llvm.nvvm.*} & \texttt{llvm.amdgcn.*} & OpenCL mangled \\
+Target Triple & \texttt{nvptx64-nvidia-cuda} & \texttt{amdgcn-amd-amdhsa} & \texttt{spir64-unknown-unknown} \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Key Insights}
+
+\begin{enumerate}[noitemsep]
+  \item \textbf{Same algorithm}: Load, compute, store—identical across all GPUs
+  \item \textbf{Different intrinsics}: Each vendor has unique thread ID functions
+  \item \textbf{Automatic parallelism}: No loops needed—GPU launches thousands of threads
+  \item \textbf{Type-safe abstractions}: Our library provides typed helpers for each architecture
+\end{enumerate}
+
+To compile:
+\begin{lstlisting}[style=ts]
+llc vectorAdd_cuda.ll -march=nvptx64 -o kernel.ptx   # NVIDIA
+llc vectorAdd_amd.ll -march=amdgcn -o kernel.s       # AMD
+llc vectorAdd_intel.ll -march=spirv64 -o kernel.spv  # Intel
+\end{lstlisting}
+\section{Instruction Reference}
+
+This section provides a comprehensive reference for all LLVM IR instructions supported by @euriklis/llvm-ir.
+
+\subsection{Arithmetic Instructions (BinaryInst)}
+
+\textbf{Integer arithmetic:}
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Opcode} & \textbf{Operation} & \textbf{Example} \\
+\hline
+\texttt{add} & Addition & \texttt{\%c = add i32 \%a, \%b} \\
+\texttt{sub} & Subtraction & \texttt{\%c = sub i32 \%a, \%b} \\
+\texttt{mul} & Multiplication & \texttt{\%c = mul i32 \%a, \%b} \\
+\texttt{sdiv} & Signed division & \texttt{\%c = sdiv i32 \%a, \%b} \\
+\texttt{udiv} & Unsigned division & \texttt{\%c = udiv i32 \%a, \%b} \\
+\texttt{srem} & Signed remainder & \texttt{\%c = srem i32 \%a, \%b} \\
+\texttt{urem} & Unsigned remainder & \texttt{\%c = urem i32 \%a, \%b} \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Floating-point arithmetic:}
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Opcode} & \textbf{Operation} & \textbf{Example} \\
+\hline
+\texttt{fadd} & Float addition & \texttt{\%c = fadd float \%a, \%b} \\
+\texttt{fsub} & Float subtraction & \texttt{\%c = fsub float \%a, \%b} \\
+\texttt{fmul} & Float multiplication & \texttt{\%c = fmul float \%a, \%b} \\
+\texttt{fdiv} & Float division & \texttt{\%c = fdiv float \%a, \%b} \\
+\texttt{frem} & Float remainder & \texttt{\%c = frem float \%a, \%b} \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Bitwise operations:}
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Opcode} & \textbf{Operation} & \textbf{Example} \\
+\hline
+\texttt{and} & Bitwise AND & \texttt{\%c = and i32 \%a, \%b} \\
+\texttt{or} & Bitwise OR & \texttt{\%c = or i32 \%a, \%b} \\
+\texttt{xor} & Bitwise XOR & \texttt{\%c = xor i32 \%a, \%b} \\
+\texttt{shl} & Shift left & \texttt{\%c = shl i32 \%a, \%b} \\
+\texttt{lshr} & Logical shift right & \texttt{\%c = lshr i32 \%a, \%b} \\
+\texttt{ashr} & Arithmetic shift right & \texttt{\%c = ashr i32 \%a, \%b} \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Usage in TypeScript:}
+\begin{lstlisting}[style=ts]
+import { BinaryInst, LLVMCodegen } from "@euriklis/llvm-ir";
+
+// Type shortcuts for readability
+const { i32, i64, float, double, ptr } = LLVMCodegen.types;
+
+const add = new BinaryInst({
+  name: "sum",
+  opcode: LLVMCodegen.opcodes.add,
+  type: i32,  // Same as LLVMCodegen.types.i32
+  lhs: "a",
+  rhs: "b"
+});
+// Generates: %sum = add i32 %a, %b
+\end{lstlisting}
+
+\textbf{Note:} Throughout this handbook, we use type shortcuts (\texttt{i32}, \texttt{float}, etc.) for brevity. These are destructured from \texttt{LLVMCodegen.types}. You can use either style in your code.
+
+\subsection{Comparison Instructions}
+
+\textbf{Integer comparisons (ICmpInst):}
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Predicate} & \textbf{Meaning} \\
+\hline
+\texttt{eq} & Equal \\
+\texttt{ne} & Not equal \\
+\texttt{sgt} & Signed greater than \\
+\texttt{sge} & Signed greater or equal \\
+\texttt{slt} & Signed less than \\
+\texttt{sle} & Signed less or equal \\
+\texttt{ugt} & Unsigned greater than \\
+\texttt{uge} & Unsigned greater or equal \\
+\texttt{ult} & Unsigned less than \\
+\texttt{ule} & Unsigned less or equal \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Float comparisons (FCmpInst):}
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Predicate} & \textbf{Meaning} \\
+\hline
+\texttt{oeq} & Ordered and equal \\
+\texttt{one} & Ordered and not equal \\
+\texttt{ogt} & Ordered and greater than \\
+\texttt{oge} & Ordered and greater or equal \\
+\texttt{olt} & Ordered and less than \\
+\texttt{ole} & Ordered and less or equal \\
+\texttt{ueq} & Unordered or equal \\
+\texttt{une} & Unordered or not equal \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Usage:}
+\begin{lstlisting}[style=ts]
+import { ICmpInst, FCmpInst } from "@euriklis/llvm-ir";
+
+// Integer comparison
+const cmp1 = new ICmpInst({
+  name: "is_greater",
+  predicate: LLVMCodegen.predicates.sgt,
+  type: i32,
+  lhs: "a",
+  rhs: "b"
+});
+// Generates: %is_greater = icmp sgt i32 %a, %b
+
+// Float comparison
+const cmp2 = new FCmpInst({
+  name: "is_close",
+  predicate: LLVMCodegen.predicates.oeq,
+  type: float,
+  lhs: "x",
+  rhs: "y"
+});
+// Generates: %is_close = fcmp oeq float %x, %y
+\end{lstlisting}
+
+\subsection{Memory Instructions}
+
+\textbf{AllocaInst - Stack allocation:}
+\begin{lstlisting}[style=ts]
+import { AllocaInst } from "@euriklis/llvm-ir";
+
+const alloc = new AllocaInst({
+  name: "temp",
+  type: i32,
+  align: 4
+});
+// Generates: %temp = alloca i32, align 4
+\end{lstlisting}
+
+\textbf{LoadInst - Load from memory:}
+\begin{lstlisting}[style=ts]
+import { LoadInst } from "@euriklis/llvm-ir";
+
+const load = new LoadInst({
+  name: "value",
+  type: i32,
+  pointerType: ptr,
+  pointer: "temp",
+  align: 4
+});
+// Generates: %value = load i32, ptr %temp, align 4
+\end{lstlisting}
+
+\textbf{StoreInst - Store to memory:}
+\begin{lstlisting}[style=ts]
+import { StoreInst } from "@euriklis/llvm-ir";
+
+const store = new StoreInst({
+  valueType: i32,
+  value: 42,
+  pointerType: ptr,
+  pointer: "temp",
+  align: 4
+});
+// Generates: store i32 42, ptr %temp, align 4
+\end{lstlisting}
+
+\textbf{GetElementPtrInst - Array/struct indexing:}
+\begin{lstlisting}[style=ts]
+import { GetElementPtrInst } from "@euriklis/llvm-ir";
+
+const gep = new GetElementPtrInst({
+  name: "ptr",
+  baseType: i32,
+  ptrType: ptr,
+  pointer: "array",
+  indices: [{ type: i32, value: "i" }]
+});
+// Generates: %ptr = getelementptr inbounds i32, ptr %array, i32 %i
+\end{lstlisting}
+
+\subsection{Control Flow Instructions}
+
+\textbf{BrInst - Branch (conditional and unconditional):}
+\begin{lstlisting}[style=ts]
+import { BrInst } from "@euriklis/llvm-ir";
+
+// Unconditional branch
+const br1 = new BrInst({ target: loopBlock });
+// Generates: br label %loop
+
+// Conditional branch
+const br2 = new BrInst({
+  condition: "cmp",
+  conditionType: i1,
+  target: thenBlock,
+  falseTarget: elseBlock
+});
+// Generates: br i1 %cmp, label %then, label %else
+\end{lstlisting}
+
+\textbf{RetInst - Return from function:}
+\begin{lstlisting}[style=ts]
+import { RetInst } from "@euriklis/llvm-ir";
+
+// Void return
+const ret1 = new RetInst({});
+// Generates: ret void
+
+// Return value
+const ret2 = new RetInst({ type: i32, value: "result" });
+// Generates: ret i32 %result
+\end{lstlisting}
+
+\textbf{PhiInst - SSA merge point:}
+\begin{lstlisting}[style=ts]
+import { PhiInst } from "@euriklis/llvm-ir";
+
+const phi = new PhiInst({
+  name: "value",
+  type: i32,
+  incomingValues: [
+    { value: 0, block: entry },
+    { value: "next", block: loop }
+  ]
+});
+// Generates: %value = phi i32 [ 0, %entry ], [ %next, %loop ]
+\end{lstlisting}
+
+\textbf{SwitchInst - Multi-way branch:}
+\begin{lstlisting}[style=ts]
+import { SwitchInst } from "@euriklis/llvm-ir";
+
+const sw = new SwitchInst({
+  value: "x",
+  valueType: i32,
+  defaultDest: defaultBlock,
+  cases: [
+    { value: 0, dest: case0Block },
+    { value: 1, dest: case1Block },
+    { value: 2, dest: case2Block }
+  ]
+});
+// Generates: switch i32 %x, label %default [
+//              i32 0, label %case0
+//              i32 1, label %case1
+//              i32 2, label %case2
+//            ]
+\end{lstlisting}
+
+\subsection{Type Conversion Instructions}
+
+\textbf{Truncation and extension:}
+\begin{lstlisting}[style=ts]
+import { TruncInst, ZExtInst, SExtInst } from "@euriklis/llvm-ir";
+
+// Truncate (i64 -> i32)
+const trunc = new TruncInst({
+  name: "small",
+  fromType: i64,
+  toType: i32,
+  value: "big"
+});
+// Generates: %small = trunc i64 %big to i32
+
+// Zero extend (i32 -> i64)
+const zext = new ZExtInst({
+  name: "big",
+  fromType: i32,
+  toType: i64,
+  value: "small"
+});
+// Generates: %big = zext i32 %small to i64
+
+// Sign extend (i32 -> i64)
+const sext = new SExtInst({
+  name: "big",
+  fromType: i32,
+  toType: i64,
+  value: "small"
+});
+// Generates: %big = sext i32 %small to i64
+\end{lstlisting}
+
+\textbf{Float conversions:}
+\begin{lstlisting}[style=ts]
+import { FPToSIInst, SIToFPInst, FPExtInst, FPTruncInst } from "@euriklis/llvm-ir";
+
+// Float to signed int
+const f2i = new FPToSIInst({
+  name: "int_val",
+  fromType: float,
+  toType: i32,
+  value: "float_val"
+});
+// Generates: %int_val = fptosi float %float_val to i32
+
+// Signed int to float
+const i2f = new SIToFPInst({
+  name: "float_val",
+  fromType: i32,
+  toType: float,
+  value: "int_val"
+});
+// Generates: %float_val = sitofp i32 %int_val to float
+
+// Float extend (float -> double)
+const fpext = new FPExtInst({
+  name: "double_val",
+  fromType: float,
+  toType: double,
+  value: "float_val"
+});
+// Generates: %double_val = fpext float %float_val to double
+
+// Float truncate (double -> float)
+const fptrunc = new FPTruncInst({
+  name: "float_val",
+  fromType: double,
+  toType: float,
+  value: "double_val"
+});
+// Generates: %float_val = fptrunc double %double_val to float
+\end{lstlisting}
+
+\subsection{Function Call Instructions}
+
+\textbf{CallInst - Function calls:}
+\begin{lstlisting}[style=ts]
+import { CallInst } from "@euriklis/llvm-ir";
+
+// Void function
+const call1 = new CallInst({
+  functionName: "print",
+  returnType: voidType,
+  args: [
+    { type: ptr, value: "message" }
+  ]
+});
+// Generates: call void @print(ptr %message)
+
+// Function with return value
+const call2 = new CallInst({
+  name: "result",
+  functionName: "compute",
+  returnType: i32,
+  args: [
+    { type: i32, value: "a" },
+    { type: i32, value: "b" }
+  ]
+});
+// Generates: %result = call i32 @compute(i32 %a, i32 %b)
+\end{lstlisting}
+
+\subsection{Select Instruction}
+
+\textbf{SelectInst - Conditional value selection:}
+\begin{lstlisting}[style=ts]
+import { SelectInst } from "@euriklis/llvm-ir";
+
+const sel = new SelectInst({
+  name: "max",
+  conditionType: i1,
+  condition: "cmp",
+  trueValue: "a",
+  falseValue: "b",
+  valueType: i32
+});
+// Generates: %max = select i1 %cmp, i32 %a, i32 %b
+// Equivalent to: %max = %cmp ? %a : %b
+\end{lstlisting}
+
+This is the ternary operator of LLVM IR—more efficient than branching for simple conditionals.
+
+\section{Memory Model and Address Spaces}
+
+Understanding LLVM's memory model is crucial for correct code generation, especially for GPUs where memory hierarchies are complex.
+
+\subsection{Stack vs Heap}
+
+LLVM distinguishes between stack (automatic) and heap (dynamic) memory:
+
+\textbf{Stack allocation (AllocaInst):}
+\begin{lstlisting}[style=ts]
+import { AllocaInst } from "@euriklis/llvm-ir";
+const { i32, ptr } = LLVMCodegen.types;
+
+const stackVar = new AllocaInst({
+  name: "local",
+  type: i32,
+  align: 4
+});
+// Generates: %local = alloca i32, align 4
+// Memory: Stack, automatic cleanup
+\end{lstlisting}
+
+Stack allocations:
+\begin{itemize}[noitemsep]
+  \item Are placed in function stack frames
+  \item Automatically freed when function returns
+  \item Have fixed size known at compile time
+  \item Are fast (just pointer arithmetic)
+\end{itemize}
+
+\textbf{Heap allocation (requires external functions):}
+\begin{lstlisting}[style=ts]
+import { CallInst } from "@euriklis/llvm-ir";
+
+// Call malloc(size)
+const heapPtr = new CallInst({
+  name: "ptr",
+  functionName: "malloc",
+  returnType: ptr,
+  args: [{ type: i64, value: 1024 }]
+});
+// Generates: %ptr = call ptr @malloc(i64 1024)
+
+// Later: call free(ptr)
+const freeCall = new CallInst({
+  functionName: "free",
+  returnType: voidType,
+  args: [{ type: ptr, value: "ptr" }]
+});
+// Generates: call void @free(ptr %ptr)
+\end{lstlisting}
+
+Heap allocations:
+\begin{itemize}[noitemsep]
+  \item Require manual allocation/deallocation
+  \item Can have dynamic sizes
+  \item Slower than stack
+  \item Must be freed to avoid leaks
+\end{itemize}
+
+\subsection{Alignment}
+
+Alignment ensures data sits at memory addresses divisible by specific values. This is critical for performance and correctness.
+
+\textbf{Why alignment matters:}
+\begin{itemize}[noitemsep]
+  \item x86-64: Unaligned access is slow (sometimes requires multiple memory transactions)
+  \item ARM: Unaligned access can fault (crash)
+  \item GPUs: Coalesced memory access requires alignment
+\end{itemize}
+
+\textbf{Common alignments:}
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Type} & \textbf{Alignment} \\
+\hline
+\texttt{i8} & 1 byte \\
+\texttt{i16} & 2 bytes \\
+\texttt{i32, float} & 4 bytes \\
+\texttt{i64, double} & 8 bytes \\
+\texttt{ptr} (64-bit) & 8 bytes \\
+\texttt{<4 x float>} (vector) & 16 bytes \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Specifying alignment:}
+\begin{lstlisting}[style=ts]
+const { float } = LLVMCodegen.types;
+
+// Aligned load (fast)
+const load1 = new LoadInst({
+  name: "val",
+  type: float,
+  pointerType: ptr,
+  pointer: "aligned_ptr",
+  align: 4  // float alignment
+});
+// Generates: %val = load float, ptr %aligned_ptr, align 4
+
+// Unaligned load (slower, but works)
+const load2 = new LoadInst({
+  name: "val",
+  type: float,
+  pointerType: ptr,
+  pointer: "unaligned_ptr",
+  align: 1  // byte-aligned (no alignment requirement)
+});
+// Generates: %val = load float, ptr %unaligned_ptr, align 1
+\end{lstlisting}
+
+\subsection{Address Spaces (GPU Memory)}
+
+GPUs have multiple memory hierarchies with different performance characteristics. LLVM uses \textbf{address spaces} to distinguish them.
+
+\textbf{Address space syntax:}
+\begin{lstlisting}[style=ir]
+ptr              ; Generic pointer (address space 0)
+ptr addrspace(1) ; Global memory
+ptr addrspace(3) ; Shared memory (CUDA), Local memory (OpenCL)
+ptr addrspace(4) ; Constant memory
+\end{lstlisting}
+
+\textbf{NVIDIA CUDA address spaces:}
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Space} & \textbf{Scope} & \textbf{Speed} \\
+\hline
+0 (generic) & Any & Variable \\
+1 (global) & Entire grid & Slow (DRAM) \\
+3 (shared) & Thread block & Fast (on-chip) \\
+4 (constant) & Read-only & Cached \\
+5 (local) & Per-thread & Register spill \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Example: Shared memory on CUDA}
+\begin{lstlisting}[style=ts]
+import { GlobalVariable } from "@euriklis/llvm-ir";
+
+// Declare shared memory (address space 3)
+const sharedMem = new GlobalVariable({
+  name: "shared_data",
+  type: new ArrayType({ elementType: float, size: 256 }),
+  addressSpace: 3,  // CUDA shared memory
+  linkage: "internal"
+});
+// Generates:
+// @shared_data = internal addrspace(3) global [256 x float] undef
+\end{lstlisting}
+
+\textbf{AMD ROCm address spaces:}
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Space} & \textbf{Memory Type} \\
+\hline
+0 & Private (per-workitem) \\
+1 & Global \\
+3 & Local (LDS - Local Data Share) \\
+4 & Constant \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{OpenCL/SPIR-V address spaces:}
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Space} & \textbf{Memory Type} \\
+\hline
+0 & Private \\
+1 & Global \\
+2 & Constant \\
+3 & Local (workgroup) \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Pointer Operations}
+
+\textbf{GetElementPtr - The array indexing instruction:}
+
+GEP (getelementptr) calculates addresses without dereferencing. It's LLVM's way of doing \texttt{array[index]}.
+
+\begin{lstlisting}[style=ts]
+import { GetElementPtrInst } from "@euriklis/llvm-ir";
+
+// Simple array indexing: ptr = &array[i]
+const gep1 = new GetElementPtrInst({
+  name: "element_ptr",
+  baseType: i32,
+  ptrType: ptr,
+  pointer: "array",
+  indices: [{ type: i32, value: "i" }]
+});
+// Generates: %element_ptr = getelementptr inbounds i32, ptr %array, i32 %i
+
+// Multi-dimensional: ptr = &matrix[row][col]
+const gep2 = new GetElementPtrInst({
+  name: "cell_ptr",
+  baseType: i32,
+  ptrType: ptr,
+  pointer: "matrix",
+  indices: [
+    { type: i64, value: "row" },
+    { type: i64, value: "col" }
+  ]
+});
+// Generates: %cell_ptr = getelementptr inbounds i32, ptr %matrix, i64 %row, i64 %col
+\end{lstlisting}
+
+\textbf{The \texttt{inbounds} keyword:}
+
+\texttt{inbounds} tells LLVM the pointer arithmetic stays within bounds. This enables optimizations but requires your code to actually stay in bounds.
+
+\subsection{Volatile Memory Access}
+
+For hardware registers, memory-mapped I/O, or preventing compiler optimizations:
+
+\begin{lstlisting}[style=ts]
+const volatileLoad = new LoadInst({
+  name: "sensor_value",
+  type: i32,
+  pointerType: ptr,
+  pointer: "mmio_register",
+  align: 4,
+  volatile: true  // Prevent optimization
+});
+// Generates: %sensor_value = load volatile i32, ptr %mmio_register, align 4
+\end{lstlisting}
+
+Volatile tells LLVM:
+\begin{itemize}[noitemsep]
+  \item Don't cache this value
+  \item Don't reorder with other volatile operations
+  \item Always perform the actual memory access
+\end{itemize}
+
+\subsection{Memory Ordering (Atomics)}
+
+For multi-threaded code, atomic operations ensure memory consistency:
+
+\begin{lstlisting}[style=ts]
+import { AtomicRMWInst } from "@euriklis/llvm-ir";
+
+const atomicAdd = new AtomicRMWInst({
+  name: "old_val",
+  operation: "add",
+  pointer: "counter",
+  value: 1,
+  type: i32,
+  ordering: "seq_cst"  // Sequential consistency
+});
+// Generates: %old_val = atomicrmw add ptr %counter, i32 1 seq_cst
+\end{lstlisting}
+
+\textbf{Memory orderings} (from weakest to strongest):
+\begin{itemize}[noitemsep]
+  \item \texttt{unordered}: No guarantees
+  \item \texttt{monotonic}: Atomic, but no ordering
+  \item \texttt{acquire}: Load-acquire barrier
+  \item \texttt{release}: Store-release barrier
+  \item \texttt{acq\_rel}: Acquire on load, release on store
+  \item \texttt{seq\_cst}: Sequential consistency (strongest, slowest)
+\end{itemize}
+
+\subsection{Summary}
+
+\begin{itemize}[noitemsep]
+  \item Use \texttt{alloca} for stack, external functions for heap
+  \item Always specify alignment matching the type
+  \item GPU code needs address spaces (1=global, 3=shared, etc.)
+  \item GEP calculates addresses, load/store dereference them
+  \item Use volatile for hardware I/O, atomics for threading
+\end{itemize}
+
+\section{Type System Reference}
+
+LLVM IR is strongly typed. Every value has an explicit type.
+
+\subsection{Integer Types}
+
+LLVM supports integers of arbitrary bit-width from 1 to 2\textsuperscript{23}-1 bits.
+
+\textbf{Common integer types:}
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Type} & \textbf{Size} & \textbf{Usage} \\
+\hline
+\texttt{i1} & 1 bit & Boolean (true/false) \\
+\texttt{i8} & 8 bits & Byte, char \\
+\texttt{i16} & 16 bits & Short \\
+\texttt{i32} & 32 bits & Int, float index \\
+\texttt{i64} & 64 bits & Long, pointers (64-bit) \\
+\texttt{i128} & 128 bits & Large integers, UUIDs \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Arbitrary-width integers:}
+\begin{lstlisting}[style=ts]
+import { IntType } from "@euriklis/llvm-ir";
+
+// Custom bit widths
+const i24 = new IntType({ bits: 24 });  // 24-bit integer
+const i7 = new IntType({ bits: 7 });    // 7-bit integer
+const i256 = new IntType({ bits: 256 }); // 256-bit integer
+
+// Usage
+const add = new BinaryInst({
+  name: "result",
+  opcode: LLVMCodegen.opcodes.add,
+  type: i24,
+  lhs: "a",
+  rhs: "b"
+});
+// Generates: %result = add i24 %a, %b
+\end{lstlisting}
+
+\textbf{Accessing built-in integer types:}
+\begin{lstlisting}[style=ts]
+const { i1, i8, i16, i32, i64, i128 } = LLVMCodegen.types;
+\end{lstlisting}
+
+\subsection{Floating-Point Types}
+
+\textbf{Standard float types:}
+\begin{center}
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Type} & \textbf{Precision} & \textbf{Size} & \textbf{Range} \\
+\hline
+\texttt{half} (f16) & Half precision & 16 bits & $\pm 6.5 \times 10^4$ \\
+\texttt{bfloat} (bf16) & Brain float & 16 bits & IEEE 754 \\
+\texttt{float} (f32) & Single precision & 32 bits & $\pm 3.4 \times 10^{38}$ \\
+\texttt{double} (f64) & Double precision & 64 bits & $\pm 1.7 \times 10^{308}$ \\
+\texttt{fp128} & Quad precision & 128 bits & IEEE 754 quad \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Usage:}
+\begin{lstlisting}[style=ts]
+import { FloatType } from "@euriklis/llvm-ir";
+
+// Built-in types
+const { half, bfloat, float, double, fp128 } = LLVMCodegen.types;
+
+// Or create explicitly
+const f16 = new FloatType("half");
+const f32 = new FloatType("float");
+const f64 = new FloatType("double");
+
+// Half-precision addition (GPU ML workloads)
+const add = new BinaryInst({
+  name: "sum",
+  opcode: LLVMCodegen.opcodes.fadd,
+  type: half,
+  lhs: "a",
+  rhs: "b"
+});
+// Generates: %sum = fadd half %a, %b
+\end{lstlisting}
+
+\textbf{When to use each:}
+\begin{itemize}[noitemsep]
+  \item \texttt{half}: GPU ML (faster, less memory), reduced precision
+  \item \texttt{bfloat}: Google TPU, TensorFlow (ML-optimized)
+  \item \texttt{float}: General-purpose, good balance
+  \item \texttt{double}: Scientific computing, high precision
+  \item \texttt{fp128}: Cryptography, extreme precision
+\end{itemize}
+
+\subsection{Pointer Type}
+
+Modern LLVM uses opaque pointers (\texttt{ptr}) instead of typed pointers.
+
+\begin{lstlisting}[style=ts]
+const { ptr } = LLVMCodegen.types;
+
+// All pointers are just "ptr"
+const load = new LoadInst({
+  name: "value",
+  type: i32,          // Type of value being loaded
+  pointerType: ptr,   // Pointer itself is just "ptr"
+  pointer: "array",
+  align: 4
+});
+// Generates: %value = load i32, ptr %array, align 4
+\end{lstlisting}
+
+\subsection{Array Types}
+
+Fixed-size arrays:
+
+\begin{lstlisting}[style=ts]
+import { ArrayType } from "@euriklis/llvm-ir";
+
+// [100 x i32] - array of 100 integers
+const arrType = new ArrayType({
+  elementType: i32,
+  size: 100
+});
+
+// [256 x float] - array of 256 floats
+const floatArr = new ArrayType({
+  elementType: float,
+  size: 256
+});
+
+// Multi-dimensional: [10 x [20 x i32]]
+const matrix = new ArrayType({
+  elementType: new ArrayType({ elementType: i32, size: 20 }),
+  size: 10
+});
+// Generates type: [10 x [20 x i32]]
+\end{lstlisting}
+
+\subsection{Structure Types}
+
+Aggregate types like C structs:
+
+\begin{lstlisting}[style=ts]
+import { StructType } from "@euriklis/llvm-ir";
+
+// struct Point { float x; float y; float z; }
+const Point = new StructType({
+  name: "Point",
+  fields: [
+    { type: float },
+    { type: float },
+    { type: float }
+  ]
+});
+// Generates: %Point = type { float, float, float }
+
+// Packed struct (no padding)
+const PackedPoint = new StructType({
+  name: "PackedPoint",
+  fields: [
+    { type: i8 },
+    { type: i32 }
+  ],
+  packed: true
+});
+// Generates: %PackedPoint = type <{ i8, i32 }>
+\end{lstlisting}
+
+\subsection{Vector Types}
+
+SIMD vectors for parallel operations:
+
+\begin{lstlisting}[style=ts]
+import { VectorType } from "@euriklis/llvm-ir";
+
+// <4 x float> - 4-element float vector (SSE, NEON)
+const vec4 = new VectorType({
+  elementType: float,
+  count: 4
+});
+
+// <8 x i32> - 8-element integer vector (AVX)
+const vec8i = new VectorType({
+  elementType: i32,
+  count: 8
+});
+
+// Vector addition
+const vadd = new BinaryInst({
+  name: "vsum",
+  opcode: LLVMCodegen.opcodes.fadd,
+  type: vec4,
+  lhs: "a",
+  rhs: "b"
+});
+// Generates: %vsum = fadd <4 x float> %a, %b
+// This adds 4 floats in parallel!
+\end{lstlisting}
+
+\subsection{Function Types}
+
+\begin{lstlisting}[style=ts]
+import { FunctionType } from "@euriklis/llvm-ir";
+
+// int add(int, int)
+const addFnType = new FunctionType({
+  returnType: i32,
+  paramTypes: [i32, i32]
+});
+// Type: i32 (i32, i32)
+
+// void print(char*)
+const printFnType = new FunctionType({
+  returnType: voidType,
+  paramTypes: [ptr]
+});
+// Type: void (ptr)
+
+// Variadic: int printf(char*, ...)
+const printfFnType = new FunctionType({
+  returnType: i32,
+  paramTypes: [ptr],
+  isVarArg: true
+});
+// Type: i32 (ptr, ...)
+\end{lstlisting}
+
+\subsection{Void Type}
+
+Special type for functions that don't return a value:
+
+\begin{lstlisting}[style=ts]
+const { void: voidType } = LLVMCodegen.types;
+
+const func = new LLVMFunction({
+  name: "doSomething",
+  returnType: voidType
+});
+// Generates: define void @doSomething() { ... }
+\end{lstlisting}
+
+\subsection{Type Compatibility}
+
+LLVM is strictly typed. You cannot mix types without explicit conversion:
+
+\begin{lstlisting}[style=ts]
+// ERROR: Cannot add i32 and i64
+const wrong = new BinaryInst({
+  opcode: LLVMCodegen.opcodes.add,
+  type: i32,
+  lhs: "i32_value",
+  rhs: "i64_value"  // Type mismatch!
+});
+
+// CORRECT: Convert first
+const ext = new SExtInst({
+  name: "i64_value_extended",
+  fromType: i32,
+  toType: i64,
+  value: "i32_value"
+});
+const correct = new BinaryInst({
+  opcode: LLVMCodegen.opcodes.add,
+  type: i64,
+  lhs: "i64_value_extended",
+  rhs: "i64_value"
+});
+\end{lstlisting}
+
+\subsection{Summary}
+
+\begin{itemize}[noitemsep]
+  \item Integers: \texttt{i1}, \texttt{i8}, \texttt{i16}, \texttt{i32}, \texttt{i64}, \texttt{i128}, or arbitrary \texttt{iN}
+  \item Floats: \texttt{half} (f16), \texttt{bfloat}, \texttt{float} (f32), \texttt{double} (f64), \texttt{fp128}
+  \item Pointers: \texttt{ptr} (opaque)
+  \item Arrays: \texttt{[N x type]}
+  \item Structs: \texttt{\{ type1, type2, ... \}}
+  \item Vectors: \texttt{<N x type>} for SIMD
+  \item All types must match exactly—use conversion instructions when needed
+\end{itemize}
+
+\section{GPU Memory Hierarchies and Thread Synchronization}
+
+Understanding GPU memory hierarchies is critical for performance. The wrong memory choice can make kernels 100x slower.
+
+\subsection{The GPU Memory Hierarchy}
+
+GPUs have multiple memory types with vastly different performance characteristics:
+
+\begin{center}
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Memory} & \textbf{Scope} & \textbf{Latency} & \textbf{Bandwidth} \\
+\hline
+Registers & Per-thread & 1 cycle & $>$ 10 TB/s \\
+Shared/Local & Thread block & 20-30 cycles & 1-2 TB/s \\
+Constant cache & Read-only & 20-30 cycles (cached) & High (if cached) \\
+Global & All threads & 200-400 cycles & 500 GB/s - 2 TB/s \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Performance impact:}
+\begin{itemize}[noitemsep]
+  \item Registers: Fastest, but limited (typically 64-256 KB per SM)
+  \item Shared memory: 100x faster than global, but limited (48-164 KB per block)
+  \item Global memory: Slowest, but large (8-80 GB)
+\end{itemize}
+
+\subsection{Global Memory (Address Space 1)}
+
+Global memory is device DRAM—accessible by all threads but slow.
+
+\textbf{Declaration:}
+\begin{lstlisting}[style=ts]
+import { GlobalVariable, ArrayType } from "@euriklis/llvm-ir";
+const { float } = LLVMCodegen.types;
+
+// Global array in device memory
+const globalArray = new GlobalVariable({
+  name: "device_data",
+  type: new ArrayType({ elementType: float, size: 1024 }),
+  addressSpace: 1,  // Global memory
+  linkage: "external"
+});
+// Generates: @device_data = external addrspace(1) global [1024 x float]
+\end{lstlisting}
+
+\textbf{Access pattern:}
+\begin{lstlisting}[style=ts]
+// Load from global memory
+const ptr = new GetElementPtrInst({
+  name: "global_ptr",
+  baseType: float,
+  ptrType: ptr,
+  pointer: "device_data",
+  indices: [{ type: i32, value: "idx" }]
+});
+
+const val = new LoadInst({
+  name: "value",
+  type: float,
+  pointerType: ptr,
+  pointer: ptr,
+  align: 4
+});
+// Generates: %global_ptr = getelementptr float, ptr @device_data, i32 %idx
+//            %value = load float, ptr %global_ptr, align 4
+\end{lstlisting}
+
+\textbf{Performance tip:} Coalesced access (adjacent threads access adjacent addresses) is crucial for bandwidth.
+
+\subsection{Shared Memory (Address Space 3)}
+
+Shared memory is on-chip, fast SRAM shared by all threads in a block. This is the key to high-performance GPU code.
+
+\textbf{Declaration:}
+\begin{lstlisting}[style=ts]
+// CUDA shared memory (address space 3)
+const sharedMem = new GlobalVariable({
+  name: "shared_tile",
+  type: new ArrayType({ elementType: float, size: 256 }),
+  addressSpace: 3,  // Shared memory
+  linkage: "internal"
+});
+// Generates: @shared_tile = internal addrspace(3) global [256 x float] undef
+\end{lstlisting}
+
+\textbf{Why shared memory matters:}
+\begin{enumerate}[noitemsep]
+  \item \textbf{Reuse data}: Load from slow global once, reuse from fast shared many times
+  \item \textbf{Synchronize}: Share data between threads in same block
+  \item \textbf{100x faster}: 20 cycles vs 400 cycles
+\end{enumerate}
+
+\textbf{Access pattern:}
+\begin{lstlisting}[style=ts]
+// Store to shared memory
+const sharedPtr = new GetElementPtrInst({
+  name: "shared_ptr",
+  baseType: float,
+  ptrType: ptr,
+  pointer: "shared_tile",
+  indices: [{ type: i32, value: "local_idx" }]
+});
+
+const store = new StoreInst({
+  valueType: float,
+  value: "global_value",
+  pointerType: ptr,
+  pointer: sharedPtr,
+  align: 4
+});
+// Now all threads in block can access this data quickly!
+\end{lstlisting}
+
+\subsection{Constant Memory (Address Space 4)}
+
+Constant memory is read-only, cached, and broadcast to all threads.
+
+\textbf{Best for:}
+\begin{itemize}[noitemsep]
+  \item Small lookup tables
+  \item Kernel parameters
+  \item Data accessed identically by all threads
+\end{itemize}
+
+\textbf{Declaration:}
+\begin{lstlisting}[style=ts]
+const constants = new GlobalVariable({
+  name: "coefficients",
+  type: new ArrayType({ elementType: float, size: 16 }),
+  addressSpace: 4,  // Constant memory
+  linkage: "external",
+  isConst: true
+});
+// Generates: @coefficients = external addrspace(4) constant [16 x float]
+\end{lstlisting}
+
+\subsection{Thread Synchronization}
+
+When using shared memory, threads must synchronize to avoid race conditions.
+
+\textbf{Barrier synchronization:}
+\begin{lstlisting}[style=ts]
+import { CallInst } from "@euriklis/llvm-ir";
+
+// CUDA: __syncthreads()
+const barrier = new CallInst({
+  functionName: "llvm.nvvm.barrier0",
+  returnType: voidType,
+  args: []
+});
+// Generates: call void @llvm.nvvm.barrier0()
+
+// AMD ROCm: barrier()
+const barrierAMD = new CallInst({
+  functionName: "llvm.amdgcn.s.barrier",
+  returnType: voidType,
+  args: []
+});
+// Generates: call void @llvm.amdgcn.s.barrier()
+
+// OpenCL: barrier(CLK_LOCAL_MEM_FENCE)
+const barrierOCL = new CallInst({
+  functionName: "_Z7barrierj",  // OpenCL barrier
+  returnType: voidType,
+  args: [{ type: i32, value: 1 }]  // CLK_LOCAL_MEM_FENCE
+});
+\end{lstlisting}
+
+\textbf{Package-provided helper functions:}
+
+Instead of manually creating \texttt{CallInst} objects, the package provides convenient helper methods:
+
+\begin{lstlisting}[style=ts]
+import { NVVMCodegen, AMDGPUCodegen, SPIRVCodegen } from "@euriklis/llvm-ir";
+
+// CUDA: Use the helper (recommended)
+const barrier = NVVMCodegen.cuda.syncThreads();
+// Returns a CallInst configured for llvm.nvvm.barrier0()
+
+// AMD ROCm: Use the helper
+const barrierAMD = AMDGPUCodegen.rocm.barrier();
+// Returns a CallInst for llvm.amdgcn.s.barrier()
+
+// OpenCL: Use the helper
+const barrierOCL = SPIRVCodegen.opencl.barrier();
+// Returns a CallInst for _Z7barrierj with correct arguments
+
+// All helpers return CallInst objects ready to add to your basic blocks
+entry.addInstruction(barrier);
+\end{lstlisting}
+
+These helpers ensure correct intrinsic names and arguments, making your code cleaner and less error-prone.
+
+\textbf{What barriers do:}
+\begin{enumerate}[noitemsep]
+  \item All threads in the block wait at the barrier
+  \item No thread proceeds until ALL threads arrive
+  \item Ensures memory operations before barrier are visible after
+\end{enumerate}
+
+\textbf{Critical rule:} Barriers must be in uniform control flow—all threads must execute the same barrier, or deadlock occurs.
+
+\begin{lstlisting}[style=ts]
+// WRONG: Conditional barrier (DEADLOCK!)
+if (threadIdx.x < 16) {
+  barrier();  // Only some threads hit barrier!
+}
+
+// CORRECT: All threads hit barrier
+barrier();  // Everyone waits
+if (threadIdx.x < 16) {
+  // Now safe to use synchronized data
+}
+\end{lstlisting}
+
+\subsection{Memory Fences}
+
+\textbf{What are memory fences?}
+
+In JavaScript/TypeScript, when you write \texttt{array[i] = 42;}, it happens immediately and in order. But in GPUs and CPUs, the hardware can reorder memory operations for performance. A \textbf{memory fence} is like saying ``wait, make sure all pending writes are actually visible before continuing.''
+
+\textbf{Barriers vs. Fences:}
+
+Think of them like this:
+\begin{itemize}[noitemsep]
+  \item \textbf{Barrier} (\texttt{syncThreads()}): ``Everyone stop and wait here. Don't proceed until all threads arrive.'' (Synchronization + memory ordering)
+  \item \textbf{Fence} (\texttt{threadfence()}): ``Make my writes visible, but don't wait for other threads.'' (Memory ordering only)
+\end{itemize}
+
+\textbf{When to use fences:}
+
+Use fences for lock-free algorithms and atomic operations where you need memory ordering guarantees but don't want the overhead of waiting for all threads.
+
+\textbf{Example: GPU memory fences}
+
+\begin{lstlisting}[style=ts]
+import { FenceInst, CallInst } from "@euriklis/llvm-ir";
+
+// Standard LLVM fence (works on all architectures)
+const fence = new FenceInst({
+  ordering: "seq_cst"  // Sequential consistency (strongest)
+});
+// Generates: fence seq_cst
+
+// CUDA threadfence (block-level) - ensures writes visible to block
+const fenceBlock = new CallInst({
+  functionName: "llvm.nvvm.membar.cta",
+  returnType: voidType,
+  args: []
+});
+// Generates: call void @llvm.nvvm.membar.cta()
+
+// CUDA threadfence (global-level) - ensures writes visible globally
+const fenceGlobal = new CallInst({
+  functionName: "llvm.nvvm.membar.gl",
+  returnType: voidType,
+  args: []
+});
+// Generates: call void @llvm.nvvm.membar.gl()
+\end{lstlisting}
+
+\textbf{Memory ordering levels:}
+
+\texttt{FenceInst} supports different ordering strengths (from weakest to strongest):
+\begin{itemize}[noitemsep]
+  \item \texttt{"acquire"}: Ensures reads after fence see all writes before
+  \item \texttt{"release"}: Ensures writes before fence are visible after
+  \item \texttt{"acq\_rel"}: Both acquire and release
+  \item \texttt{"seq\_cst"}: Sequentially consistent (default, safest)
+\end{itemize}
+
+For most use cases, use \texttt{"seq\_cst"} (sequential consistency). Only use weaker orderings if you understand low-level memory models and need the performance.
+
+\subsection{Tiled Matrix Multiplication Example}
+
+Now let's see why shared memory matters with a real example: matrix multiplication \(C = A \times B\).
+
+\textbf{Naive version (global memory only):}
+
+For \(N \times N\) matrices, each thread computes one element:
+\begin{lstlisting}[style=ts]
+C[row][col] = 0;
+for (k = 0; k < N; k++) {
+  C[row][col] += A[row][k] * B[k][col];  // N global loads per thread!
+}
+\end{lstlisting}
+
+\textbf{Problem:} Each thread loads the same \texttt{A[row][k]} and \texttt{B[k][col]} values. For a 16×16 tile, that's 256 redundant loads from slow global memory.
+
+\textbf{Optimized version (tiled with shared memory):}
+
+Break matrices into tiles, load each tile into shared memory once, reuse many times.
+
+\begin{lstlisting}[style=ts]
+import { NVVMCodegen, LLVMFunction, Parameter, BasicBlock,
+         GlobalVariable, ArrayType, BinaryInst, ICmpInst, BrInst,
+         LoadInst, StoreInst, GetElementPtrInst, RetInst, PhiInst,
+         CallInst } from "@euriklis/llvm-ir";
+
+const codegen = new NVVMCodegen("matmul_tiled");
+const { float, ptr, i32, void: voidType } = NVVMCodegen.types;
+
+// Shared memory tiles (16x16 each)
+const TILE_SIZE = 16;
+
+const tileA = new GlobalVariable({
+  name: "tileA",
+  type: new ArrayType({
+    elementType: new ArrayType({ elementType: float, size: TILE_SIZE }),
+    size: TILE_SIZE
+  }),
+  addressSpace: 3,  // Shared memory
+  linkage: "internal"
+});
+
+const tileB = new GlobalVariable({
+  name: "tileB",
+  type: new ArrayType({
+    elementType: new ArrayType({ elementType: float, size: TILE_SIZE }),
+    size: TILE_SIZE
+  }),
+  addressSpace: 3,  // Shared memory
+  linkage: "internal"
+});
+
+codegen.getModule().addGlobalVariable(tileA);
+codegen.getModule().addGlobalVariable(tileB);
+
+// Kernel function
+const kernel = new LLVMFunction({
+  name: "matMulTiled",
+  returnType: voidType
+});
+
+kernel.addParameter(new Parameter({ type: ptr, name: "A" }));
+kernel.addParameter(new Parameter({ type: ptr, name: "B" }));
+kernel.addParameter(new Parameter({ type: ptr, name: "C" }));
+kernel.addParameter(new Parameter({ type: i32, name: "N" }));
+
+const entry = new BasicBlock("entry");
+const tileLoop = new BasicBlock("tile_loop");
+const loadTile = new BasicBlock("load_tile");
+const syncLoad = new BasicBlock("sync_load");
+const computeTile = new BasicBlock("compute_tile");
+const innerLoop = new BasicBlock("inner_loop");
+const innerBody = new BasicBlock("inner_body");
+const innerExit = new BasicBlock("inner_exit");
+const syncCompute = new BasicBlock("sync_compute");
+const tileNext = new BasicBlock("tile_next");
+const writeResult = new BasicBlock("write_result");
+const exit = new BasicBlock("exit");
+
+// Entry: Get thread indices
+const tx = NVVMCodegen.cuda.threadIdxX("tx");
+const ty = NVVMCodegen.cuda.threadIdxY("ty");
+const bx = NVVMCodegen.cuda.blockIdxX("bx");
+const by = NVVMCodegen.cuda.blockIdxY("by");
+entry.addInstruction(tx);
+entry.addInstruction(ty);
+entry.addInstruction(bx);
+entry.addInstruction(by);
+
+// Global row and col
+const row = new BinaryInst({
+  name: "row",
+  opcode: NVVMCodegen.opcodes.add,
+  type: i32,
+  lhs: new BinaryInst({
+    opcode: NVVMCodegen.opcodes.mul,
+    type: i32,
+    lhs: by,
+    rhs: TILE_SIZE
+  }),
+  rhs: ty
+});
+entry.addInstruction(row);
+
+const col = new BinaryInst({
+  name: "col",
+  opcode: NVVMCodegen.opcodes.add,
+  type: i32,
+  lhs: new BinaryInst({
+    opcode: NVVMCodegen.opcodes.mul,
+    type: i32,
+    lhs: bx,
+    rhs: TILE_SIZE
+  }),
+  rhs: tx
+});
+entry.addInstruction(col);
+
+entry.setTerminator(new BrInst({ target: tileLoop }));
+
+// Tile loop: Process matrix in TILE_SIZE chunks
+const tileIdx = new PhiInst({
+  name: "tile",
+  type: i32,
+  incomingValues: [
+    { value: 0, block: entry },
+    { value: "tile_next_val", block: syncCompute }
+  ]
+});
+tileLoop.addInstruction(tileIdx);
+
+const sum = new PhiInst({
+  name: "sum",
+  type: float,
+  incomingValues: [
+    { value: 0.0, block: entry },
+    { value: "sum_next", block: syncCompute }
+  ]
+});
+tileLoop.addInstruction(sum);
+
+const tileCmp = new ICmpInst({
+  name: "tile_cmp",
+  predicate: NVVMCodegen.predicates.slt,
+  type: i32,
+  lhs: tileIdx,
+  rhs: "N"
+});
+tileLoop.addInstruction(tileCmp);
+
+tileLoop.setTerminator(new BrInst({
+  condition: tileCmp,
+  conditionType: i1,
+  target: loadTile,
+  falseTarget: writeResult
+}));
+
+// Load tile: Each thread loads one element from A and B into shared memory
+// tileA[ty][tx] = A[row][tile + tx]
+// tileB[ty][tx] = B[tile + ty][col]
+
+// ... (Load from global A and B into shared tileA and tileB)
+
+loadTile.setTerminator(new BrInst({ target: syncLoad }));
+
+// Barrier: Ensure all threads finished loading tile
+const barrierLoad = new CallInst({
+  functionName: "llvm.nvvm.barrier0",
+  returnType: voidType,
+  args: []
+});
+syncLoad.addInstruction(barrierLoad);
+syncLoad.setTerminator(new BrInst({ target: computeTile }));
+
+// Compute tile: Multiply tiles in shared memory
+computeTile.setTerminator(new BrInst({ target: innerLoop }));
+
+// Inner loop over tile elements
+const k = new PhiInst({
+  name: "k",
+  type: i32,
+  incomingValues: [
+    { value: 0, block: computeTile },
+    { value: "k_next", block: innerBody }
+  ]
+});
+innerLoop.addInstruction(k);
+
+const partialSum = new PhiInst({
+  name: "partial_sum",
+  type: float,
+  incomingValues: [
+    { value: sum, block: computeTile },
+    { value: "partial_sum_next", block: innerBody }
+  ]
+});
+innerLoop.addInstruction(partialSum);
+
+const kCmp = new ICmpInst({
+  name: "k_cmp",
+  predicate: NVVMCodegen.predicates.slt,
+  type: i32,
+  lhs: k,
+  rhs: TILE_SIZE
+});
+innerLoop.addInstruction(kCmp);
+
+innerLoop.setTerminator(new BrInst({
+  condition: kCmp,
+  conditionType: i1,
+  target: innerBody,
+  falseTarget: innerExit
+}));
+
+// Inner body: partial_sum += tileA[ty][k] * tileB[k][tx]
+// Load from shared memory (FAST!)
+// ... (GEP, load tileA, load tileB, multiply, add)
+
+innerBody.setTerminator(new BrInst({ target: innerLoop }));
+
+// Inner exit: Update sum
+innerExit.setTerminator(new BrInst({ target: syncCompute }));
+
+// Barrier: Ensure all threads finished computing before loading next tile
+const barrierCompute = new CallInst({
+  functionName: "llvm.nvvm.barrier0",
+  returnType: voidType,
+  args: []
+});
+syncCompute.addInstruction(barrierCompute);
+
+const tileNextVal = new BinaryInst({
+  name: "tile_next_val",
+  opcode: NVVMCodegen.opcodes.add,
+  type: i32,
+  lhs: tileIdx,
+  rhs: TILE_SIZE
+});
+syncCompute.addInstruction(tileNextVal);
+
+syncCompute.setTerminator(new BrInst({ target: tileLoop }));
+
+// Write result: C[row][col] = sum
+writeResult.setTerminator(new BrInst({ target: exit }));
+exit.setTerminator(new RetInst({}));
+
+kernel.addBasicBlock(entry);
+kernel.addBasicBlock(tileLoop);
+kernel.addBasicBlock(loadTile);
+kernel.addBasicBlock(syncLoad);
+kernel.addBasicBlock(computeTile);
+kernel.addBasicBlock(innerLoop);
+kernel.addBasicBlock(innerBody);
+kernel.addBasicBlock(innerExit);
+kernel.addBasicBlock(syncCompute);
+kernel.addBasicBlock(writeResult);
+kernel.addBasicBlock(exit);
+
+codegen.getModule().addFunction(kernel);
+\end{lstlisting}
+
+\textbf{Performance analysis:}
+
+\textbf{Naive (global only):}
+\begin{itemize}[noitemsep]
+  \item Each thread: $2N$ global loads (400 cycles each)
+  \item Total latency: $\sim 800N$ cycles
+  \item For $N=1024$: $\sim 819,200$ cycles
+\end{itemize}
+
+\textbf{Tiled (shared memory):}
+\begin{itemize}[noitemsep]
+  \item Each tile: $TILE\_SIZE^2$ global loads shared across block
+  \item Tile reused $TILE\_SIZE$ times from shared (20 cycles each)
+  \item Total latency: $\sim \frac{800N}{TILE\_SIZE} + 20N$
+  \item For $N=1024, TILE=16$: $\sim 71,680$ cycles
+  \item \textbf{11x speedup!}
+\end{itemize}
+
+\subsection{Key Takeaways}
+
+\begin{enumerate}[noitemsep]
+  \item \textbf{Use shared memory} to cache frequently accessed data
+  \item \textbf{Synchronize with barriers} after loading and before computing
+  \item \textbf{Tile your algorithms} to fit working sets in shared memory
+  \item \textbf{Coalesce global accesses} when loading tiles
+  \item \textbf{Avoid bank conflicts} in shared memory (advanced topic)
+\end{enumerate}
+
+The tiled pattern applies to many GPU algorithms: convolutions, FFTs, reductions, sorting.
+
+\section{Future Work: Apple Silicon GPU Support}
+
+\subsection{Current State}
+
+This package currently supports Apple Silicon \textbf{CPUs} via the ARM/AArch64 backend:
+
+\begin{lstlisting}[style=ts]
+import { ARMCodegen } from "@euriklis/llvm-ir";
+
+// Target Apple M3/M5 CPU cores
+const codegen = new ARMCodegen("apple_module", true);  // 64-bit
+codegen.targetTriple = "arm64-apple-macosx";
+
+// Use NEON SIMD for vectorization (128-bit vectors)
+const vec4 = new VectorType({ elementType: float, count: 4 });
+// Generates efficient ARM NEON instructions
+\end{lstlisting}
+
+This works well for CPU-bound computations with SIMD acceleration.
+
+\subsection{The Apple GPU Challenge}
+
+Apple M3/M5 chips have powerful GPUs that are excellent for AI and parallel computing. However, unlike NVIDIA and AMD, Apple uses a \textbf{proprietary GPU architecture}:
+
+\textbf{How GPU compilation works:}
+
+\begin{itemize}[noitemsep]
+  \item \textbf{NVIDIA}: Your code → LLVM IR (NVPTX) → PTX → CUDA binary (supported)
+  \item \textbf{AMD}: Your code → LLVM IR (AMDGPU) → GCN/RDNA binary (supported)
+  \item \textbf{Apple}: Your code → Metal Shading Language\cite{metalspec} → \textbf{AIR (proprietary)} → Metal binary (not supported)
+\end{itemize}
+
+\textbf{The problem:} AIR (Apple Intermediate Representation) is based on LLVM IR, but Apple keeps the format \textbf{closed and undocumented}\cite{airformat}. We cannot generate it directly.
+
+\subsection{Why This Matters for TypeScript Developers}
+
+If you're coming from a JavaScript/TypeScript background, here's an analogy:
+
+\begin{itemize}[noitemsep]
+  \item CUDA/AMD are like \textbf{open APIs}—you can generate code programmatically (what this package does)
+  \item Metal is like a \textbf{proprietary framework}—you must use Apple's tools and pre-built libraries
+\end{itemize}
+
+Think of it like this:
+\begin{lstlisting}[style=ts]
+// CUDA/AMD (what this package does)
+const kernel = generateLLVMIR({
+  instructions: [...],  // Full programmatic control
+  intrinsics: [...]
+});
+
+// Metal (what Apple requires)
+const kernel = `
+  kernel void myKernel(...) {
+    // Must write Metal Shading Language as text
+  }
+`;
+// Then compile with Apple's tools
+\end{lstlisting}
+
+\subsection{How PyTorch and TensorFlow Do It}
+
+Frameworks like PyTorch don't generate Metal code either. Instead, they use \textbf{MPS (Metal Performance Shaders)}\cite{pytorchmps}\cite{applepytorch}—Apple's high-level library:
+
+\begin{itemize}[noitemsep]
+  \item Apple provides hundreds of \textbf{pre-optimized GPU kernels} (matrix multiply, convolution, etc.)\cite{metaldocs}
+  \item PyTorch maps operations to these kernels via the \textbf{MPSGraph API}
+  \item This works great for standard ML operations
+  \item For custom kernels, you must write \texttt{.metal} files by hand\cite{metalspec}
+\end{itemize}
+
+\subsection{What We're Waiting For}
+
+Apple has two paths to enable this package's Metal support:
+
+\textbf{Option 1: Open the AIR format specification}
+
+If Apple documents how AIR works\cite{airformat}, we could:
+\begin{lstlisting}[style=ts]
+import { MetalCodegen } from "@euriklis/llvm-ir";
+
+const codegen = new MetalCodegen("my_kernel");
+codegen.targetTriple = "air64-apple-macosx";
+// Generate AIR directly, just like we do for NVPTX
+\end{lstlisting}
+
+\textbf{Option 2: Stable Metal Shading Language generation}
+
+Alternatively, we could generate \texttt{.metal} source files programmatically\cite{metaltools}:
+\begin{lstlisting}[style=ts]
+const codegen = new MetalCodegen("my_kernel");
+const metalSource = codegen.toMetalSource();  // Generate .metal text
+// User compiles: xcrun metal -c kernel.metal
+\end{lstlisting}
+
+This is less elegant than LLVM IR generation, but would work.
+
+\subsection{Current Workarounds}
+
+Until Apple opens AIR or provides better tooling, TypeScript/JavaScript developers targeting Apple GPUs should:
+
+\begin{enumerate}[noitemsep]
+  \item \textbf{Use high-level frameworks}: PyTorch MPS, TensorFlow, Core ML
+  \item \textbf{Write Metal Shading Language directly}: Create \texttt{.metal} files for custom kernels
+  \item \textbf{Use this package for CPU SIMD}: ARM/NEON support works today
+  \item \textbf{Prototype on NVIDIA/AMD}: Develop with this package's GPU support, deploy to Apple via Metal ports
+\end{enumerate}
+
+\subsection{Unified Memory Advantage}
+
+One unique strength of Apple Silicon: \textbf{unified memory architecture}.
+
+\begin{itemize}[noitemsep]
+  \item CPU and GPU share the same memory pool (16-128 GB)
+  \item No expensive CPU$\leftrightarrow$GPU copies (unlike NVIDIA)
+  \item Ideal for workflows mixing CPU and GPU work
+\end{itemize}
+
+Once Metal support is added, this will make Apple Silicon extremely competitive for heterogeneous computing workflows.
+
+\subsection{Timeline}
+
+\textbf{When AIR becomes public or Apple provides stable LLVM IR → Metal tooling}, we will add:
+
+\begin{itemize}[noitemsep]
+  \item \texttt{MetalCodegen} class matching the API of \texttt{NVVMCodegen}, \texttt{AMDGPUCodegen}
+  \item Metal-specific intrinsics (\texttt{threadgroup} memory, barriers, SIMD-groups)
+  \item Complete examples for Apple GPU programming
+  \item Validation with Apple's Metal compiler
+\end{itemize}
+
+We're monitoring Apple's developer documentation and LLVM commits for any changes. If you have insights into Metal's IR generation, please contribute!
+
+\subsection{Community Contributions Welcome}
+
+Possible paths forward:
+\begin{itemize}[noitemsep]
+  \item \textbf{Metal Shading Language generator}: Generate \texttt{.metal} source text (similar to how we generate LLVM IR text)
+  \item \textbf{MPSGraph bindings}: High-level TypeScript API for Metal Performance Shaders
+  \item \textbf{AIR reverse-engineering}: Document the format (challenging, legal concerns)
+  \item \textbf{Lobby Apple}: Request official AIR documentation or LLVM Metal backend
+\end{itemize}
+
+If you're interested in helping, see the repository's contribution guidelines.
+
+\begin{thebibliography}{99}
+\bibitem{llvmessentials}
+Suyog Sarda, Mayur Pandey. \textit{LLVM Essentials}. Packt Publishing, 2015. An excellent overview of LLVM fundamentals; this handbook extends those concepts to the TypeScript ecosystem and multi-architecture workflows.
+
+\bibitem{llvmbindings}
+ApsarasX. \textit{llvm-bindings: LLVM bindings for Node.js/JavaScript/TypeScript}. GitHub, 2021. Available at: \url{https://github.com/ApsarasX/llvm-bindings}
+
+\bibitem{llvmnode}
+Maël Nison et al. \textit{llvm-node: Node.js bindings for LLVM}. npm package, 2023. Available at: \url{https://www.npmjs.com/package/llvm-node}
+
+\bibitem{nodellvmc}
+Cornell Capra. \textit{node-llvmc: JavaScript/TypeScript FFI bindings for the LLVM C API}. GitHub, 2023. Available at: \url{https://github.com/cucapra/node-llvmc}
+
+\bibitem{metalspec}
+Apple Inc. \textit{Metal Shading Language Specification, Version 4}. Apple Developer Documentation, 2025. Available at: \url{https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf}
+
+\bibitem{metaldocs}
+Apple Inc. \textit{Metal Documentation}. Apple Developer, 2024. Available at: \url{https://developer.apple.com/metal/}
+
+\bibitem{pytorchmps}
+PyTorch Contributors. \textit{MPS backend --- PyTorch Documentation}. PyTorch, 2024. Available at: \url{https://docs.pytorch.org/docs/stable/notes/mps.html}
+
+\bibitem{applepytorch}
+Apple Inc. \textit{Accelerated PyTorch training on Mac}. Apple Developer, 2024. Available at: \url{https://developer.apple.com/metal/pytorch/}
+
+\bibitem{airformat}
+SamoZ256. \textit{Breaking down Metal's intermediate representation format}. Medium, 2024. Available at: \url{https://medium.com/@samuliak/breaking-down-metals-intermediate-representation-format-41827022489c}
+
+\bibitem{metaltools}
+Apple Inc. \textit{Metal Programming Guide}. Apple Developer Documentation Archive, 2024. Available at: \url{https://developer.apple.com/library/archive/documentation/Miscellaneous/Conceptual/MetalProgrammingGuide/}
+\end{thebibliography}
+
+\end{document}
