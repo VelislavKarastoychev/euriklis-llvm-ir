@@ -20,6 +20,15 @@
 \definecolor{coverbottom}{RGB}{42,82,152}
 \definecolor{accentgold}{RGB}{255,200,87}
 \definecolor{accentlight}{RGB}{100,149,237}
+\newcommand{\AuthorBadge}{%
+  \begin{tikzpicture}[baseline=-0.5ex]
+    \begin{scope}
+      \clip (0,0) circle (0.3cm);
+      \node at (0,0) {\includegraphics[width=0.6cm]{465218720_8763616726992194_1789456364342463852_n.jpg}};
+    \end{scope}
+    \draw[accentgold,line width=0.4pt] (0,0) circle (0.3cm);
+  \end{tikzpicture}%
+}
 \lstdefinestyle{ts}{%
   basicstyle=\ttfamily\small,
   backgroundcolor=\color{codebg},
@@ -81,7 +90,7 @@
         ([shift={(2.1cm,4.1cm)}]current page.south west) rectangle ([shift={(-2.1cm,-4.1cm)}]current page.north east);
 
     % Technology Stack Diagram
-    \begin{scope}[shift={(current page.center)}, yshift=-8cm]
+    \begin{scope}[shift={(current page.center)}, yshift=-6.5cm]
         % Define colors for each technology
         \definecolor{tsblue}{RGB}{0,122,204}
         \definecolor{llvmred}{RGB}{194,66,52}
@@ -90,22 +99,25 @@
         \definecolor{spirvblue}{RGB}{102,102,153}
 
         % TypeScript (center top)
-        \node[fill=tsblue, text=white, font=\bfseries, rounded corners=3pt, minimum width=2cm, minimum height=0.8cm] (ts) at (0,2) {TypeScript};
+        \node[inner sep=0pt] (ts) at (0,2) {\includegraphics[width=2cm]{typescript.png}};
 
         % LLVM IR (center)
-        \node[fill=llvmred, text=white, font=\bfseries, rounded corners=3pt, minimum width=2cm, minimum height=0.8cm] (llvm) at (0,0) {LLVM IR};
+        \node[inner sep=0pt] (llvm) at (0,0) {\includegraphics[width=2cm]{LLVM_logo.png}};
+
+        % Common style for lower nodes
+        \tikzset{archnode/.style={ellipse, draw=white, line width=1pt, minimum width=2.4cm, minimum height=1.4cm, inner sep=2pt}}
 
         % NVIDIA NVVM (left bottom)
-        \node[fill=nvidiagreen, text=white, font=\small\bfseries, rounded corners=3pt, minimum width=1.6cm, minimum height=0.7cm] (nvvm) at (-3.5,-2) {NVIDIA};
+        \node[archnode] (nvvm) at (-3.5,-2) {\includegraphics[width=1.4cm]{Nvidia_logo.svg.png}};
 
         % AMD (center-left bottom)
-        \node[fill=amdred, text=white, font=\small\bfseries, rounded corners=3pt, minimum width=1.6cm, minimum height=0.7cm] (amd) at (-1.5,-2) {AMD};
+        \node[archnode] (amd) at (-1.5,-2) {\includegraphics[width=1.4cm]{amd-logo-wallpaper.jpg}};
 
         % SPIR-V (center-right bottom)
-        \node[fill=spirvblue, text=white, font=\small\bfseries, rounded corners=3pt, minimum width=1.6cm, minimum height=0.7cm] (spirv) at (1.5,-2) {SPIR-V};
+        \node[archnode] (spirv) at (1.5,-2) {\includegraphics[width=1.4cm]{spirv.png}};
 
         % ARM (right bottom)
-        \node[fill=accentlight, text=white, font=\small\bfseries, rounded corners=3pt, minimum width=1.6cm, minimum height=0.7cm] (arm) at (3.5,-2) {ARM};
+        \node[archnode] (arm) at (3.5,-2) {\includegraphics[width=1.4cm]{ARM.png}};
 
         % Arrows connecting the technologies
         \draw[->, white, line width=1.5pt, opacity=0.8] (ts) -- (llvm);
@@ -119,7 +131,7 @@
 \vspace*{3cm}
 \begin{center}
     % Author name at top
-    {\LARGE\itshape\color{white}Velislav Simov Karastoychev\par}
+    {\LARGE\itshape\color{white}Velislav S. Karastoychev\par}
 
     \vspace{3cm}
 
@@ -153,22 +165,17 @@
     % Book title
     {\Large\bfseries Programming LLVM IR with TypeScript\par}
 
+    \vspace{0.5cm}
+
+    % Subtitle
+    {\normalsize A Practical Handbook for Cross-Platform and Multi-Architecture Code Generation\par}
+
     \vspace{1cm}
 
-    % Author name
-    {\LARGE\bfseries Velislav Karastoychev\par}
+    % Author line with avatar
+    {\Large \AuthorBadge\hspace{0.5cm}Velislav Karastoychev\par}
 
-    \vspace{1.5cm}
-
-    % Author avatar with border
-    \begin{tikzpicture}
-        \draw[accentgold,line width=2pt] (0,0) circle (1.5cm);
-        \draw[coverbottom,line width=1pt] (0,0) circle (1.45cm);
-        \clip (0,0) circle (1.4cm);
-        \node at (0,0) {\includegraphics[width=2.8cm]{465218720_8763616726992194_1789456364342463852_n.jpg}};
-    \end{tikzpicture}
-
-    \vspace{1.5cm}
+    \vspace{1.2cm}
 
     {\large
     Founder of Euriklis LTD\\
@@ -200,7 +207,7 @@ However, given the inherent theoretical complexity of LLVM IR, compiler design, 
 
 \subsection*{Acknowledgments}
 
-I would like to express my deep gratitude to \textbf{\textit{Peter Sveshtarov}} for the fruitful conversations and precious guidance, and for all the time spent in discussions with him, which have left a bright mark on the understanding and conceptual constructions of such projects. A large part of his ideas and directions are reflected in this project.
+I would like to express my deep gratitude to \textbf{\textit{Dr. Peter Sveshtarov}} for the fruitful conversations and precious guidance, and for all the time spent in discussions with him, which have left a bright mark on the understanding and conceptual constructions of such projects. A large part of his ideas and directions are reflected in this project.
 
 \tableofcontents
 
