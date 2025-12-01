@@ -1,0 +1,63 @@
+\documentclass[11pt,oneside]{book}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{shadings,shadows,positioning,shapes.geometric}
+\usepackage{titlesec}
+\usepackage{enumitem}
+
+\definecolor{codebg}{RGB}{248,248,248}
+% Cover colors
+\definecolor{covertop}{RGB}{30,60,114}
+\definecolor{coverbottom}{RGB}{42,82,152}
+\definecolor{accentgold}{RGB}{255,200,87}
+\definecolor{accentlight}{RGB}{100,149,237}
+\newcommand{\AuthorBadge}{%
+  \begin{tikzpicture}[baseline=-0.5ex]
+    \begin{scope}
+      \clip (0,0) circle (0.3cm);
+      \node at (0,0) {\includegraphics[width=0.6cm]{465218720_8763616726992194_1789456364342463852_n.jpg}};
+    \end{scope}
+    \draw[accentgold,line width=0.4pt] (0,0) circle (0.3cm);
+  \end{tikzpicture}%
+}
+\lstdefinestyle{ts}{%
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codebg},
+  keywordstyle=\color{blue!60!black},
+  commentstyle=\color{green!40!black},
+  stringstyle=\color{orange!60!black},
+  frame=single,
+  framerule=0.2pt,
+  breaklines=true,
+  showstringspaces=false
+}
+\lstdefinestyle{ir}{%
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codebg},
+  frame=single,
+  framerule=0.2pt,
+  breaklines=true,
+  showstringspaces=false
+}
+
+% Hyperref setup for better PDF metadata
+\hypersetup{
+    pdftitle={Programming LLVM IR with TypeScript},
+    pdfauthor={Velislav Karastoychev},
+    pdfsubject={LLVM IR, TypeScript, GPU Programming},
+    pdfkeywords={LLVM, TypeScript, GPU, CUDA, ROCm, Metal, WebAssembly},
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+

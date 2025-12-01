@@ -1,0 +1,342 @@
+\chapter{GPU Programming: Same Function Across All Architectures}
+
+LLVM supports GPU targets via architecture-specific backends:
+\begin{itemize}[noitemsep]
+  \item \textbf{NVIDIA}: NVPTX backend (CUDA)
+  \item \textbf{AMD}: AMDGPU backend (ROCm)
+  \item \textbf{Intel/OpenCL}: SPIR-V backend
+\end{itemize}
+
+This chapter shows how to write the same algorithm (vector addition) for all three GPU architectures using this library's unified API.
+
+\section{Vector Addition: NVIDIA CUDA}
+
+\textbf{CUDA C equivalent:}
+\begin{lstlisting}[style=ir]
+__global__ void vectorAdd(float* a, float* b, float* c, int n) {
+  int idx = blockIdx.x * blockDim.x + threadIdx.x;
+  if (idx < n) {
+    c[idx] = a[idx] + b[idx];
+  }
+}
+\end{lstlisting}
+
+\textbf{TypeScript with NVVMCodegen:}
+\begin{lstlisting}[style=ts]
+import {
+  NVVMCodegen,
+  LLVMFunction,
+  Parameter,
+  BasicBlock,
+  BinaryInst,
+  ICmpInst,
+  BrInst,
+  LoadInst,
+  StoreInst,
+  GetElementPtrInst,
+  RetInst,
+  LLVMCodegen,
+  FloatType
+} from "@euriklis/llvm-ir";
+
+const codegen = new NVVMCodegen("vector_add");
+const module = codegen.getModule();
+
+const floatType = new FloatType("float");
+
+const kernel = new LLVMFunction({
+  name: "vectorAdd",
+  returnType: LLVMCodegen.types.void
+});
+
+kernel.addParameter(new Parameter({ type: LLVMCodegen.types.ptr, name: "a" }));
+kernel.addParameter(new Parameter({ type: LLVMCodegen.types.ptr, name: "b" }));
+kernel.addParameter(new Parameter({ type: LLVMCodegen.types.ptr, name: "c" }));
+kernel.addParameter(new Parameter({ type: LLVMCodegen.types.i32, name: "n" }));
+
+const entry = new BasicBlock("entry");
+const compute = new BasicBlock("compute");
+const exit = new BasicBlock("exit");
+
+// Get thread ID using CUDA intrinsics
+const blockIdx = NVVMCodegen.cuda.blockIdxX("blockIdx.x");
+const blockDim = NVVMCodegen.cuda.blockDimX("blockDim.x");
+const threadIdx = NVVMCodegen.cuda.threadIdxX("threadIdx.x");
+
+entry.addInstruction(blockIdx);
+entry.addInstruction(blockDim);
+entry.addInstruction(threadIdx);
+
+// idx = blockIdx.x * blockDim.x + threadIdx.x
+const mul = new BinaryInst({
+  name: "mul",
+  opcode: LLVMCodegen.opcodes.mul,
+  type: LLVMCodegen.types.i32,
+  lhs: blockIdx,
+  rhs: blockDim
+});
+entry.addInstruction(mul);
+
+const idx = new BinaryInst({
+  name: "idx",
+  opcode: LLVMCodegen.opcodes.add,
+  type: LLVMCodegen.types.i32,
+  lhs: mul,
+  rhs: threadIdx
+});
+entry.addInstruction(idx);
+
+// Bounds check: idx < n
+const cmp = new ICmpInst({
+  name: "cmp",
+  predicate: LLVMCodegen.predicates.slt,
+  type: LLVMCodegen.types.i32,
+  lhs: idx,
+  rhs: "n"
+});
+entry.addInstruction(cmp);
+
+entry.setTerminator(new BrInst({
+  condition: cmp,
+  conditionType: LLVMCodegen.types.i1,
+  target: compute,
+  falseTarget: exit
+}));
+
+// Compute: c[idx] = a[idx] + b[idx]
+// ... (full implementation in repository examples)
+
+kernel.addBasicBlock(entry);
+kernel.addBasicBlock(compute);
+kernel.addBasicBlock(exit);
+module.addFunction(kernel);
+
+console.log(codegen.toString());
+\end{lstlisting}
+
+\textbf{Key CUDA intrinsics:}
+\begin{itemize}[noitemsep]
+  \item \texttt{NVVMCodegen.cuda.threadIdxX/Y/Z}: Thread index within block
+  \item \texttt{NVVMCodegen.cuda.blockIdxX/Y/Z}: Block index within grid
+  \item \texttt{NVVMCodegen.cuda.blockDimX/Y/Z}: Block dimensions
+  \item \texttt{NVVMCodegen.cuda.syncThreads()}: Barrier synchronization
+\end{itemize}
+
+\section{Vector Addition: AMD ROCm}
+
+\textbf{HIP equivalent (AMD's CUDA-like API):}
+\begin{lstlisting}[style=ir]
+__global__ void vectorAdd(float* a, float* b, float* c, int n) {
+  int idx = hipBlockIdx_x * hipBlockDim_x + hipThreadIdx_x;
+  if (idx < n) {
+    c[idx] = a[idx] + b[idx];
+  }
+}
+\end{lstlisting}
+
+\textbf{TypeScript with AMDGPUCodegen:}
+\begin{lstlisting}[style=ts]
+import { AMDGPUCodegen } from "@euriklis/llvm-ir";
+
+const codegen = new AMDGPUCodegen("vector_add");
+
+// Same structure as CUDA, but use AMD intrinsics:
+const workitemId = AMDGPUCodegen.rocm.workitemIdX("tid.x");
+const workgroupId = AMDGPUCodegen.rocm.workgroupIdX("gid.x");
+// Workgroup size is typically passed as kernel parameter
+
+// Rest identical to CUDA version
+\end{lstlisting}
+
+\textbf{Key AMD intrinsics:}
+\begin{itemize}[noitemsep]
+  \item \texttt{AMDGPUCodegen.rocm.workitemIdX/Y/Z}: Work-item ID (like \texttt{threadIdx})
+  \item \texttt{AMDGPUCodegen.rocm.workgroupIdX/Y/Z}: Work-group ID (like \texttt{blockIdx})
+  \item \texttt{AMDGPUCodegen.rocm.barrier()}: Work-group barrier
+\end{itemize}
+
+\section{Vector Addition: Intel GPU (OpenCL)}
+
+\textbf{OpenCL kernel:}
+\begin{lstlisting}[style=ir]
+__kernel void vectorAdd(__global float* a, __global float* b,
+                        __global float* c, int n) {
+  int idx = get_global_id(0);
+  if (idx < n) {
+    c[idx] = a[idx] + b[idx];
+  }
+}
+\end{lstlisting}
+
+\textbf{TypeScript with SPIRVCodegen:}
+\begin{lstlisting}[style=ts]
+import { SPIRVCodegen } from "@euriklis/llvm-ir";
+
+const codegen = new SPIRVCodegen("vector_add");
+
+// OpenCL provides global ID directly
+const globalId = SPIRVCodegen.opencl.getGlobalIdX("gid");
+// Note: Returns i64, may need ZExtInst for conversions
+
+// Rest similar to CUDA/AMD versions
+\end{lstlisting}
+
+\textbf{Key OpenCL intrinsics:}
+\begin{itemize}[noitemsep]
+  \item \texttt{SPIRVCodegen.opencl.getGlobalIdX/Y/Z}: Global work-item ID (i64)
+  \item \texttt{SPIRVCodegen.opencl.getLocalIdX/Y/Z}: Local work-item ID
+  \item \texttt{SPIRVCodegen.opencl.getGroupIdX/Y/Z}: Work-group ID
+  \item \texttt{SPIRVCodegen.opencl.barrier()}: Work-group barrier
+\end{itemize}
+
+\section{GPU Architecture Comparison}
+
+\begin{longtable}{|p{3cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}|}
+\hline
+\textbf{Concept} & \textbf{NVIDIA (NVPTX)} & \textbf{AMD (AMDGPU)} & \textbf{Intel (SPIR-V)} \\
+\hline
+Thread ID & \texttt{threadIdx} & \texttt{workitemId} & \texttt{get\_local\_id} \\
+\hline
+Block/Group ID & \texttt{blockIdx} & \texttt{workgroupId} & \texttt{get\_group\_id} \\
+\hline
+Block/Group Size & \texttt{blockDim} & (parameter) & \texttt{get\_local\_size} \\
+\hline
+Global ID & \texttt{blockIdx * blockDim + threadIdx} & (computed) & \texttt{get\_global\_id} \\
+\hline
+SIMD Width & Warp (32) & Wavefront (64) & Sub-group (8-32) \\
+\hline
+Synchronization & \texttt{\_\_syncthreads} & \texttt{barrier} & \texttt{barrier} \\
+\hline
+Shared Memory & \texttt{\_\_shared\_\_} (addr space 3) & \texttt{\_\_local} (addr space 3) & \texttt{\_\_local} (addr space 3) \\
+\hline
+\end{longtable}
+
+All three dialects are production-ready with comprehensive intrinsic libraries and \texttt{llc}-validated IR generation. See the repository's \texttt{src/} directory for complete working examples.
+
+\section{Compiling GPU LLVM IR to Machine Code}
+
+After generating LLVM IR with GPU-specific intrinsics, you must compile it to the target GPU's native format using \texttt{llc} or vendor-specific tools.
+
+\subsection{NVIDIA: Compiling NVVM IR to PTX}
+
+\textbf{PTX (Parallel Thread Execution)} is NVIDIA's intermediate assembly language for CUDA. It's then JIT-compiled by the GPU driver to native SASS (Shader Assembly) for your specific GPU architecture.
+
+\textbf{Using llc to generate PTX:}
+\begin{lstlisting}[style=ir]
+# Basic PTX generation
+llc -march=nvptx64 -mcpu=sm_75 -o kernel.ptx module.ll
+
+# With optimizations (recommended)
+llc -O3 -march=nvptx64 -mcpu=sm_75 -o kernel.ptx module.ll
+\end{lstlisting}
+
+\textbf{Common NVIDIA compute capabilities (-mcpu):}
+\begin{itemize}[noitemsep]
+  \item \texttt{sm\_50}: Maxwell (GTX 900 series)
+  \item \texttt{sm\_60}: Pascal (GTX 10xx, Tesla P100)
+  \item \texttt{sm\_70}: Volta (Tesla V100)
+  \item \texttt{sm\_75}: Turing (RTX 20xx, T4)
+  \item \texttt{sm\_80}: Ampere (A100, RTX 30xx)
+  \item \texttt{sm\_86}: Ampere (RTX 30xx mobile)
+  \item \texttt{sm\_89}: Ada Lovelace (RTX 40xx)
+  \item \texttt{sm\_90}: Hopper (H100)
+\end{itemize}
+
+\textbf{Loading PTX from Node.js:}
+\begin{lstlisting}[style=ts]
+import { readFileSync } from "fs";
+
+// Assuming you have a CUDA runtime binding (e.g., gpu.js, node-cuda)
+const ptxCode = readFileSync("kernel.ptx", "utf-8");
+// Load PTX module and launch kernel with CUDA runtime
+\end{lstlisting}
+
+\subsection{AMD: Compiling AMDGPU IR to GCN/RDNA}
+
+AMD GPUs use \textbf{GCN (Graphics Core Next)} or \textbf{RDNA} instruction sets. The LLVM AMDGPU backend can generate both object files and assembly.
+
+\textbf{Using llc for AMD GPUs:}
+\begin{lstlisting}[style=ir]
+# Generate AMD GCN assembly
+llc -march=amdgcn -mcpu=gfx900 -o kernel.s module.ll
+
+# Generate object file (for ROCm linking)
+llc -O3 -march=amdgcn -mcpu=gfx1030 -filetype=obj -o kernel.o module.ll
+\end{lstlisting}
+
+\textbf{Common AMD GPU architectures (-mcpu):}
+\begin{itemize}[noitemsep]
+  \item \texttt{gfx803}: Polaris (RX 400/500 series)
+  \item \texttt{gfx900}: Vega (Radeon VII, MI25)
+  \item \texttt{gfx906}: Vega 20 (MI50, MI60)
+  \item \texttt{gfx908}: CDNA (MI100)
+  \item \texttt{gfx90a}: CDNA2 (MI200 series)
+  \item \texttt{gfx1030}: RDNA2 (RX 6000 series)
+  \item \texttt{gfx1100}: RDNA3 (RX 7000 series)
+\end{itemize}
+
+\textbf{Integration with ROCm:}
+\begin{lstlisting}[style=ir]
+# Link with ROCm device libraries
+clang -target amdgcn-amd-amdhsa -mcpu=gfx906 \
+      -o kernel.co module.ll
+
+# Create HSA code object
+clang-offload-bundler --type=o \
+      --targets=hipv4-amdgcn-amd-amdhsa--gfx906 \
+      --inputs=kernel.co --outputs=kernel.hsaco
+\end{lstlisting}
+
+\subsection{Intel/OpenCL: Compiling to SPIR-V Binary}
+
+\textbf{SPIR-V} is Khronos's standard intermediate representation for GPU compute (OpenCL, Vulkan).
+
+\textbf{Using llvm-spirv translator:}
+\begin{lstlisting}[style=ir]
+# First, compile to LLVM bitcode
+llc -march=spir64 -filetype=obj -o module.bc module.ll
+
+# Then translate to SPIR-V binary
+llvm-spirv module.bc -o kernel.spv
+\end{lstlisting}
+
+\textbf{Alternative: Direct SPIR-V generation with clang:}
+\begin{lstlisting}[style=ir]
+clang -cc1 -triple spir64-unknown-unknown \
+      -emit-llvm-bc -o module.bc module.ll
+
+llvm-spirv module.bc -o kernel.spv
+\end{lstlisting}
+
+\textbf{Loading SPIR-V in OpenCL:}
+\begin{lstlisting}[style=ts]
+import { readFileSync } from "fs";
+
+// Using an OpenCL binding for Node.js
+const spirvBinary = readFileSync("kernel.spv");
+// Create OpenCL program from SPIR-V binary
+// const program = clCreateProgramWithIL(context, spirvBinary, ...);
+\end{lstlisting}
+
+\subsection{GPU Compilation Workflow Summary}
+
+\begin{longtable}{|p{3cm}|p{4cm}|p{6cm}|}
+\hline
+\textbf{GPU Vendor} & \textbf{Output Format} & \textbf{Compilation Command} \\
+\hline
+NVIDIA & PTX (text) & \texttt{llc -march=nvptx64 -mcpu=sm\_XX -o out.ptx} \\
+\hline
+AMD & GCN assembly or object & \texttt{llc -march=amdgcn -mcpu=gfxXXXX -o out.s} \\
+\hline
+Intel/OpenCL & SPIR-V binary & \texttt{llc -march=spir64 | llvm-spirv -o out.spv} \\
+\hline
+\end{longtable}
+
+\textbf{Key differences:}
+\begin{itemize}[noitemsep]
+  \item \textbf{NVIDIA PTX} is human-readable text (like assembly), JIT-compiled by the driver at runtime
+  \item \textbf{AMD GCN/RDNA} can be assembly (.s) or binary (.o), linked with ROCm runtime
+  \item \textbf{SPIR-V} is a binary format, consumed by OpenCL/Vulkan drivers
+\end{itemize}
+
+Always use \texttt{-O3} optimization for GPU code—the parallel nature of GPU execution benefits heavily from loop unrolling, vectorization, and memory coalescing optimizations.

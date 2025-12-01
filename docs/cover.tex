@@ -1,0 +1,131 @@
+% Professional Cover Page
+\begin{titlepage}
+\pagecolor{coverbottom}
+\begin{tikzpicture}[remember picture,overlay]
+    % Gradient background
+    \shade[top color=covertop,bottom color=coverbottom]
+        (current page.north west) rectangle (current page.south east);
+
+    % Decorative top border
+    \fill[accentgold,opacity=0.9]
+        ([yshift=-2cm]current page.north west) rectangle ([yshift=-2.2cm]current page.north east);
+    \fill[accentlight,opacity=0.7]
+        ([yshift=-2.2cm]current page.north west) rectangle ([yshift=-2.25cm]current page.north east);
+
+    % Decorative bottom border
+    \fill[accentlight,opacity=0.7]
+        ([yshift=2.25cm]current page.south west) rectangle ([yshift=2.2cm]current page.south east);
+    \fill[accentgold,opacity=0.9]
+        ([yshift=2.2cm]current page.south west) rectangle ([yshift=2cm]current page.south east);
+
+    % Central decorative frame
+    \draw[accentgold,line width=2pt,opacity=0.8]
+        ([shift={(2cm,4cm)}]current page.south west) rectangle ([shift={(-2cm,-4cm)}]current page.north east);
+    \draw[white,line width=0.5pt,opacity=0.6]
+        ([shift={(2.1cm,4.1cm)}]current page.south west) rectangle ([shift={(-2.1cm,-4.1cm)}]current page.north east);
+
+    % Technology Stack Diagram
+    \begin{scope}[shift={(current page.center)}, yshift=-6.5cm]
+        % Define colors for each technology
+        \definecolor{tsblue}{RGB}{0,122,204}
+        \definecolor{llvmred}{RGB}{194,66,52}
+        \definecolor{nvidiagreen}{RGB}{118,185,0}
+        \definecolor{amdred}{RGB}{237,28,36}
+        \definecolor{spirvblue}{RGB}{102,102,153}
+
+        % TypeScript (center top)
+        \node[inner sep=0pt] (ts) at (0,2) {\includegraphics[width=2cm]{typescript.png}};
+
+        % LLVM IR (center)
+        \node[inner sep=0pt] (llvm) at (0,0) {\includegraphics[width=2cm]{LLVM_logo.png}};
+
+        % Common style for lower nodes
+        \tikzset{archnode/.style={ellipse, draw=white, line width=1pt, minimum width=2.4cm, minimum height=1.4cm, inner sep=2pt}}
+
+        % NVIDIA NVVM (left bottom)
+        \node[archnode] (nvvm) at (-3.5,-2) {\includegraphics[width=1.4cm]{Nvidia_logo.svg.png}};
+
+        % AMD (center-left bottom)
+        \node[archnode] (amd) at (-1.5,-2) {\includegraphics[width=1.4cm]{amd-logo-wallpaper.jpg}};
+
+        % SPIR-V (center-right bottom)
+        \node[archnode] (spirv) at (1.5,-2) {\includegraphics[width=1.4cm]{spirv.png}};
+
+        % ARM (right bottom)
+        \node[archnode] (arm) at (3.5,-2) {\includegraphics[width=1.4cm]{ARM.png}};
+
+        % Arrows connecting the technologies
+        \draw[->, white, line width=1.5pt, opacity=0.8] (ts) -- (llvm);
+        \draw[->, white, line width=1.5pt, opacity=0.8] (llvm) -- (nvvm);
+        \draw[->, white, line width=1.5pt, opacity=0.8] (llvm) -- (amd);
+        \draw[->, white, line width=1.5pt, opacity=0.8] (llvm) -- (spirv);
+        \draw[->, white, line width=1.5pt, opacity=0.8] (llvm) -- (arm);
+    \end{scope}
+\end{tikzpicture}
+
+\vspace*{3cm}
+\begin{center}
+    % Author name at top
+    {\LARGE\itshape\color{white}Velislav S. Karastoychev\par}
+
+    \vspace{3cm}
+
+    % Title
+    {\fontsize{40}{48}\selectfont\bfseries\color{white}
+    Programming LLVM IR\\[0.5cm]
+    with TypeScript\par}
+
+    \vspace{0.8cm}
+
+    % Decorative line
+    {\color{accentgold}\rule{10cm}{2pt}}
+
+    \vspace{0.8cm}
+
+    % Subtitle
+    {\Large\color{white!90}
+    A Practical Handbook for Cross-Platform and Multi-Architecture Code Generation\par}
+
+    \vfill
+\end{center}
+\end{titlepage}
+\nopagecolor
+
+% Author Information Page
+\newpage
+\thispagestyle{empty}
+\begin{center}
+    \vspace*{3cm}
+
+    % Book title
+    {\Large\bfseries Programming LLVM IR with TypeScript\par}
+
+    \vspace{0.5cm}
+
+    % Subtitle
+    {\normalsize A Practical Handbook for Cross-Platform and Multi-Architecture Code Generation\par}
+
+    \vspace{1cm}
+
+    % Author line with avatar
+    {\Large \AuthorBadge\hspace{0.5cm}Velislav Karastoychev\par}
+
+    \vspace{1.2cm}
+
+    {\large
+    Founder of Euriklis LTD\\
+    Co-founder of One Agent LTD\par}
+
+    \vspace{2cm}
+
+    % Contact information
+    {\large
+    \texttt{vskarastoychev@gmail.com}\\[0.5cm]
+    \url{https://github.com/VelislavKarastoychev/euriklis-llvm-ir}\par}
+
+    \vspace{2cm}
+
+    {\large \today\par}
+
+\end{center}
+

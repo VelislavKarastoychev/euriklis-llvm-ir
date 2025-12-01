@@ -1,0 +1,350 @@
+\chapter{Implementing TypeScript Functions as LLVM IR}
+
+This chapter demonstrates how to translate TypeScript logic into LLVM IR using the library's object-based API. Each example shows the TypeScript concept, the generated IR, and the underlying assembly/execution model.
+
+\section{Example 1: Simple Arithmetic}
+
+\textbf{TypeScript equivalent:}
+\begin{lstlisting}[style=ts]
+function add(a: number, b: number): number {
+  return a + b;
+}
+\end{lstlisting}
+
+\textbf{LLVM IR generation:}
+\begin{lstlisting}[style=ts]
+import {
+  LLVMCodegen,
+  LLVMFunction,
+  Parameter,
+  BasicBlock,
+  BinaryInst,
+  RetInst
+} from "@euriklis/llvm-ir";
+
+const codegen = new LLVMCodegen("arithmetic");
+
+const addFunc = new LLVMFunction({
+  name: "add",
+  returnType: LLVMCodegen.types.i32
+});
+
+addFunc.addParameter(new Parameter({
+  type: LLVMCodegen.types.i32,
+  name: "a"
+}));
+addFunc.addParameter(new Parameter({
+  type: LLVMCodegen.types.i32,
+  name: "b"
+}));
+
+const entry = new BasicBlock("entry");
+entry.addInstruction(new BinaryInst({
+  name: "result",
+  opcode: LLVMCodegen.opcodes.add,
+  type: LLVMCodegen.types.i32,
+  lhs: "a",
+  rhs: "b"
+}));
+entry.setTerminator(new RetInst({
+  type: LLVMCodegen.types.i32,
+  value: "result"
+}));
+
+addFunc.addBasicBlock(entry);
+codegen.getModule().addFunction(addFunc);
+
+console.log(codegen.toString());
+\end{lstlisting}
+
+\textbf{Generated LLVM IR:}
+\begin{lstlisting}[style=ir]
+target triple = "x86_64-unknown-linux-gnu"
+
+define i32 @add(i32 %a, i32 %b) {
+entry:
+  %result = add i32 %a, %b
+  ret i32 %result
+}
+\end{lstlisting}
+
+\textbf{Key concepts:}
+\begin{itemize}[noitemsep]
+  \item \texttt{LLVMFunction}: Defines function signature
+  \item \texttt{Parameter}: Typed function argument (automatically prefixed with \texttt{\%})
+  \item \texttt{BasicBlock}: Container for instructions (must end with terminator)
+  \item \texttt{BinaryInst}: Arithmetic operation (add, sub, mul, etc.)
+  \item \texttt{RetInst}: Return value (terminates basic block)
+\end{itemize}
+
+\section{Example 2: Conditional Logic (if-else)}
+
+\textbf{TypeScript equivalent:}
+\begin{lstlisting}[style=ts]
+function max(a: number, b: number): number {
+  if (a > b) {
+    return a;
+  } else {
+    return b;
+  }
+}
+\end{lstlisting}
+
+\textbf{LLVM IR generation with control flow:}
+\begin{lstlisting}[style=ts]
+import {
+  LLVMCodegen,
+  LLVMFunction,
+  Parameter,
+  BasicBlock,
+  ICmpInst,
+  BrInst,
+  RetInst
+} from "@euriklis/llvm-ir";
+
+const codegen = new LLVMCodegen("conditional");
+
+const maxFunc = new LLVMFunction({
+  name: "max",
+  returnType: LLVMCodegen.types.i32
+});
+
+maxFunc.addParameter(new Parameter({
+  type: LLVMCodegen.types.i32,
+  name: "a"
+}));
+maxFunc.addParameter(new Parameter({
+  type: LLVMCodegen.types.i32,
+  name: "b"
+}));
+
+const entry = new BasicBlock("entry");
+const ifThen = new BasicBlock("if.then");
+const ifElse = new BasicBlock("if.else");
+
+// entry: compare a > b
+entry.addInstruction(new ICmpInst({
+  name: "cmp",
+  predicate: LLVMCodegen.predicates.sgt,  // signed greater than
+  type: LLVMCodegen.types.i32,
+  lhs: "a",
+  rhs: "b"
+}));
+entry.setTerminator(new BrInst({
+  condition: "cmp",
+  conditionType: LLVMCodegen.types.i1,
+  target: ifThen,
+  falseTarget: ifElse
+}));
+
+// if.then: return a
+ifThen.setTerminator(new RetInst({
+  type: LLVMCodegen.types.i32,
+  value: "a"
+}));
+
+// if.else: return b
+ifElse.setTerminator(new RetInst({
+  type: LLVMCodegen.types.i32,
+  value: "b"
+}));
+
+maxFunc.addBasicBlock(entry);
+maxFunc.addBasicBlock(ifThen);
+maxFunc.addBasicBlock(ifElse);
+codegen.getModule().addFunction(maxFunc);
+
+console.log(codegen.toString());
+\end{lstlisting}
+
+\textbf{Generated LLVM IR:}
+\begin{lstlisting}[style=ir]
+define i32 @max(i32 %a, i32 %b) {
+entry:
+  %cmp = icmp sgt i32 %a, %b
+  br i1 %cmp, label %if.then, label %if.else
+
+if.then:
+  ret i32 %a
+
+if.else:
+  ret i32 %b
+}
+\end{lstlisting}
+
+\textbf{Key concepts:}
+\begin{itemize}[noitemsep]
+  \item \texttt{ICmpInst}: Integer comparison (returns \texttt{i1} boolean)
+  \item \texttt{BrInst}: Conditional branch (if-else in LLVM)
+  \item Multiple basic blocks: Each path gets its own block
+  \item Control flow graph: \texttt{entry} → \texttt{if.then} or \texttt{if.else}
+\end{itemize}
+
+\section{Example 3: Loops with PHI Nodes}
+
+\textbf{TypeScript equivalent:}
+\begin{lstlisting}[style=ts]
+function sum(n: number): number {
+  let total = 0;
+  for (let i = 0; i < n; i++) {
+    total += i;
+  }
+  return total;
+}
+\end{lstlisting}
+
+\textbf{LLVM IR generation with loops:}
+\begin{lstlisting}[style=ts]
+import {
+  LLVMCodegen,
+  LLVMFunction,
+  Parameter,
+  BasicBlock,
+  PhiInst,
+  ICmpInst,
+  BinaryInst,
+  BrInst,
+  RetInst
+} from "@euriklis/llvm-ir";
+
+const codegen = new LLVMCodegen("loop");
+
+const sumFunc = new LLVMFunction({
+  name: "sum",
+  returnType: LLVMCodegen.types.i32
+});
+
+sumFunc.addParameter(new Parameter({
+  type: LLVMCodegen.types.i32,
+  name: "n"
+}));
+
+const entry = new BasicBlock("entry");
+const loop = new BasicBlock("loop");
+const exit = new BasicBlock("exit");
+
+// entry: unconditional jump to loop
+entry.setTerminator(new BrInst({ target: loop }));
+
+// loop: PHI nodes for i and total
+loop.addInstruction(new PhiInst({
+  name: "i",
+  type: LLVMCodegen.types.i32,
+  incomingValues: [
+    { value: 0, block: entry },
+    { value: "i.next", block: loop }
+  ]
+}));
+
+loop.addInstruction(new PhiInst({
+  name: "total",
+  type: LLVMCodegen.types.i32,
+  incomingValues: [
+    { value: 0, block: entry },
+    { value: "total.next", block: loop }
+  ]
+}));
+
+// total.next = total + i
+loop.addInstruction(new BinaryInst({
+  name: "total.next",
+  opcode: LLVMCodegen.opcodes.add,
+  type: LLVMCodegen.types.i32,
+  lhs: "total",
+  rhs: "i"
+}));
+
+// i.next = i + 1
+loop.addInstruction(new BinaryInst({
+  name: "i.next",
+  opcode: LLVMCodegen.opcodes.add,
+  type: LLVMCodegen.types.i32,
+  lhs: "i",
+  rhs: 1
+}));
+
+// cmp = (i.next < n)
+loop.addInstruction(new ICmpInst({
+  name: "cmp",
+  predicate: LLVMCodegen.predicates.slt,
+  type: LLVMCodegen.types.i32,
+  lhs: "i.next",
+  rhs: "n"
+}));
+
+// if cmp, continue loop; else exit
+loop.setTerminator(new BrInst({
+  condition: "cmp",
+  conditionType: LLVMCodegen.types.i1,
+  target: loop,
+  falseTarget: exit
+}));
+
+// exit: return total
+exit.setTerminator(new RetInst({
+  type: LLVMCodegen.types.i32,
+  value: "total"
+}));
+
+sumFunc.addBasicBlock(entry);
+sumFunc.addBasicBlock(loop);
+sumFunc.addBasicBlock(exit);
+codegen.getModule().addFunction(sumFunc);
+
+console.log(codegen.toString());
+\end{lstlisting}
+
+\textbf{Generated LLVM IR:}
+\begin{lstlisting}[style=ir]
+define i32 @sum(i32 %n) {
+entry:
+  br label %loop
+
+loop:
+  %i = phi i32 [ 0, %entry ], [ %i.next, %loop ]
+  %total = phi i32 [ 0, %entry ], [ %total.next, %loop ]
+  %total.next = add i32 %total, %i
+  %i.next = add i32 %i, 1
+  %cmp = icmp slt i32 %i.next, %n
+  br i1 %cmp, label %loop, label %exit
+
+exit:
+  ret i32 %total
+}
+\end{lstlisting}
+
+\textbf{Key concepts:}
+\begin{itemize}[noitemsep]
+  \item \texttt{PhiInst}: Merge values from different control flow paths
+  \item Loop structure: \texttt{entry} → \texttt{loop} → (\texttt{loop} or \texttt{exit})
+  \item SSA form maintained: \texttt{i}, \texttt{i.next}, \texttt{total}, \texttt{total.next} are all unique
+  \item Back-edge: \texttt{loop} can branch to itself
+\end{itemize}
+
+\section{Type Shortcuts for Cleaner Code}
+
+Throughout this handbook, we use type shortcuts for brevity:
+
+\begin{lstlisting}[style=ts]
+import { LLVMCodegen } from "@euriklis/llvm-ir";
+
+// Destructure common types
+const { i32, i64, float, double, ptr, void: voidType } = LLVMCodegen.types;
+
+// Now use directly
+const add = new BinaryInst({
+  name: "sum",
+  opcode: LLVMCodegen.opcodes.add,
+  type: i32,  // Instead of LLVMCodegen.types.i32
+  lhs: "a",
+  rhs: "b"
+});
+\end{lstlisting}
+
+These are equivalent to their fully-qualified names:
+\begin{itemize}[noitemsep]
+  \item \texttt{i32} = \texttt{LLVMCodegen.types.i32}
+  \item \texttt{float} = \texttt{LLVMCodegen.types.float}
+  \item \texttt{ptr} = \texttt{LLVMCodegen.types.ptr}
+\end{itemize}
+

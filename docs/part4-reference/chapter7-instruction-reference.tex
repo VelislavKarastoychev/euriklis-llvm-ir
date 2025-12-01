@@ -1,0 +1,349 @@
+\chapter{Instruction Reference}
+
+This chapter provides a comprehensive reference for all LLVM IR instructions supported by the library.
+
+\section{Arithmetic Operations}
+
+\textbf{Integer arithmetic:}
+\begin{longtable}{|p{3cm}|p{5cm}|p{5cm}|}
+\hline
+\textbf{Instruction} & \textbf{TypeScript} & \textbf{LLVM IR} \\
+\hline
+Addition & \texttt{BinaryInst\{opcode: "add"\}} & \texttt{\%r = add i32 \%a, \%b} \\
+\hline
+Subtraction & \texttt{BinaryInst\{opcode: "sub"\}} & \texttt{\%r = sub i32 \%a, \%b} \\
+\hline
+Multiplication & \texttt{BinaryInst\{opcode: "mul"\}} & \texttt{\%r = mul i32 \%a, \%b} \\
+\hline
+Division (signed) & \texttt{BinaryInst\{opcode: "sdiv"\}} & \texttt{\%r = sdiv i32 \%a, \%b} \\
+\hline
+Division (unsigned) & \texttt{BinaryInst\{opcode: "udiv"\}} & \texttt{\%r = udiv i32 \%a, \%b} \\
+\hline
+Remainder (signed) & \texttt{BinaryInst\{opcode: "srem"\}} & \texttt{\%r = srem i32 \%a, \%b} \\
+\hline
+Remainder (unsigned) & \texttt{BinaryInst\{opcode: "urem"\}} & \texttt{\%r = urem i32 \%a, \%b} \\
+\hline
+\end{longtable}
+
+\textbf{Floating-point arithmetic:}
+\begin{longtable}{|p{3cm}|p{5cm}|p{5cm}|}
+\hline
+\textbf{Instruction} & \textbf{TypeScript} & \textbf{LLVM IR} \\
+\hline
+Addition & \texttt{BinaryInst\{opcode: "fadd"\}} & \texttt{\%r = fadd float \%a, \%b} \\
+\hline
+Subtraction & \texttt{BinaryInst\{opcode: "fsub"\}} & \texttt{\%r = fsub float \%a, \%b} \\
+\hline
+Multiplication & \texttt{BinaryInst\{opcode: "fmul"\}} & \texttt{\%r = fmul float \%a, \%b} \\
+\hline
+Division & \texttt{BinaryInst\{opcode: "fdiv"\}} & \texttt{\%r = fdiv float \%a, \%b} \\
+\hline
+Remainder & \texttt{BinaryInst\{opcode: "frem"\}} & \texttt{\%r = frem float \%a, \%b} \\
+\hline
+\end{longtable}
+
+\section{Bitwise Operations}
+
+\begin{longtable}{|p{3cm}|p{5cm}|p{5cm}|}
+\hline
+\textbf{Instruction} & \textbf{TypeScript} & \textbf{LLVM IR} \\
+\hline
+Bitwise AND & \texttt{BinaryInst\{opcode: "and"\}} & \texttt{\%r = and i32 \%a, \%b} \\
+\hline
+Bitwise OR & \texttt{BinaryInst\{opcode: "or"\}} & \texttt{\%r = or i32 \%a, \%b} \\
+\hline
+Bitwise XOR & \texttt{BinaryInst\{opcode: "xor"\}} & \texttt{\%r = xor i32 \%a, \%b} \\
+\hline
+Shift left & \texttt{BinaryInst\{opcode: "shl"\}} & \texttt{\%r = shl i32 \%a, \%b} \\
+\hline
+Logical shift right & \texttt{BinaryInst\{opcode: "lshr"\}} & \texttt{\%r = lshr i32 \%a, \%b} \\
+\hline
+Arithmetic shift right & \texttt{BinaryInst\{opcode: "ashr"\}} & \texttt{\%r = ashr i32 \%a, \%b} \\
+\hline
+\end{longtable}
+
+\section{Comparison Operations}
+
+\textbf{Integer comparisons (ICmpInst):}
+\begin{longtable}{|p{2.5cm}|p{3cm}|p{7cm}|}
+\hline
+\textbf{Predicate} & \textbf{Meaning} & \textbf{Example} \\
+\hline
+\texttt{eq} & Equal & \texttt{\%r = icmp eq i32 \%a, \%b} \\
+\hline
+\texttt{ne} & Not equal & \texttt{\%r = icmp ne i32 \%a, \%b} \\
+\hline
+\texttt{sgt} & Signed greater & \texttt{\%r = icmp sgt i32 \%a, \%b} \\
+\hline
+\texttt{sge} & Signed greater/equal & \texttt{\%r = icmp sge i32 \%a, \%b} \\
+\hline
+\texttt{slt} & Signed less & \texttt{\%r = icmp slt i32 \%a, \%b} \\
+\hline
+\texttt{sle} & Signed less/equal & \texttt{\%r = icmp sle i32 \%a, \%b} \\
+\hline
+\texttt{ugt} & Unsigned greater & \texttt{\%r = icmp ugt i32 \%a, \%b} \\
+\hline
+\texttt{uge} & Unsigned greater/equal & \texttt{\%r = icmp uge i32 \%a, \%b} \\
+\hline
+\texttt{ult} & Unsigned less & \texttt{\%r = icmp ult i32 \%a, \%b} \\
+\hline
+\texttt{ule} & Unsigned less/equal & \texttt{\%r = icmp ule i32 \%a, \%b} \\
+\hline
+\end{longtable}
+
+\textbf{Floating-point comparisons (FCmpInst):}
+\begin{longtable}{|p{2.5cm}|p{3cm}|p{7cm}|}
+\hline
+\textbf{Predicate} & \textbf{Meaning} & \textbf{Example} \\
+\hline
+\texttt{oeq} & Ordered equal & \texttt{\%r = fcmp oeq float \%a, \%b} \\
+\hline
+\texttt{one} & Ordered not equal & \texttt{\%r = fcmp one float \%a, \%b} \\
+\hline
+\texttt{ogt} & Ordered greater & \texttt{\%r = fcmp ogt float \%a, \%b} \\
+\hline
+\texttt{oge} & Ordered greater/equal & \texttt{\%r = fcmp oge float \%a, \%b} \\
+\hline
+\texttt{olt} & Ordered less & \texttt{\%r = fcmp olt float \%a, \%b} \\
+\hline
+\texttt{ole} & Ordered less/equal & \texttt{\%r = fcmp ole float \%a, \%b} \\
+\hline
+\texttt{uno} & Unordered (NaN) & \texttt{\%r = fcmp uno float \%a, \%b} \\
+\hline
+\end{longtable}
+
+\section{Memory Operations}
+
+\textbf{Stack allocation:}
+\begin{lstlisting}[style=ts]
+import { AllocaInst } from "@euriklis/llvm-ir";
+
+const alloc = new AllocaInst({
+  name: "ptr",
+  allocatedType: LLVMCodegen.types.i32,
+  align: 4
+});
+// Generates: %ptr = alloca i32, align 4
+\end{lstlisting}
+
+\textbf{Load from memory:}
+\begin{lstlisting}[style=ts]
+import { LoadInst } from "@euriklis/llvm-ir";
+
+const load = new LoadInst({
+  name: "val",
+  type: LLVMCodegen.types.i32,
+  pointerType: LLVMCodegen.types.ptr,
+  pointer: "ptr",
+  align: 4
+});
+// Generates: %val = load i32, ptr %ptr, align 4
+\end{lstlisting}
+
+\textbf{Store to memory:}
+\begin{lstlisting}[style=ts]
+import { StoreInst } from "@euriklis/llvm-ir";
+
+const store = new StoreInst({
+  valueType: LLVMCodegen.types.i32,
+  value: 42,
+  pointerType: LLVMCodegen.types.ptr,
+  pointer: "ptr",
+  align: 4
+});
+// Generates: store i32 42, ptr %ptr, align 4
+\end{lstlisting}
+
+\textbf{Array/struct indexing (GetElementPtr):}
+\begin{lstlisting}[style=ts]
+import { GetElementPtrInst } from "@euriklis/llvm-ir";
+
+const gep = new GetElementPtrInst({
+  name: "elem_ptr",
+  baseType: LLVMCodegen.types.i32,
+  ptrType: LLVMCodegen.types.ptr,
+  pointer: "array",
+  indices: [
+    { type: LLVMCodegen.types.i32, value: 0 },
+    { type: LLVMCodegen.types.i32, value: "idx" }
+  ]
+});
+// Generates: %elem_ptr = getelementptr i32, ptr %array, i32 0, i32 %idx
+\end{lstlisting}
+
+\section{Control Flow}
+
+\textbf{Conditional branch:}
+\begin{lstlisting}[style=ts]
+import { BrInst } from "@euriklis/llvm-ir";
+
+const br = new BrInst({
+  condition: "cmp",
+  conditionType: LLVMCodegen.types.i1,
+  target: thenBlock,
+  falseTarget: elseBlock
+});
+// Generates: br i1 %cmp, label %then, label %else
+\end{lstlisting}
+
+\textbf{Unconditional branch:}
+\begin{lstlisting}[style=ts]
+const br = new BrInst({ target: nextBlock });
+// Generates: br label %next
+\end{lstlisting}
+
+\textbf{Return:}
+\begin{lstlisting}[style=ts]
+import { RetInst } from "@euriklis/llvm-ir";
+
+// Return value
+const ret = new RetInst({
+  type: LLVMCodegen.types.i32,
+  value: 42
+});
+// Generates: ret i32 42
+
+// Return void
+const retVoid = new RetInst({});
+// Generates: ret void
+\end{lstlisting}
+
+\textbf{Switch statement:}
+\begin{lstlisting}[style=ts]
+import { SwitchInst } from "@euriklis/llvm-ir";
+
+const sw = new SwitchInst({
+  value: "x",
+  valueType: LLVMCodegen.types.i32,
+  defaultDest: defaultBlock,
+  cases: [
+    { value: 0, dest: case0Block },
+    { value: 1, dest: case1Block },
+    { value: 2, dest: case2Block }
+  ]
+});
+// Generates: switch i32 %x, label %default [
+//              i32 0, label %case0
+//              i32 1, label %case1
+//              i32 2, label %case2
+//            ]
+\end{lstlisting}
+
+\section{Type Conversions}
+
+\begin{longtable}{|p{3cm}|p{5cm}|p{5cm}|}
+\hline
+\textbf{Instruction} & \textbf{Purpose} & \textbf{Example} \\
+\hline
+\texttt{TruncInst} & Truncate integer & \texttt{\%r = trunc i64 \%a to i32} \\
+\hline
+\texttt{ZExtInst} & Zero-extend integer & \texttt{\%r = zext i32 \%a to i64} \\
+\hline
+\texttt{SExtInst} & Sign-extend integer & \texttt{\%r = sext i32 \%a to i64} \\
+\hline
+\texttt{FPTruncInst} & Truncate float & \texttt{\%r = fptrunc double \%a to float} \\
+\hline
+\texttt{FPExtInst} & Extend float & \texttt{\%r = fpext float \%a to double} \\
+\hline
+\texttt{BitCastInst} & Reinterpret bits & \texttt{\%r = bitcast i32 \%a to float} \\
+\hline
+\end{longtable}
+
+\section{Function Calls}
+
+\begin{lstlisting}[style=ts]
+import { CallInst } from "@euriklis/llvm-ir";
+
+const call = new CallInst({
+  name: "result",
+  returnType: LLVMCodegen.types.i32,
+  functionName: "my_function",
+  args: [
+    { type: LLVMCodegen.types.i32, value: 10 },
+    { type: LLVMCodegen.types.float, value: "x" }
+  ]
+});
+// Generates: %result = call i32 @my_function(i32 10, float %x)
+\end{lstlisting}
+
+\section{Vector Operations}
+
+\begin{lstlisting}[style=ts]
+import {
+  InsertElementInst,
+  ExtractElementInst,
+  ShuffleVectorInst,
+  VectorType
+} from "@euriklis/llvm-ir";
+
+const vec4 = new VectorType({ elementType: float, count: 4 });
+
+// Insert element
+const insert = new InsertElementInst({
+  name: "v2",
+  vectorType: vec4,
+  vector: "v1",
+  element: 3.14,
+  elementType: float,
+  index: 0,
+  indexType: i32
+});
+// Generates: %v2 = insertelement <4 x float> %v1, float 3.14, i32 0
+
+// Extract element
+const extract = new ExtractElementInst({
+  name: "elem",
+  vectorType: vec4,
+  vector: "v",
+  index: 2,
+  indexType: i32
+});
+// Generates: %elem = extractelement <4 x float> %v, i32 2
+
+// Shuffle vector
+const shuffle = new ShuffleVectorInst({
+  name: "result",
+  vectorType: vec4,
+  vector1: "v1",
+  vector2: "v2",
+  mask: [0, 1, 6, 7]
+});
+// Generates: %result = shufflevector <4 x float> %v1, <4 x float> %v2,
+//                                     <4 x i32> <i32 0, i32 1, i32 6, i32 7>
+\end{lstlisting}
+
+\section{Atomic Operations}
+
+\begin{lstlisting}[style=ts]
+import { AtomicRMWInst, AtomicCmpXchgInst, FenceInst } from "@euriklis/llvm-ir";
+
+// Atomic read-modify-write
+const atomicAdd = new AtomicRMWInst({
+  name: "old_val",
+  operation: "add",
+  pointer: "counter",
+  pointerType: ptr,
+  value: 1,
+  valueType: i32,
+  ordering: "seq_cst"
+});
+// Generates: %old_val = atomicrmw add ptr %counter, i32 1 seq_cst
+
+// Compare-and-swap
+const cas = new AtomicCmpXchgInst({
+  name: "result",
+  pointer: "lock",
+  pointerType: ptr,
+  cmp: 0,
+  new: 1,
+  valueType: i32,
+  successOrdering: "seq_cst",
+  failureOrdering: "acquire"
+});
+// Generates: %result = cmpxchg ptr %lock, i32 0, i32 1 seq_cst acquire
+
+// Memory fence
+const fence = new FenceInst({ ordering: "seq_cst" });
+// Generates: fence seq_cst
+\end{lstlisting}
+

@@ -1,0 +1,209 @@
+\chapter{Type System Reference}
+
+LLVM IR is strongly typed. Every value, instruction, and function has an explicit type.
+
+\section{Integer Types}
+
+\textbf{Fixed-width integers:}
+\begin{lstlisting}[style=ts]
+import { IntType } from "@euriklis/llvm-ir";
+
+const i1 = LLVMCodegen.types.i1;      // Boolean (1 bit)
+const i8 = LLVMCodegen.types.i8;      // Byte (8 bits)
+const i16 = LLVMCodegen.types.i16;    // Short (16 bits)
+const i32 = LLVMCodegen.types.i32;    // Int (32 bits)
+const i64 = LLVMCodegen.types.i64;    // Long (64 bits)
+const i128 = LLVMCodegen.types.i128;  // Quad (128 bits)
+\end{lstlisting}
+
+\textbf{Arbitrary-width integers:}
+\begin{lstlisting}[style=ts]
+const i7 = new IntType({ bits: 7 });    // 7-bit integer
+const i24 = new IntType({ bits: 24 });  // 24-bit integer (RGB color)
+const i256 = new IntType({ bits: 256 }); // 256-bit integer (crypto)
+// Generates: i7, i24, i256
+\end{lstlisting}
+
+LLVM supports integers from \texttt{i1} to \texttt{i2\^{}23-1} (8 million bits).
+
+\section{Floating-Point Types}
+
+\begin{lstlisting}[style=ts]
+import { FloatType } from "@euriklis/llvm-ir";
+
+const half = new FloatType("half");      // f16: 16-bit half precision
+const bfloat = new FloatType("bfloat");  // bf16: Brain float (ML)
+const float = new FloatType("float");    // f32: Single precision (IEEE 754)
+const double = new FloatType("double");  // f64: Double precision
+const fp128 = new FloatType("fp128");    // Quad precision (128-bit)
+\end{lstlisting}
+
+\textbf{When to use each:}
+\begin{itemize}[noitemsep]
+  \item \texttt{half (f16)}: GPU compute, ML inference (low precision, high throughput)
+  \item \texttt{bfloat (bf16)}: ML training (Google TPUs, NVIDIA Ampere+)
+  \item \texttt{float (f32)}: Default for graphics and general compute
+  \item \texttt{double (f64)}: Scientific computing, high-precision math
+  \item \texttt{fp128}: Rare (extreme precision needs)
+\end{itemize}
+
+\section{Pointer Types}
+
+In LLVM IR, pointers are opaque (no element type in modern LLVM):
+
+\begin{lstlisting}[style=ts]
+const ptr = LLVMCodegen.types.ptr;  // Opaque pointer
+// Generates: ptr
+
+// Address space variant
+const ptr_addrspace3 = new PointerType(3);  // ptr addrspace(3)
+// Generates: ptr addrspace(3) (CUDA shared memory)
+\end{lstlisting}
+
+\section{Array Types}
+
+\begin{lstlisting}[style=ts]
+import { ArrayType } from "@euriklis/llvm-ir";
+
+const intArray = new ArrayType({
+  elementType: i32,
+  size: 10
+});
+// Generates: [10 x i32]
+
+const floatMatrix = new ArrayType({
+  elementType: new ArrayType({ elementType: float, size: 4 }),
+  size: 4
+});
+// Generates: [4 x [4 x float]] (4x4 matrix)
+\end{lstlisting}
+
+\section{Struct Types}
+
+\begin{lstlisting}[style=ts]
+import { StructType } from "@euriklis/llvm-ir";
+
+// Named struct
+const Point = new StructType({
+  name: "Point",
+  fields: [
+    { type: float },
+    { type: float },
+    { type: float }
+  ]
+});
+// Generates: %Point = type { float, float, float }
+
+// Packed struct (no padding)
+const PackedPoint = new StructType({
+  name: "PackedPoint",
+  fields: [
+    { type: i8 },
+    { type: i32 }
+  ],
+  packed: true
+});
+// Generates: %PackedPoint = type <{ i8, i32 }>
+\end{lstlisting}
+
+\section{Vector Types}
+
+SIMD vectors for parallel operations:
+
+\begin{lstlisting}[style=ts]
+import { VectorType } from "@euriklis/llvm-ir";
+
+// <4 x float> - 4-element float vector (SSE, NEON)
+const vec4 = new VectorType({
+  elementType: float,
+  count: 4
+});
+
+// <8 x i32> - 8-element integer vector (AVX)
+const vec8i = new VectorType({
+  elementType: i32,
+  count: 8
+});
+
+// Vector addition
+const vadd = new BinaryInst({
+  name: "vsum",
+  opcode: LLVMCodegen.opcodes.fadd,
+  type: vec4,
+  lhs: "a",
+  rhs: "b"
+});
+// Generates: %vsum = fadd <4 x float> %a, %b
+// This adds 4 floats in parallel!
+\end{lstlisting}
+
+\section{Function Types}
+
+\begin{lstlisting}[style=ts]
+import { FunctionType } from "@euriklis/llvm-ir";
+
+// int add(int, int)
+const addFnType = new FunctionType({
+  returnType: i32,
+  paramTypes: [i32, i32]
+});
+// Type: i32 (i32, i32)
+
+// void print(char*)
+const printFnType = new FunctionType({
+  returnType: voidType,
+  paramTypes: [ptr]
+});
+// Type: void (ptr)
+
+// Variadic: int printf(char*, ...)
+const printfFnType = new FunctionType({
+  returnType: i32,
+  paramTypes: [ptr],
+  isVarArg: true
+});
+// Type: i32 (ptr, ...)
+\end{lstlisting}
+
+\section{Void Type}
+
+Special type for functions that don't return a value:
+
+\begin{lstlisting}[style=ts]
+const { void: voidType } = LLVMCodegen.types;
+
+const func = new LLVMFunction({
+  name: "doSomething",
+  returnType: voidType
+});
+// Generates: define void @doSomething() { ... }
+\end{lstlisting}
+
+\section{Type Compatibility}
+
+LLVM is strictly typed. You cannot mix types without explicit conversion:
+
+\begin{lstlisting}[style=ts]
+// ERROR: Cannot add i32 and i64
+const wrong = new BinaryInst({
+  opcode: "add",
+  type: i32,
+  lhs: "x",  // i32
+  rhs: "y"   // i64 - type mismatch!
+});
+
+// CORRECT: Convert first
+const y64 = new ZExtInst({
+  name: "y_extended",
+  from: "y",
+  fromType: i32,
+  toType: i64
+});
+const correct = new BinaryInst({
+  opcode: "add",
+  type: i64,
+  lhs: y64,
+  rhs: "x"
+});
+\end{lstlisting}
+
