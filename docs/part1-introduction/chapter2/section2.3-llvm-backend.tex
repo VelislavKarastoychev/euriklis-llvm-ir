@@ -1,0 +1,70 @@
+\section{\acr{LLVM} as the Universal Backend}
+\label{sec:llvm-optimization-flags}
+\acr{LLVM} provides a \emph{universal code generation backend}:
+
+\begin{enumerate}[noitemsep]
+  \item \textbf{Write code generation logic in TypeScript} (type-safe, testable, version-controlled with \acr{NPM})
+  \item \textbf{Generate \acr{LLVM} \acr{IR}} (platform-independent intermediate representation)
+  \item \textbf{Compile to any architecture}: \acr{x86}, \acr{ARM}, \acr{CUDA}, \acr{AMD}, \acr{WASM}—from the same \acr{IR}
+  \item \textbf{Leverage \acr{LLVM}'s optimizer}: Auto-vectorization, loop unrolling, inlining—for free
+\end{enumerate}
+
+Example workflow:
+\begin{lstlisting}[style=ts]
+// TypeScript
+import { LLVMCodegen } from "@euriklis/llvm-ir";
+
+const codegen = new LLVMCodegen("my_module");
+// ... build IR programmatically ...
+
+const ir = codegen.toString();
+// Emit LLVM IR as text (platform-independent)
+\end{lstlisting}
+
+Then compile with \texttt{llc} or \texttt{clang}:
+\begin{lstlisting}[style=ir]
+$ llc -march=x86-64 -o output.o module.ll       # x86-64
+$ llc -march=aarch64 -o output.o module.ll      # ARM
+$ llc -march=nvptx64 -o output.ptx module.ll    # NVIDIA GPU
+$ llc -march=amdgcn -o output.o module.ll       # AMD GPU
+\end{lstlisting}
+
+\textbf{Optimization strategies:} \acr{LLVM} provides multiple optimization levels, controlled via the \texttt{-O} flag:
+
+\begin{longtable}{|l|p{10cm}|}
+\hline
+\textbf{Level} & \textbf{Description} \\
+\hline
+\texttt{-O0} & No optimization (fastest compilation, useful for debugging) \\
+\hline
+\texttt{-O1} & Basic optimizations (constant folding, dead code elimination, simple inlining) \\
+\hline
+\texttt{-O2} & Moderate optimizations (most production code uses this: loop unrolling, vectorization, function inlining) \\
+\hline
+\texttt{-O3} & Aggressive optimizations (may increase binary size; adds advanced loop transformations and aggressive inlining) \\
+\hline
+\texttt{-Os} & Optimize for size (useful for embedded systems and \acr{WASM}) \\
+\hline
+\texttt{-Oz} & Aggressively optimize for size (even more than \texttt{-Os}) \\
+\hline
+\end{longtable}
+
+To apply optimizations, you can either:
+
+\textbf{Option 1: Use \texttt{opt} before \texttt{llc}}
+\begin{lstlisting}[style=ir]
+$ opt -O3 module.ll -o optimized.ll    # Optimize IR
+$ llc -march=x86-64 optimized.ll -o output.o
+\end{lstlisting}
+
+\textbf{Option 2: Use \texttt{llc} directly with optimization level}
+\begin{lstlisting}[style=ir]
+$ llc -O3 -march=x86-64 -o output.o module.ll
+\end{lstlisting}
+
+\textbf{Option 3: Use \texttt{clang} (combines everything)}
+\begin{lstlisting}[style=ir]
+$ clang -O3 -c module.ll -o output.o
+\end{lstlisting}
+
+For most production use cases, \texttt{-O2} provides an excellent balance between compilation time and runtime performance. \acr{GPU} code (\texttt{nvptx64}, \texttt{amdgcn}) often benefits from \texttt{-O3} due to the massively parallel architecture.
