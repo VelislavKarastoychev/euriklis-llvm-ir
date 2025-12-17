@@ -1,0 +1,96 @@
+\section{The Post-\acr{PC} Era and New Computational Requirements}
+
+The transformation of human labor practices presents qualitatively new challenges for society to address.
+Computing technologies, as an indispensable instrument for solving most of these challenges, must also
+adapt appropriately to meet the needs of emerging economic and social realities.
+Moreover, it appears that changes in computing technologies, like socio-economic transformations, follow
+the principles of evolution and co-evolution. This perspective is more than mere metaphor—researchers such as Leo Meyerovich and Ariel Rabkin \cite{meyerovichrabkin} document how programming languages evolve under selective pressure from hardware capabilities, business requirements, and competing technologies, much like biological species in a changing environment.
+
+Indeed, the first computers were programmed in machine code.
+Later, for convenience, machine instructions were replaced with mnemonics that represented a bijective correspondence to them.
+Machine code and mnemonic languages (assembly) are, in their instruction semantics, much closer to programming
+physical memory and computer hardware, making them unsuitable for programming abstract processes.
+This inconvenience gave rise to the need for a more abstract \acr{ISA}, enabling
+the description of processes of broader scientific interest.
+
+Since the first scientific communities to adopt computing
+technologies were mathematicians and engineers, it was natural to expect that the first
+programming languages beyond mnemonics would have \acr{ISA}s particularly suited for developing and programming
+algorithms and mathematical computations. Thus, the first high-level languages such as \acr{Fortran} (1957) and \acr{Algol} (1958) were created primarily
+for building algorithms and mathematical computations. They employed \acr{ISA}s close to mathematical notation,
+which through parsing were "translated"—or as the established term goes, "compiled"—to assembly, and from there to machine code.
+
+However, these languages proved less suitable for programming business and production tasks
+(writing operating systems, inventory management programs, reading data from multiple inputs, etc.).
+The search by programmers for a suitable language during this period did not follow any particular pattern but rather
+had a somewhat random character. For example, Pascal was developed by Niklaus Wirth in 1970 to teach students structured programming,
+\acr{Ada} was developed by the U.S. Department of Defense in 1980 for critical military and aviation systems with high reliability and safety requirements,
+and \acr{BASIC} was developed by John Kemeny and Thomas Kurtz in 1964 at Dartmouth College as a simple language for teaching novice programmers.
+
+The most successful proved to be
+the C programming language, created by Dennis Ritchie at Bell Labs in 1972. This language possessed the best
+combination of \acr{ISA}s suitable for both algorithmic and hardware design. With it, one could conveniently write both algorithmically
+formulated problems and system programming tasks (such as writing an operating system—indeed, the C compiler is written in C itself, the so-called "self-hosting compiler").
+Additionally, it was sufficiently efficient in terms of performance. Here again, the compiler played a crucial role,
+as its task was to reduce C instructions to assembly instructions.
+
+Thanks to the C language,
+many different types of languages were created, such as Prolog (1972), C++ (1985), Perl (1987), Python (1991), Ruby (1995), and many others. Some languages resembled C/C++ in syntax
+and functionality, while others sought to differentiate themselves from its semantics.
+
+Particularly noteworthy is the Java language (created by James Gosling at Sun Microsystems in 1995),
+which resembles C++ but compiles not to machine code but to bytecode, which is then executed by the \acr{JVM} for each computer architecture, making it maximally portable ("write once, run anywhere"). Additionally, Java does not allow direct memory management (automatic garbage collector).
+
+Other languages diverged from the C paradigm, such as JavaScript (created by Brendan Eich at Netscape in 1995 in 10 days) and Python. They completely eliminated
+strict static typing of data and focused on \acr{ISA}s optimized for rapid prototyping, dynamic data processing, and interactive development.
+
+Gradually, languages that do not use strict static data types and have simplified syntax with limited
+or no direct machine instructions (high level of abstraction) gained prominence in practice. The nature of software products established the paradigm
+of object-oriented programming over others. If the path of programming were linear
+or governed by some law, one would expect these trends to solidify over time.
+However, precisely the opposite occurred.
+
+After the establishment of web technologies and mobile platforms (the "Post-\acr{PC}" era after 2010), the need for more efficient process execution
+brought strictly typed languages back into fashion, with Java and C\# becoming most prevalent.
+JavaScript responded to this challenge by becoming a backend language through Node.js technology (created by Ryan Dahl in 2009,
+later also through Deno and Bun) and through its "pseudo-typing" in TypeScript (created by Microsoft in 2012, adding static types to JavaScript).
+
+Python responded through the use
+of \acr{JIT} compilers like Numba or PyPy, as well as through new compilers like Cython, while also introducing optional typing (type hints) from version 3.5 (2015).
+
+But the story does not end here. Writing increasingly efficient programs that process big data
+becomes an ever-growing challenge, and one of the simplest working solutions is parallel processing \cite{pattersonhennessy}.
+Initially, parallel processing was reduced to multi-threading, later expanding to
+interconnected computing machines (cluster computing, distributed computing), and today the paradigm of heterogeneous programming has emerged,
+where program execution is distributed between the \acr{CPU} and the \acr{GPU}.
+
+This led once again to the "reign" of C (and C++), which supports \acr{GPU} programming through technologies like \acr{CUDA}, \acr{OpenCL}, \acr{SYCL}, and protocols for
+managing \acr{GPU} memory, with strictly typed data being a mandatory requirement
+for executing code on \acr{GPU}s (due to hardware-level optimizations and \acr{SIMD}).
+
+Languages like Python find solutions to this problem by
+creating compilers for heterogeneous programs using \acr{LLVM} (such as Numba for \acr{CUDA} kernels), while others like TypeScript use \acr{FFI} protocols to call C/C++ code.
+It should be noted that all languages use \acr{FFI} protocols or similar mechanisms, since only C/C++ (and other systems languages) can directly manage \acr{GPU} memory and invoke \acr{CUDA}/\acr{OpenCL}/\acr{Vulkan} \acr{API}s.
+
+The attentive reader will easily notice that in this case as well,
+the development of programming languages does not follow some strictly defined linear path but is a series of contingencies,
+societal needs, and reserves of variability that languages possess to respond to the demands of
+emerging environments. Thus, the trajectory of programming language development has a rather zigzag pattern and
+is evolutionary in nature, not deterministic. This dynamic resembles the Red Queen Hypothesis from evolutionary biology—programming languages must constantly
+adapt not to displace a given paradigm or technology, but to remain competitive in a rapidly changing technological environment. Conversely,
+the adaptation of individual languages and computing technologies changes the technological environment itself.
+
+Thus, already-created programming languages do not disappear but, through the forces of interdependence and functional complementarity, specialize in different niches,
+such as scientific (\acr{Fortran}, \acr{MATLAB}, Wolfram Language, R), \acr{DSL}
+(\acr{SQL} for databases, Verilog/\acr{VHDL} for hardware design, shader languages for \acr{GPU} graphics), and legacy niches
+(\acr{COBOL} for financial infrastructure, \acr{Ada} for aviation safety, \acr{Fortran} for climate models). The factor that
+determines how a programming language or computing technology will situate itself relative to others is the capacity for maximal adaptation
+to the environment and the specialization niche.
+
+Another phenomenon worthy of note is that once again there arises
+the need for compilers and compilation infrastructure (such as \acr{LLVM}) to optimize code efficiency for different architectures (\acr{x86}, \acr{ARM}, \acr{RISC-V}, \acr{GPU}). \acr{LLVM} serves as a "universal adapter" in this ecosystem, allowing different languages to compile efficiently for multiple hardware platforms—yet another example of technological co-evolution.
+
+This understanding of computing technologies and interpretation of events in the programming sphere
+I largely obtained from the prominent scientist, aristocrat, and public benefactor Peter Sveshtarov through the numerous conversations we have had.
+Thanks to him, I was inspired to build this project.
+
