@@ -1,0 +1,22 @@
+\section{@euriklis/llvm-ir Design Philosophy}
+
+This package takes a different approach: \textbf{generate \acr{LLVM} \acr{IR} as text}. No native bindings, no \acr{FFI}, no compiled dependencies.
+
+\textbf{Advantages:}
+\begin{itemize}[noitemsep]
+  \item \textbf{Zero dependencies}: Pure TypeScript, runs in Node.js, Bun, Deno, browsers
+  \item \textbf{Instant installation}: \texttt{npm install @euriklis/llvm-ir} with no compilation step
+  \item \textbf{Type-safe \acr{API}}: Full IntelliSense with TypeScript types
+  \item \textbf{Debuggable output}: Inspect generated \acr{IR} as human-readable text
+  \item \textbf{Composable}: Pipe \acr{IR} to any \acr{LLVM} tool (\texttt{llc}, \texttt{opt}, \texttt{lli})
+  \item \textbf{Portable}: Same code works on Windows, macOS, Linux, \acr{ARM}, \acr{x86}
+\end{itemize}
+
+\textbf{Trade-offs:}
+\begin{itemize}[noitemsep]
+  \item Cannot use \acr{LLVM}'s optimizer programmatically (must shell out to \texttt{opt})
+  \item Cannot \acr{JIT}-compile directly (must use \texttt{lli} or write \acr{IR} to file)
+  \item Validation happens at compile-time via external tools, not runtime
+\end{itemize}
+
+For most use cases—code generation, \acr{DSL} compilers, build tools—these trade-offs are acceptable. The benefits of simplicity, portability, and zero native dependencies far outweigh the limitations.
