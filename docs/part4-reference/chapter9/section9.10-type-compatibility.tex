@@ -1,0 +1,28 @@
+\section{Type Compatibility}
+
+\acr{LLVM} is strictly typed. You cannot mix types without explicit conversion:
+
+\begin{lstlisting}[style=ts]
+// ERROR: Cannot add i32 and i64
+const wrong = new BinaryInst({
+  opcode: "add",
+  type: i32,
+  lhs: "x",  // i32
+  rhs: "y"   // i64 - type mismatch!
+});
+
+// CORRECT: Convert first
+const y64 = new ZExtInst({
+  name: "y_extended",
+  from: "y",
+  fromType: i32,
+  toType: i64
+});
+const correct = new BinaryInst({
+  opcode: "add",
+  type: i64,
+  lhs: y64,
+  rhs: "x"
+});
+\end{lstlisting}
+
