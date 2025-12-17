@@ -1,0 +1,479 @@
+\section{Core Concepts and \acr{LLVM} Syntax}
+
+\acr{LLVM} \acr{IR} is a low-level, strongly-typed intermediate language that resembles assembly but provides platform independence and optimization opportunities. This section introduces the fundamental concepts and syntax elements that form the foundation of \acr{LLVM} \acr{IR} programming.
+
+\subsection{Static Single Assignment (\acr{SSA}) Form}
+
+\acr{SSA} is a property where each variable is assigned exactly once and every use refers to a specific definition. This constraint makes data flow explicit and enables powerful compiler optimizations by simplifying the analysis of how values propagate through the program.
+
+\textbf{Non-\acr{SSA} code:}
+\begin{lstlisting}[style=ir]
+x = 1
+x = x + 2  // x is assigned twice (not SSA)
+\end{lstlisting}
+
+\textbf{\acr{SSA} code:}
+\begin{lstlisting}[style=ir]
+%x1 = 1
+%x2 = add i32 %x1, 2  // Each value has unique name
+\end{lstlisting}
+
+The benefits of \acr{SSA} form include:
+\begin{itemize}[noitemsep]
+  \item \textbf{Constant propagation}: The value of \texttt{\%x2} is provably 3, enabling compile-time evaluation
+  \item \textbf{Dead code elimination}: Unused definitions can be safely removed without complex liveness analysis
+  \item \textbf{Register allocation}: Clear lifetime of each value simplifies mapping virtual registers to physical registers
+  \item \textbf{Simplified dependency tracking}: Each definition has a unique name, making def-use chains trivial to construct
+\end{itemize}
+
+\subsection{Modules and Target Specification}
+
+\acr{LLVM} \acr{IR} is organized hierarchically, with the \textbf{module} serving as the top-level container. A module corresponds to a single compilation unit and contains functions, global variables, type definitions, and metadata.
+
+Every module must specify its target architecture through two declarations:
+
+\begin{lstlisting}[style=ir]
+target triple = "x86_64-unknown-linux-gnu"
+target datalayout = "e-m:e-p270:32:32-i64:64-f80:128-n8:16:32:64-S128"
+\end{lstlisting}
+
+The \textbf{target triple} follows the format \texttt{architecture-vendor-os-environment} and identifies the platform:
+
+\begin{itemize}[noitemsep]
+  \item \texttt{\acr{x86}\_64-apple-darwin} --- macOS on Intel
+  \item \texttt{aarch64-apple-darwin} --- macOS on Apple Silicon
+  \item \texttt{aarch64-unknown-linux-gnu} --- Linux on \acr{ARM} (\acr{AWS} Graviton, Raspberry Pi)
+  \item \texttt{nvptx64-nvidia-cuda} --- NVIDIA \acr{GPU}s
+  \item \texttt{amdgcn-amd-amdhsa} --- \acr{AMD} \acr{GPU}s (\acr{ROCm})
+  \item \texttt{wasm32-unknown-unknown} --- \acr{WASM}
+  \item \texttt{spirv64-unknown-unknown} --- \acr{SPIR-V} for Vulkan/\acr{OpenCL}
+\end{itemize}
+
+The \textbf{data layout string} is a compact specification that encodes essential low-level architectural properties required for correct code generation~\cite{llvmlangref}. This string informs the \acr{LLVM} optimizer and backend about target-specific characteristics such as endianness, pointer sizes, type alignments, and memory layout conventions~\cite{lopesauler2014}. Without accurate data layout information, the compiler cannot generate correct memory access patterns, properly align data structures, or make sound optimization decisions that depend on type sizes and alignment constraints~\cite{llvmessentials}.
+
+\subsubsection*{Data Layout String Format}
+
+The data layout specification consists of multiple components separated by the minus sign (\texttt{-}), where each component begins with a letter identifying the specification type, followed by parameters~\cite{llvmlangref}. A typical \acr{x86}-64 data layout string is:
+
+\begin{lstlisting}[style=ir]
+target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
+\end{lstlisting}
+
+\subsubsection*{Component Breakdown}
+
+\textbf{Endianness (\texttt{e} or \texttt{E}):} The first character specifies byte ordering~\cite{llvmlangref}:
+\begin{itemize}[noitemsep]
+  \item \texttt{e} --- Little-endian: least significant byte at lowest memory address (Intel/\acr{AMD} \acr{x86}, \acr{ARM} in little-endian mode)
+  \item \texttt{E} --- Big-endian: most significant byte at lowest memory address (legacy PowerPC, SPARC, some network protocols)
+\end{itemize}
+
+Endianness affects how multi-byte values are stored in memory. For example, the 32-bit integer \texttt{0x12345678} is stored as:
+\begin{itemize}[noitemsep]
+  \item Little-endian: \texttt{78 56 34 12} (bytes at increasing addresses)
+  \item Big-endian: \texttt{12 34 56 78} (bytes at increasing addresses)
+\end{itemize}
+
+\textbf{Name Mangling (\texttt{m:<style>}):} Specifies how symbol names are mangled for the linker~\cite{llvmlangref}:
+\begin{itemize}[noitemsep]
+  \item \texttt{m:e} --- ELF mangling (Linux, BSD, most Unix systems)
+  \item \texttt{m:o} --- Mach-O mangling (macOS, iOS)
+  \item \texttt{m:m} --- Mips mangling
+  \item \texttt{m:w} --- Windows COFF mangling
+  \item \texttt{m:x} --- Windows COFF \acr{x86} mangling (different from \texttt{m:w} for compatibility)
+\end{itemize}
+
+Symbol mangling affects how function and global variable names are encoded in object files, determining linker compatibility and calling convention details.
+
+\textbf{Pointer Layout (\texttt{p[n]:<size>:<abi>:<pref>}):} Specifies pointer characteristics for address space \texttt{n}~\cite{llvmlangref}. If \texttt{n} is omitted, address space 0 (default) is assumed:
+\begin{itemize}[noitemsep]
+  \item \texttt{<size>} --- Pointer size in bits
+  \item \texttt{<abi>} --- \acr{ABI}-required alignment in bits (minimum guaranteed by calling conventions)
+  \item \texttt{<pref>} --- Preferred alignment in bits for performance (optional; if omitted, equals \texttt{<abi>})
+\end{itemize}
+
+Examples from the \acr{x86}-64 data layout:
+\begin{itemize}[noitemsep]
+  \item \texttt{p270:32:32} --- Address space 270: 32-bit pointers with 32-bit alignment (used for \texttt{\_\_ptr32} Microsoft extension)
+  \item \texttt{p271:32:32} --- Address space 271: 32-bit zero-extended pointers (used for \texttt{\_\_uptr})
+  \item \texttt{p272:64:64} --- Address space 272: 64-bit pointers with 64-bit alignment (used for \texttt{\_\_ptr64})
+  \item Default (\texttt{p:64:64:64}) --- Address space 0: 64-bit pointers with 64-bit alignment (standard pointers)
+\end{itemize}
+
+Multiple address spaces enable heterogeneous programming where different pointer types have different sizes (e.g., \acr{GPU} programming with separate host and device address spaces)~\cite{lopesauler2014}.
+
+\textbf{Integer Alignment (\texttt{i<size>:<abi>:<pref>}):} Specifies alignment requirements for integer types~\cite{llvmlangref}:
+
+\begin{lstlisting}[style=ir]
+i64:64      ; i64 has 64-bit ABI and preferred alignment
+i32:32      ; i32 has 32-bit alignment
+i8:8        ; i8 has 8-bit alignment
+\end{lstlisting}
+
+Correct alignment is critical for performance and correctness. Misaligned memory access can cause:
+\begin{itemize}[noitemsep]
+  \item Performance degradation (multiple memory transactions on \acr{x86})
+  \item Hardware exceptions or crashes (strict-alignment architectures like older \acr{ARM}, SPARC)
+  \item Incorrect atomic operations (atomics require natural alignment)
+\end{itemize}
+
+\textbf{Floating-Point Alignment (\texttt{f<size>:<abi>:<pref>}):} Specifies alignment for floating-point types~\cite{llvmlangref}:
+
+\begin{lstlisting}[style=ir]
+f80:128     ; x86 80-bit extended precision (stored in 128-bit slots)
+f64:64      ; double (64-bit float)
+f32:32      ; float (32-bit float)
+\end{lstlisting}
+
+The \texttt{f80:128} entry indicates that while \acr{x86} extended precision floats are 80 bits, they are stored in 128-bit-aligned memory slots for efficiency.
+
+\textbf{Vector Alignment (\texttt{v<size>:<abi>:<pref>}):} Specifies alignment for vector types used in \acr{SIMD} operations~\cite{llvmlangref}:
+
+\begin{lstlisting}[style=ir]
+v128:128    ; 128-bit vectors (SSE on x86, NEON on ARM)
+v256:256    ; 256-bit vectors (AVX)
+v512:512    ; 512-bit vectors (AVX-512)
+\end{lstlisting}
+
+Proper vector alignment is mandatory for \acr{SIMD} instruction efficiency. Misaligned vector loads/stores can cause significant performance penalties or instruction faults.
+
+\textbf{Aggregate Alignment (\texttt{a:<abi>:<pref>}):} Specifies alignment for aggregate types (structs, arrays)~\cite{llvmlangref}:
+
+\begin{lstlisting}[style=ir]
+a:0:64      ; Aggregates have 0-bit ABI alignment, 64-bit preferred alignment
+\end{lstlisting}
+
+This allows the compiler to optimize struct layout while maintaining \acr{ABI} compatibility.
+
+\textbf{Native Integer Widths (\texttt{n<size1>:<size2>:...}):} Specifies integer widths that the target CPU can efficiently process in a single instruction~\cite{llvmlangref}:
+
+\begin{lstlisting}[style=ir]
+n8:16:32:64 ; x86-64 efficiently supports 8, 16, 32, and 64-bit integers
+n32:64      ; PowerPC 64 efficiently supports 32 and 64-bit integers
+\end{lstlisting}
+
+The optimizer uses this information for type legalization decisions. Operations on \textbf{\textit{non-native widths}} (e.g., \texttt{i7}, \texttt{i128} on \acr{x86}-64) are decomposed into multiple native-width operations.
+
+\textbf{Stack Alignment (\texttt{S<size>}):} Specifies the natural stack alignment in bits~\cite{llvmlangref}:
+
+\begin{lstlisting}[style=ir]
+S128        ; Stack maintains 128-bit (16-byte) alignment
+\end{lstlisting}
+
+Stack alignment affects:
+\begin{itemize}[noitemsep]
+  \item Function prologues/epilogues (stack frame setup)
+  \item \acr{SIMD} variable allocation (local vectors must be aligned)
+  \item Calling conventions (some \acr{ABI}s require specific stack alignment)
+\end{itemize}
+
+On \acr{x86}-64, 16-byte stack alignment enables efficient \acr{SSE} operations on stack-allocated vectors~\cite{lopesauler2014}.
+
+The data layout string is essential for three fundamental reasons~\cite{llvmessentials}: \textbf{(1) Correctness}---wrong alignment can cause crashes on strict-alignment architectures or incorrect atomic operations; \textbf{(2) Performance}---proper alignment enables efficient memory access, \acr{SIMD} vectorization, and cache utilization; and \textbf{(3) \acr{ABI} compliance}---data layout must match the platform \acr{ABI} to ensure interoperability with system libraries and other compiled code. Modern \acr{LLVM} automatically sets the data layout when you specify the target triple, but understanding the format is crucial for cross-compilation, \acr{GPU} programming, and custom target development~\cite{lopesauler2014}.
+
+\subsection{Functions}
+
+Functions are the primary units of executable code in \acr{LLVM} \acr{IR}. A function declaration consists of:
+
+\begin{lstlisting}[style=ir]
+define <return_type> @function_name(<param_type> %param1, ...) {
+  ; function body
+}
+\end{lstlisting}
+
+\textbf{Linkage types} control visibility and linking behavior:
+
+\begin{itemize}[noitemsep]
+  \item \texttt{define} --- Default linkage (internal to module unless exported)
+  \item \texttt{define external} --- Exported symbol, visible to other modules
+  \item \texttt{define internal} --- Private to the module (similar to C \texttt{static})
+  \item \texttt{define weak} --- Can be overridden by other definitions
+  \item \texttt{declare} --- External function (declaration only, no body)
+\end{itemize}
+
+\textbf{Function attributes} modify compilation behavior:
+
+\begin{lstlisting}[style=ir]
+define i32 @pure_function(i32 %x) nounwind readnone {
+  %result = mul i32 %x, %x
+  ret i32 %result
+}
+\end{lstlisting}
+
+Common attributes:
+\begin{itemize}[noitemsep]
+  \item \texttt{nounwind} --- Function never throws exceptions
+  \item \texttt{readnone} --- Pure function, no memory access
+  \item \texttt{readonly} --- Function only reads memory
+  \item \texttt{alwaysinline} --- Force inlining
+  \item \texttt{noinline} --- Prevent inlining
+\end{itemize}
+
+\subsection{Basic Blocks and Labels}
+
+\acr{LLVM} organizes function bodies into \textbf{basic blocks}---straight-line sequences of instructions with no branches except at the end. This structure is fundamental to control flow analysis and optimization.
+
+\begin{lstlisting}[style=ir]
+define i32 @max(i32 %a, i32 %b) {
+entry:
+  %cmp = icmp sgt i32 %a, %b  ; Compare: a > b?
+  br i1 %cmp, label %if.then, label %if.else
+
+if.then:
+  ret i32 %a
+
+if.else:
+  ret i32 %b
+}
+\end{lstlisting}
+
+Each basic block has three essential properties:
+
+\begin{enumerate}[noitemsep]
+  \item \textbf{Unique label}: Every block has a name (\texttt{entry}, \texttt{if.then}, \texttt{if.else}) that serves as a branch target
+  \item \textbf{Sequential instructions}: No control flow transfers occur in the middle of a block
+  \item \textbf{Terminator instruction}: Every block must end with exactly one terminator that transfers control
+\end{enumerate}
+
+\textbf{Terminator instructions:}
+
+\begin{itemize}[noitemsep]
+  \item \texttt{ret <type> <value>} --- Return from function
+  \item \texttt{br label \%dest} --- Unconditional jump
+  \item \texttt{br i1 \%cond, label \%true, label \%false} --- Conditional branch
+  \item \texttt{switch} --- Multi-way branch (jump table)
+  \item \texttt{unreachable} --- Marks dead code paths
+\end{itemize}
+
+The first basic block in every function is conventionally named \texttt{entry} and serves as the function's entry point.
+
+\subsection{Global and Local Variables}
+
+\acr{LLVM} distinguishes between global variables (module-level storage) and local variables (function-level virtual registers).
+
+\textbf{Global variables} are declared outside functions and persist for the program's lifetime:
+
+\begin{lstlisting}[style=ir]
+@global_counter = global i32 0
+@constant_pi = constant float 3.14159
+@external_array = external global [100 x i32]
+\end{lstlisting}
+
+Global variables use the \texttt{@} prefix and have linkage specifiers:
+\begin{itemize}[noitemsep]
+  \item \texttt{global} --- Mutable global variable
+  \item \texttt{constant} --- Immutable global constant
+  \item \texttt{external} --- Declared elsewhere (no initializer)
+  \item \texttt{internal} --- Private to the module
+\end{itemize}
+
+\textbf{Local variables} (virtual registers) use the \texttt{\%} prefix and exist only within a function:
+
+\begin{lstlisting}[style=ir]
+define i32 @compute(i32 %x) {
+entry:
+  %temp1 = add i32 %x, 5
+  %temp2 = mul i32 %temp1, 2
+  ret i32 %temp2
+}
+\end{lstlisting}
+
+In \acr{SSA} form, each local variable is assigned exactly once. For mutable variables (stack allocations), \acr{LLVM} uses memory operations:
+
+\begin{lstlisting}[style=ir]
+define void @mutable_example() {
+entry:
+  %ptr = alloca i32              ; Allocate stack space
+  store i32 42, ptr %ptr         ; Write to memory
+  %val = load i32, ptr %ptr      ; Read from memory
+  ret void
+}
+\end{lstlisting}
+
+\subsection{Type System}
+
+\acr{LLVM} \acr{IR} is strongly typed. Every value has an explicit type, and type mismatches are compile-time errors. The type system includes primitive types, aggregate types, and pointer types.
+
+\textbf{Primitive types:}
+
+\begin{itemize}[noitemsep]
+  \item \textbf{Integer types}: \texttt{i1} (boolean), \texttt{i8}, \texttt{i16}, \texttt{i32}, \texttt{i64}, \texttt{i128} (arbitrary-width integers like \texttt{i7} or \texttt{i256} are also valid)
+  \item \textbf{Floating-point types}: \texttt{half} (16-bit), \texttt{float} (32-bit), \texttt{double} (64-bit), \texttt{fp128} (quad-precision)
+  \item \textbf{Void type}: \texttt{void} (used only for function return types, not for values)
+\end{itemize}
+
+\textbf{Aggregate types:}
+
+\begin{lstlisting}[style=ir]
+; Array: [length x element_type]
+[10 x i32]                    ; Array of 10 i32 values
+[3 x float]                   ; Array of 3 floats
+
+; Structure: { type1, type2, ... }
+{ i32, float, ptr }           ; Unpacked struct
+<{ i8, i32 }>                ; Packed struct (no padding)
+
+; Vector: <length x element_type>
+<4 x float>                   ; SIMD vector (SSE, NEON)
+<16 x i8>                     ; 128-bit packed integer vector
+\end{lstlisting}
+
+\textbf{Pointer type}: \texttt{ptr} (opaque pointer, introduced in \acr{LLVM} 15):
+
+\begin{lstlisting}[style=ir]
+%heap_ptr = call ptr @malloc(i64 64)
+store i32 42, ptr %heap_ptr
+%value = load i32, ptr %heap_ptr
+\end{lstlisting}
+
+Older \acr{LLVM} versions used typed pointers (\texttt{i32*}, \texttt{float*}), but modern \acr{LLVM} uses opaque \texttt{ptr} to simplify the type system and improve optimization.
+
+\textbf{Function types} specify signatures:
+
+\begin{lstlisting}[style=ir]
+; Function type: return_type (param_types)
+i32 (i32, i32)                ; Takes two i32, returns i32
+void (ptr, i64)               ; Takes pointer and i64, returns void
+\end{lstlisting}
+
+\subsection{Instructions and Opcodes}
+
+\acr{LLVM} instructions are the fundamental operations that manipulate values. Every instruction produces a result (except terminators and side-effecting operations like \texttt{store}).
+
+\textbf{Arithmetic instructions:}
+
+\begin{lstlisting}[style=ir]
+%sum = add i32 %a, %b         ; Integer addition
+%diff = sub i32 %a, %b        ; Integer subtraction
+%prod = mul i32 %a, %b        ; Integer multiplication
+%quot = sdiv i32 %a, %b       ; Signed division
+%rem = srem i32 %a, %b        ; Signed remainder
+
+%fsum = fadd float %x, %y     ; Floating-point addition
+%fdiff = fsub float %x, %y    ; Floating-point subtraction
+%fprod = fmul float %x, %y    ; Floating-point multiplication
+%fquot = fdiv float %x, %y    ; Floating-point division
+\end{lstlisting}
+
+\textbf{Bitwise operations:}
+
+\begin{lstlisting}[style=ir]
+%and_result = and i32 %a, %b  ; Bitwise AND
+%or_result = or i32 %a, %b    ; Bitwise OR
+%xor_result = xor i32 %a, %b  ; Bitwise XOR
+%shift_left = shl i32 %a, 2   ; Shift left by 2 bits
+%shift_right = lshr i32 %a, 2 ; Logical shift right
+%arith_shift = ashr i32 %a, 2 ; Arithmetic shift right (sign-extend)
+\end{lstlisting}
+
+\textbf{Comparison instructions:}
+
+\begin{lstlisting}[style=ir]
+; Integer comparisons (icmp)
+%eq = icmp eq i32 %a, %b      ; Equal
+%ne = icmp ne i32 %a, %b      ; Not equal
+%gt = icmp sgt i32 %a, %b     ; Signed greater than
+%lt = icmp slt i32 %a, %b     ; Signed less than
+%uge = icmp uge i32 %a, %b    ; Unsigned greater or equal
+
+; Floating-point comparisons (fcmp)
+%feq = fcmp oeq float %x, %y  ; Ordered equal
+%fgt = fcmp ogt float %x, %y  ; Ordered greater than
+%fne = fcmp une float %x, %y  ; Unordered or not equal
+\end{lstlisting}
+
+\textbf{Memory operations:}
+
+\begin{lstlisting}[style=ir]
+%ptr = alloca i32             ; Stack allocation
+store i32 42, ptr %ptr        ; Write to memory
+%val = load i32, ptr %ptr     ; Read from memory
+
+; Pointer arithmetic with getelementptr (GEP)
+%array_ptr = getelementptr [10 x i32], ptr %base, i64 0, i64 3
+; Access element 3 of array at %base
+\end{lstlisting}
+
+\textbf{Type conversion instructions:}
+
+\begin{lstlisting}[style=ir]
+%ext = zext i32 %a to i64     ; Zero-extend to wider type
+%trunc = trunc i64 %b to i32  ; Truncate to narrower type
+%fp_to_int = fptosi float %x to i32  ; Float to signed int
+%int_to_fp = sitofp i32 %y to float  ; Signed int to float
+%bitcast = bitcast i32 %z to float   ; Reinterpret bits
+\end{lstlisting}
+
+\textbf{Function calls:}
+
+\begin{lstlisting}[style=ir]
+%result = call i32 @compute(i32 %x, i32 %y)
+call void @print_value(i32 %result)
+\end{lstlisting}
+
+\textbf{Vector operations (\acr{SIMD}):}
+
+\begin{lstlisting}[style=ir]
+%vec_a = <4 x float> <float 1.0, float 2.0, float 3.0, float 4.0>
+%vec_b = <4 x float> <float 5.0, float 6.0, float 7.0, float 8.0>
+%vec_sum = fadd <4 x float> %vec_a, %vec_b
+\end{lstlisting}
+
+\subsection{The \acr{PHI} Instruction}
+
+When control flow merges from multiple basic blocks, \acr{SSA} form requires a mechanism to select the appropriate value based on which predecessor block was executed. The \texttt{phi} instruction serves this purpose.
+
+\begin{lstlisting}[style=ir]
+define i32 @abs(i32 %x) {
+entry:
+  %is_neg = icmp slt i32 %x, 0
+  br i1 %is_neg, label %negate, label %done
+
+negate:
+  %neg = sub i32 0, %x
+  br label %done
+
+done:
+  %result = phi i32 [ %x, %entry ], [ %neg, %negate ]
+  ret i32 %result
+}
+\end{lstlisting}
+
+The \texttt{phi} instruction syntax is:
+
+\begin{lstlisting}[style=ir]
+%result = phi <type> [ <value1>, %block1 ], [ <value2>, %block2 ], ...
+\end{lstlisting}
+
+Semantics: "If control flow arrived from \texttt{\%block1}, use \texttt{<value1>}; if from \texttt{\%block2}, use \texttt{<value2>}."
+
+\textbf{Why \texttt{phi} is necessary:}
+
+Without \texttt{phi}, we cannot maintain \acr{SSA} form when values merge from different control paths. Consider this invalid attempt:
+
+\begin{lstlisting}[style=ir]
+; INVALID: Cannot assign to %result in multiple blocks
+entry:
+  %result = ... ; First assignment
+  br ...
+
+other_block:
+  %result = ... ; ERROR: violates SSA (redefinition)
+\end{lstlisting}
+
+The \texttt{phi} instruction solves this by creating a single assignment point that selects from multiple incoming values.
+
+\textbf{Multiple \texttt{phi} nodes:}
+
+A block can have multiple \texttt{phi} instructions. All \texttt{phi} instructions in a block are conceptually executed simultaneously before any other instructions:
+
+\begin{lstlisting}[style=ir]
+loop:
+  %i = phi i32 [ 0, %entry ], [ %i_next, %loop ]
+  %sum = phi i32 [ 0, %entry ], [ %sum_next, %loop ]
+  %i_next = add i32 %i, 1
+  %sum_next = add i32 %sum, %i
+  %cond = icmp slt i32 %i_next, 10
+  br i1 %cond, label %loop, label %exit
+\end{lstlisting}
+
+This example implements a loop that sums integers from 0 to 9, demonstrating how \texttt{phi} enables iterative control flow in \acr{SSA} form.
