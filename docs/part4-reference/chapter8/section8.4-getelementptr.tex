@@ -1,0 +1,31 @@
+\section{GetElementPtr (\acr{GEP}) Operations}
+
+\texttt{GetElementPtr} computes addresses within aggregates (arrays, structs):
+
+\begin{lstlisting}[style=ts]
+// Array indexing: array[idx]
+const gep = new GetElementPtrInst({
+  name: "elem_ptr",
+  baseType: i32,
+  ptrType: ptr,
+  pointer: "array",
+  indices: [{ type: i32, value: "idx" }]
+});
+// Generates: %elem_ptr = getelementptr i32, ptr %array, i32 %idx
+
+// Struct field access: struct.field1
+const structGep = new GetElementPtrInst({
+  name: "field_ptr",
+  baseType: structType,
+  ptrType: ptr,
+  pointer: "struct_ptr",
+  indices: [
+    { type: i32, value: 0 },   // First: dereference pointer
+    { type: i32, value: 1 }    // Second: select field 1
+  ]
+});
+// Generates: %field_ptr = getelementptr %StructType, ptr %struct_ptr, i32 0, i32 1
+\end{lstlisting}
+
+\textbf{Important:} \acr{GEP} does \emph{not} load memory—it only computes addresses. Use \texttt{LoadInst} to read the value.
+
