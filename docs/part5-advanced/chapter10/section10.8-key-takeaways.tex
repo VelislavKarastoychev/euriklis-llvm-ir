@@ -1,0 +1,12 @@
+\section{Key Takeaways}
+
+\begin{enumerate}[noitemsep]
+  \item \textbf{Use shared memory} to cache frequently accessed data
+  \item \textbf{Synchronize with barriers} after loading and before computing
+  \item \textbf{Tile your algorithms} to fit working sets in shared memory
+  \item \textbf{Coalesce global accesses} when loading tiles
+  \item \textbf{Avoid bank conflicts} in shared memory (advanced topic)
+\end{enumerate}
+
+The tiled pattern applies to many \acr{GPU} algorithms: convolutions, FFTs, reductions, sorting.
+
