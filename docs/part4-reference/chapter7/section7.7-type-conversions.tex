@@ -1,0 +1,20 @@
+\section{Type Conversions}
+
+\begin{longtable}{|p{3cm}|p{5cm}|p{5cm}|}
+\hline
+\textbf{Instruction} & \textbf{Purpose} & \textbf{Example} \\
+\hline
+\texttt{TruncInst} & Truncate integer & \texttt{\%r = trunc i64 \%a to i32} \\
+\hline
+\texttt{ZExtInst} & Zero-extend integer & \texttt{\%r = zext i32 \%a to i64} \\
+\hline
+\texttt{SExtInst} & Sign-extend integer & \texttt{\%r = sext i32 \%a to i64} \\
+\hline
+\texttt{FPTruncInst} & Truncate float & \texttt{\%r = fptrunc double \%a to float} \\
+\hline
+\texttt{FPExtInst} & Extend float & \texttt{\%r = fpext float \%a to double} \\
+\hline
+\texttt{BitCastInst} & Reinterpret bits & \texttt{\%r = bitcast i32 \%a to float} \\
+\hline
+\end{longtable}
+
