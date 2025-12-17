@@ -1,0 +1,11 @@
+\section{How PyTorch and TensorFlow Do It}
+
+Frameworks like PyTorch don't generate Metal code either. Instead, they use \textbf{\acr{MPS}}\cite{pytorchmps}\cite{applepytorch}—Apple's high-level library:
+
+\begin{itemize}[noitemsep]
+  \item Apple provides hundreds of \textbf{pre-optimized \acr{GPU} kernels} (matrix multiply, convolution, etc.)\cite{metaldocs}
+  \item PyTorch maps operations to these kernels via the \textbf{\acr{MPSGraph} \acr{API}}
+  \item This works great for standard \acr{ML} operations
+  \item For custom kernels, you must write \texttt{.metal} files by hand\cite{metalspec}
+\end{itemize}
+
