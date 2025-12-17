@@ -1,0 +1,17 @@
+\section{Function Calls}
+
+\begin{lstlisting}[style=ts]
+import { CallInst } from "@euriklis/llvm-ir";
+
+const call = new CallInst({
+  name: "result",
+  returnType: LLVMCodegen.types.i32,
+  functionName: "my_function",
+  args: [
+    { type: LLVMCodegen.types.i32, value: 10 },
+    { type: LLVMCodegen.types.float, value: "x" }
+  ]
+});
+// Generates: %result = call i32 @my_function(i32 10, float %x)
+\end{lstlisting}
+
