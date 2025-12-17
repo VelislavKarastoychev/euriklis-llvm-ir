@@ -1,0 +1,33 @@
+\section{Vector Addition: \acr{AMD} \acr{ROCm}}
+
+\textbf{\acr{HIP} equivalent (\acr{AMD}'s \acr{CUDA}-like \acr{API}):}
+\begin{lstlisting}[style=ir]
+__global__ void vectorAdd(float* a, float* b, float* c, int n) {
+  int idx = hipBlockIdx_x * hipBlockDim_x + hipThreadIdx_x;
+  if (idx < n) {
+    c[idx] = a[idx] + b[idx];
+  }
+}
+\end{lstlisting}
+
+\textbf{TypeScript with AMDGPUCodegen:}
+\begin{lstlisting}[style=ts]
+import { AMDGPUCodegen } from "@euriklis/llvm-ir";
+
+const codegen = new AMDGPUCodegen("vector_add");
+
+// Same structure as CUDA, but use AMD intrinsics:
+const workitemId = AMDGPUCodegen.rocm.workitemIdX("tid.x");
+const workgroupId = AMDGPUCodegen.rocm.workgroupIdX("gid.x");
+// Workgroup size is typically passed as kernel parameter
+
+// Rest identical to CUDA version
+\end{lstlisting}
+
+\textbf{Key \acr{AMD} intrinsics:}
+\begin{itemize}[noitemsep]
+  \item \texttt{AMDGPUCodegen.rocm.workitemIdX/Y/Z}: Work-item ID (like \texttt{threadIdx})
+  \item \texttt{AMDGPUCodegen.rocm.workgroupIdX/Y/Z}: Work-group ID (like \texttt{blockIdx})
+  \item \texttt{AMDGPUCodegen.rocm.barrier()}: Work-group barrier
+\end{itemize}
+
