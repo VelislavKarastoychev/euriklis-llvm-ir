@@ -1,0 +1,44 @@
+\section{Cross-Compilation Example}
+
+\textbf{Same TypeScript code, three architectures:}
+
+\begin{lstlisting}[style=ts]
+import {
+  LLVMCodegen,
+  ARMCodegen,
+  WASMCodegen,
+  LLVMFunction,
+  BasicBlock,
+  RetInst
+} from "@euriklis/llvm-ir";
+
+function createAddFunction(codegen) {
+  const func = new LLVMFunction({
+    name: "add",
+    returnType: LLVMCodegen.types.i32
+  });
+  // ... (same function body for all architectures)
+  codegen.getModule().addFunction(func);
+}
+
+// x86-64
+const x86 = new LLVMCodegen("x86");
+createAddFunction(x86);
+console.log("=== x86-64 ===");
+console.log(x86.toString());
+
+// ARM64
+const arm = new ARMCodegen("arm", true);
+createAddFunction(arm);
+console.log("=== ARM64 ===");
+console.log(arm.toString());
+
+// WebAssembly
+const wasm = new WASMCodegen("wasm");
+createAddFunction(wasm);
+console.log("=== WASM ===");
+console.log(wasm.toString());
+\end{lstlisting}
+
+Each will have a different target triple, but the function \acr{IR} is identical. \acr{LLVM}'s backends handle architecture-specific optimizations (register allocation, instruction selection, calling conventions).
+
