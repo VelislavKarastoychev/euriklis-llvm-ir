@@ -1,0 +1,31 @@
+\section{Vector Types}
+
+\acr{SIMD} vectors for parallel operations:
+
+\begin{lstlisting}[style=ts]
+import { VectorType } from "@euriklis/llvm-ir";
+
+// <4 x float> - 4-element float vector (SSE, NEON)
+const vec4 = new VectorType({
+  elementType: float,
+  count: 4
+});
+
+// <8 x i32> - 8-element integer vector (AVX)
+const vec8i = new VectorType({
+  elementType: i32,
+  count: 8
+});
+
+// Vector addition
+const vadd = new BinaryInst({
+  name: "vsum",
+  opcode: LLVMCodegen.opcodes.fadd,
+  type: vec4,
+  lhs: "a",
+  rhs: "b"
+});
+// Generates: %vsum = fadd <4 x float> %a, %b
+// This adds 4 floats in parallel!
+\end{lstlisting}
+
