@@ -1,0 +1,21 @@
+\section{Floating-Point Types}
+
+\begin{lstlisting}[style=ts]
+import { FloatType } from "@euriklis/llvm-ir";
+
+const half = new FloatType("half");      // f16: 16-bit half precision
+const bfloat = new FloatType("bfloat");  // bf16: Brain float (ML)
+const float = new FloatType("float");    // f32: Single precision (IEEE 754)
+const double = new FloatType("double");  // f64: Double precision
+const fp128 = new FloatType("fp128");    // Quad precision (128-bit)
+\end{lstlisting}
+
+\textbf{When to use each:}
+\begin{itemize}[noitemsep]
+  \item \texttt{half (f16)}: \acr{GPU} compute, \acr{ML} inference (low precision, high throughput)
+  \item \texttt{bfloat (bf16)}: \acr{ML} training (Google TPUs, NVIDIA Ampere+)
+  \item \texttt{float (f32)}: Default for graphics and general compute
+  \item \texttt{double (f64)}: Scientific computing, high-precision math
+  \item \texttt{fp128}: Rare (extreme precision needs)
+\end{itemize}
+
