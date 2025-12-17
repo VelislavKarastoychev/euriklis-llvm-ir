@@ -1,0 +1,28 @@
+\section{Function Types}
+
+\begin{lstlisting}[style=ts]
+import { FunctionType } from "@euriklis/llvm-ir";
+
+// int add(int, int)
+const addFnType = new FunctionType({
+  returnType: i32,
+  paramTypes: [i32, i32]
+});
+// Type: i32 (i32, i32)
+
+// void print(char*)
+const printFnType = new FunctionType({
+  returnType: voidType,
+  paramTypes: [ptr]
+});
+// Type: void (ptr)
+
+// Variadic: int printf(char*, ...)
+const printfFnType = new FunctionType({
+  returnType: i32,
+  paramTypes: [ptr],
+  isVarArg: true
+});
+// Type: i32 (ptr, ...)
+\end{lstlisting}
+
