@@ -1,0 +1,26 @@
+\section{Why This Matters for TypeScript Developers}
+
+If you're coming from a JavaScript/TypeScript background, here's an analogy:
+
+\begin{itemize}[noitemsep]
+  \item \acr{CUDA}/\acr{AMD} are like \textbf{open APIs}—you can generate code programmatically (what this package does)
+  \item Metal is like a \textbf{proprietary framework}—you must use Apple's tools and pre-built libraries
+\end{itemize}
+
+Think of it like this:
+\begin{lstlisting}[style=ts]
+// CUDA/AMD (what this package does)
+const kernel = generateLLVMIR({
+  instructions: [...],  // Full programmatic control
+  intrinsics: [...]
+});
+
+// Metal (what Apple requires)
+const kernel = `
+  kernel void myKernel(...) {
+    // Must write Metal Shading Language as text
+  }
+`;
+// Then compile with Apple's tools
+\end{lstlisting}
+
