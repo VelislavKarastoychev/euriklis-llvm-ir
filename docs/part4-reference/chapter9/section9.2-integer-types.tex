@@ -1,0 +1,24 @@
+\section{Integer Types}
+
+\textbf{Fixed-width integers:}
+\begin{lstlisting}[style=ts]
+import { IntType } from "@euriklis/llvm-ir";
+
+const i1 = LLVMCodegen.types.i1;      // Boolean (1 bit)
+const i8 = LLVMCodegen.types.i8;      // Byte (8 bits)
+const i16 = LLVMCodegen.types.i16;    // Short (16 bits)
+const i32 = LLVMCodegen.types.i32;    // Int (32 bits)
+const i64 = LLVMCodegen.types.i64;    // Long (64 bits)
+const i128 = LLVMCodegen.types.i128;  // Quad (128 bits)
+\end{lstlisting}
+
+\textbf{Arbitrary-width integers:}
+\begin{lstlisting}[style=ts]
+const i7 = new IntType({ bits: 7 });    // 7-bit integer
+const i24 = new IntType({ bits: 24 });  // 24-bit integer (RGB color)
+const i256 = new IntType({ bits: 256 }); // 256-bit integer (crypto)
+// Generates: i7, i24, i256
+\end{lstlisting}
+
+\acr{LLVM} supports integers from \texttt{i1} to \texttt{i2\^{}23-1} (8 million bits).
+
