@@ -1,0 +1,14 @@
+\section{Void Type}
+
+Special type for functions that don't return a value:
+
+\begin{lstlisting}[style=ts]
+const { void: voidType } = LLVMCodegen.types;
+
+const func = new LLVMFunction({
+  name: "doSomething",
+  returnType: voidType
+});
+// Generates: define void @doSomething() { ... }
+\end{lstlisting}
+
