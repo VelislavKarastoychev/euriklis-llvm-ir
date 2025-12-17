@@ -1,0 +1,58 @@
+\section{Control Flow}
+
+\textbf{Conditional branch:}
+\begin{lstlisting}[style=ts]
+import { BrInst } from "@euriklis/llvm-ir";
+
+const br = new BrInst({
+  condition: "cmp",
+  conditionType: LLVMCodegen.types.i1,
+  target: thenBlock,
+  falseTarget: elseBlock
+});
+// Generates: br i1 %cmp, label %then, label %else
+\end{lstlisting}
+
+\textbf{Unconditional branch:}
+\begin{lstlisting}[style=ts]
+const br = new BrInst({ target: nextBlock });
+// Generates: br label %next
+\end{lstlisting}
+
+\textbf{Return:}
+\begin{lstlisting}[style=ts]
+import { RetInst } from "@euriklis/llvm-ir";
+
+// Return value
+const ret = new RetInst({
+  type: LLVMCodegen.types.i32,
+  value: 42
+});
+// Generates: ret i32 42
+
+// Return void
+const retVoid = new RetInst({});
+// Generates: ret void
+\end{lstlisting}
+
+\textbf{Switch statement:}
+\begin{lstlisting}[style=ts]
+import { SwitchInst } from "@euriklis/llvm-ir";
+
+const sw = new SwitchInst({
+  value: "x",
+  valueType: LLVMCodegen.types.i32,
+  defaultDest: defaultBlock,
+  cases: [
+    { value: 0, dest: case0Block },
+    { value: 1, dest: case1Block },
+    { value: 2, dest: case2Block }
+  ]
+});
+// Generates: switch i32 %x, label %default [
+//              i32 0, label %case0
+//              i32 1, label %case1
+//              i32 2, label %case2
+//            ]
+\end{lstlisting}
+
