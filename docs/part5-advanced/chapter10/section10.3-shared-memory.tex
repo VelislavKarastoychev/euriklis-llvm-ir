@@ -1,0 +1,21 @@
+\section{Shared Memory (Address Space 3)}
+
+Shared memory is small (KB) but fast (20-30 cycle latency):
+
+\begin{lstlisting}[style=ts]
+const sharedTile = new GlobalVariable({
+  name: "tile",
+  type: new ArrayType({ elementType: float, size: 256 }),  // 256 floats (1 KB)
+  addressSpace: 3,  // Shared memory
+  linkage: "internal"
+});
+// Generates: @tile = internal addrspace(3) global [256 x float]
+\end{lstlisting}
+
+\textbf{Why shared memory is 100x faster:}
+\begin{itemize}[noitemsep]
+  \item On-chip \acr{SRAM} (not external \acr{DRAM})
+  \item Shared across threads in the same block
+  \item Perfect for tiling algorithms (reuse data)
+\end{itemize}
+
