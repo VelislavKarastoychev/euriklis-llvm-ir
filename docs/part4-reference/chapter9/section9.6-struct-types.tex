@@ -1,0 +1,28 @@
+\section{Struct Types}
+
+\begin{lstlisting}[style=ts]
+import { StructType } from "@euriklis/llvm-ir";
+
+// Named struct
+const Point = new StructType({
+  name: "Point",
+  fields: [
+    { type: float },
+    { type: float },
+    { type: float }
+  ]
+});
+// Generates: %Point = type { float, float, float }
+
+// Packed struct (no padding)
+const PackedPoint = new StructType({
+  name: "PackedPoint",
+  fields: [
+    { type: i8 },
+    { type: i32 }
+  ],
+  packed: true
+});
+// Generates: %PackedPoint = type <{ i8, i32 }>
+\end{lstlisting}
+
