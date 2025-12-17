@@ -1,0 +1,50 @@
+\section{Comparison Operations}
+
+\textbf{Integer comparisons (ICmpInst):}
+\begin{longtable}{|p{2.5cm}|p{3cm}|p{7cm}|}
+\hline
+\textbf{Predicate} & \textbf{Meaning} & \textbf{Example} \\
+\hline
+\texttt{eq} & Equal & \texttt{\%r = icmp eq i32 \%a, \%b} \\
+\hline
+\texttt{ne} & Not equal & \texttt{\%r = icmp ne i32 \%a, \%b} \\
+\hline
+\texttt{sgt} & Signed greater & \texttt{\%r = icmp sgt i32 \%a, \%b} \\
+\hline
+\texttt{sge} & Signed greater/equal & \texttt{\%r = icmp sge i32 \%a, \%b} \\
+\hline
+\texttt{slt} & Signed less & \texttt{\%r = icmp slt i32 \%a, \%b} \\
+\hline
+\texttt{sle} & Signed less/equal & \texttt{\%r = icmp sle i32 \%a, \%b} \\
+\hline
+\texttt{ugt} & Unsigned greater & \texttt{\%r = icmp ugt i32 \%a, \%b} \\
+\hline
+\texttt{uge} & Unsigned greater/equal & \texttt{\%r = icmp uge i32 \%a, \%b} \\
+\hline
+\texttt{ult} & Unsigned less & \texttt{\%r = icmp ult i32 \%a, \%b} \\
+\hline
+\texttt{ule} & Unsigned less/equal & \texttt{\%r = icmp ule i32 \%a, \%b} \\
+\hline
+\end{longtable}
+
+\textbf{Floating-point comparisons (FCmpInst):}
+\begin{longtable}{|p{2.5cm}|p{3cm}|p{7cm}|}
+\hline
+\textbf{Predicate} & \textbf{Meaning} & \textbf{Example} \\
+\hline
+\texttt{oeq} & Ordered equal & \texttt{\%r = fcmp oeq float \%a, \%b} \\
+\hline
+\texttt{one} & Ordered not equal & \texttt{\%r = fcmp one float \%a, \%b} \\
+\hline
+\texttt{ogt} & Ordered greater & \texttt{\%r = fcmp ogt float \%a, \%b} \\
+\hline
+\texttt{oge} & Ordered greater/equal & \texttt{\%r = fcmp oge float \%a, \%b} \\
+\hline
+\texttt{olt} & Ordered less & \texttt{\%r = fcmp olt float \%a, \%b} \\
+\hline
+\texttt{ole} & Ordered less/equal & \texttt{\%r = fcmp ole float \%a, \%b} \\
+\hline
+\texttt{uno} & Unordered (NaN) & \texttt{\%r = fcmp uno float \%a, \%b} \\
+\hline
+\end{longtable}
+
