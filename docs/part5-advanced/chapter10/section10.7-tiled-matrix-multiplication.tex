@@ -1,0 +1,79 @@
+\section{Tiled Matrix Multiplication Example}
+
+Now let's see why shared memory matters with a real example: matrix multiplication \(C = A \times B\).
+
+\textbf{Naive version (global memory only):}
+
+Each thread computes one element of \(C\):
+\begin{lstlisting}[style=ts]
+for (int k = 0; k < N; k++) {
+  sum += A[row][k] * B[k][col];  // 2N global memory accesses per thread
+}
+\end{lstlisting}
+
+Problem: \textbf{Every iteration reads from global memory} (200-400 cycles each). For \(N=1024\), that's 2048 slow memory accesses per thread.
+
+\textbf{Tiled version (shared memory):}
+
+\begin{enumerate}[noitemsep]
+  \item Load a \textbf{tile} of A and B into shared memory
+  \item Synchronize threads (barrier)
+  \item Compute using fast shared memory
+  \item Repeat for next tile
+\end{enumerate}
+
+\begin{lstlisting}[style=ts]
+import { NVVMCodegen, GlobalVariable, ArrayType } from "@euriklis/llvm-ir";
+
+const TILE_SIZE = 16;
+
+// Declare shared memory tiles (address space 3)
+const tileA = new GlobalVariable({
+  name: "tileA",
+  type: new ArrayType({
+    elementType: new ArrayType({ elementType: float, size: TILE_SIZE }),
+    size: TILE_SIZE
+  }),
+  addressSpace: 3,  // Shared memory
+  linkage: "internal"
+});
+
+const tileB = new GlobalVariable({
+  name: "tileB",
+  type: new ArrayType({
+    elementType: new ArrayType({ elementType: float, size: TILE_SIZE }),
+    size: TILE_SIZE
+  }),
+  addressSpace: 3,
+  linkage: "internal"
+});
+
+// Kernel structure (simplified):
+// 1. Load tile from A (global) into tileA (shared)
+// 2. Load tile from B (global) into tileB (shared)
+// 3. barrier() - ensure all loads complete
+// 4. Compute using tileA and tileB (fast!)
+// 5. barrier() - before loading next tile
+// 6. Repeat for all tiles
+\end{lstlisting}
+
+Full implementation with all details (thread indexing, tile loop, \acr{PHI} nodes) is available in the repository examples.
+
+\textbf{Performance analysis:}
+
+\textbf{Naive (global only):}
+\begin{itemize}[noitemsep]
+  \item Each thread: $2N$ global loads (400 cycles each)
+  \item Total latency: $\sim 800N$ cycles
+  \item For $N=1024$: $\sim 819,200$ cycles
+\end{itemize}
+
+\textbf{Tiled (shared memory):}
+\begin{itemize}[noitemsep]
+  \item Each tile: $TILE\_SIZE^2$ global loads shared across block
+  \item Tile reused $TILE\_SIZE$ times from shared (20 cycles each)
+  \item Total latency: $\sim \frac{800N}{TILE\_SIZE} + 20N$
+  \item For $N=1024, TILE=16$: $\sim 71,680$ cycles
+  \item \textbf{11x speedup!}
+\end{itemize}
+
