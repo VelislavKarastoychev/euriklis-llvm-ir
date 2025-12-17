@@ -1,0 +1,48 @@
+\section{Stack vs Heap}
+
+\acr{LLVM} \acr{IR} supports two memory allocation strategies:
+
+\textbf{Stack allocation (alloca):}
+\begin{lstlisting}[style=ts]
+const alloc = new AllocaInst({
+  name: "local_var",
+  allocatedType: i32,
+  align: 4
+});
+// Generates: %local_var = alloca i32, align 4
+\end{lstlisting}
+
+\begin{itemize}[noitemsep]
+  \item Automatically deallocated when function returns
+  \item Fast (stack pointer bump)
+  \item Limited size (typical stack: 1-8 MB)
+  \item Good for small, short-lived data
+\end{itemize}
+
+\textbf{Heap allocation (external malloc):}
+\begin{lstlisting}[style=ts]
+// Declare malloc
+const mallocDecl = new LLVMFunction({
+  name: "malloc",
+  returnType: ptr,
+  isExternal: true
+});
+mallocDecl.addParameter(new Parameter({ type: i64, name: "size" }));
+
+// Call malloc
+const heapPtr = new CallInst({
+  name: "heap_ptr",
+  returnType: ptr,
+  functionName: "malloc",
+  args: [{ type: i64, value: 4096 }]
+});
+// Generates: %heap_ptr = call ptr @malloc(i64 4096)
+\end{lstlisting}
+
+\begin{itemize}[noitemsep]
+  \item Manual deallocation required (\texttt{free})
+  \item Slower (OS allocator overhead)
+  \item Virtually unlimited size (limited by RAM)
+  \item Good for large, long-lived data
+\end{itemize}
+
