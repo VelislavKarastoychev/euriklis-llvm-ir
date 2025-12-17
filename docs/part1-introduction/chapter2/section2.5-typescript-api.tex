@@ -1,0 +1,22 @@
+\section{Why a TypeScript \acr{API} Instead of C Bindings?}
+
+\acr{LLVM} provides a comprehensive C \acr{API} (\texttt{llvm-c}), and several Node.js bindings exist (\texttt{llvm-node}\cite{llvmnode}, \texttt{llvm-bindings}\cite{llvmbindings}, \texttt{node-llvmc}\cite{nodellvmc}). However, \acr{FFI} bindings have inherent limitations:
+
+\begin{enumerate}[noitemsep]
+  \item \textbf{Native dependencies}: Require compiling against specific \acr{LLVM} versions
+  \begin{itemize}[noitemsep]
+    \item \acr{LLVM} 15, 16, 17+ are not \acr{API}-stable
+    \item Users must install exact \acr{LLVM} version on their system
+    \item Cross-compilation becomes complex
+  \end{itemize}
+
+  \item \textbf{Platform fragility}: Native Node.js addons break across Node versions
+  \begin{itemize}[noitemsep]
+    \item Rebuilding required for Node 18, 20, 22, etc.
+    \item Electron and Bun compatibility issues
+  \end{itemize}
+
+  \item \textbf{Distribution complexity}: npm packages with native addons need pre-built binaries for every platform
+
+  \item \textbf{No tree-shaking}: \acr{FFI} bundles entire \acr{LLVM} library (hundreds of MB)
+\end{enumerate}
