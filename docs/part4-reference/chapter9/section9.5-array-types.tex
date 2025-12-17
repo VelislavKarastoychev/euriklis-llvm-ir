@@ -1,0 +1,18 @@
+\section{Array Types}
+
+\begin{lstlisting}[style=ts]
+import { ArrayType } from "@euriklis/llvm-ir";
+
+const intArray = new ArrayType({
+  elementType: i32,
+  size: 10
+});
+// Generates: [10 x i32]
+
+const floatMatrix = new ArrayType({
+  elementType: new ArrayType({ elementType: float, size: 4 }),
+  size: 4
+});
+// Generates: [4 x [4 x float]] (4x4 matrix)
+\end{lstlisting}
+
