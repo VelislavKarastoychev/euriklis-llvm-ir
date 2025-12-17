@@ -1,0 +1,82 @@
+% Professional Back Cover Page
+\clearpage
+\thispagestyle{empty}
+\pagecolor{coverbottom}
+\begin{tikzpicture}[remember picture,overlay]
+    % Gradient background (matching front cover)
+    \shade[top color=coverbottom,bottom color=covertop]
+        (current page.north west) rectangle (current page.south east);
+
+    % Decorative top border
+    \fill[accentgold,opacity=0.9]
+        ([yshift=-2cm]current page.north west) rectangle ([yshift=-2.2cm]current page.north east);
+    \fill[accentlight,opacity=0.7]
+        ([yshift=-2.2cm]current page.north west) rectangle ([yshift=-2.25cm]current page.north east);
+
+    % Decorative bottom border
+    \fill[accentlight,opacity=0.7]
+        ([yshift=2.25cm]current page.south west) rectangle ([yshift=2.2cm]current page.south east);
+    \fill[accentgold,opacity=0.9]
+        ([yshift=2.2cm]current page.south west) rectangle ([yshift=2cm]current page.south east);
+
+    % Central decorative frame
+    \draw[accentgold,line width=2pt,opacity=0.8]
+        ([shift={(2cm,2cm)}]current page.south west) rectangle ([shift={(-2cm,-2cm)}]current page.north east);
+    \draw[white,line width=0.5pt,opacity=0.6]
+        ([shift={(2.1cm,2.1cm)}]current page.south west) rectangle ([shift={(-2.1cm,-2.1cm)}]current page.north east);
+
+    % Content overlay - positioned at page center
+    \node[text width=0.7\paperwidth, align=left, anchor=north] at ([yshift=-3.5cm]current page.north) {
+        \begin{center}
+        {\Large\bfseries\color{white}About This Handbook\par}
+        \end{center}
+
+        \vspace{0.6cm}
+
+        {\large\color{white}
+        This comprehensive handbook bridges the gap between high-level TypeScript programming and low-level LLVM IR code generation. The main goal of this project is to create a TypeScript-supported LLVM generator designed for computationally intensive applications, including heterogeneous programming and GPU-accelerated computing. This project will be integrated into more advanced packages of the @euriklis family, providing a robust way for heterogeneous programming via TypeScript. Whether you're building compilers, optimizing performance-critical applications, or targeting multiple architectures, this guide provides practical knowledge for leveraging LLVM's powerful infrastructure.
+        \par}
+
+        \vspace{0.8cm}
+
+        {\large\bfseries\color{accentgold}Main topics:\par}
+
+        \vspace{0.4cm}
+
+        {\normalsize\color{white}
+        \begin{itemize}[leftmargin=1.5cm,itemsep=0.2cm]
+            \item Core concepts of LLVM IR and its type system
+            \item Cross-platform compilation for ARM, x86, and GPU architectures
+            \item GPU programming with NVIDIA NVVM, AMD, and SPIR-V
+            \item Memory management and optimization techniques
+            \item Complete instruction reference and practical examples
+        \end{itemize}
+        \par}
+
+        \vspace{0.8cm}
+
+        {\large\bfseries\color{white}About the Author\par}
+
+        \vspace{0.4cm}
+
+        {\normalsize\color{white}
+        Velislav Karastoychev is an economist and the founder of Euriklis LTD and co-founder of One Agent LTD. With rich experience in econometrics and the implementation of statistical test hypothesis algorithms, he has translated and implemented in TypeScript a vast collection of algorithms for mathematical programming, optimization, linear algebra, and graph/network analysis. His goal is to elevate TypeScript to the level of a comprehensive language for data processing, analysis, and machine learning, bringing the power of low-level optimization to high-level application development.
+        \par}
+
+        \vspace{1cm}
+
+        \begin{center}
+        {\large\color{white}
+        \textbf{GitHub Repository:}\\[0.3cm]
+        \url{https://github.com/VelislavKarastoychev/euriklis-llvm-ir}
+        \par}
+
+        \vspace{0.8cm}
+
+        {\normalsize\color{white!80}
+        \textcopyright\ \the\year\ Velislav Karastoychev. All rights reserved.
+        \par}
+        \end{center}
+    };
+\end{tikzpicture}
+\nopagecolor
