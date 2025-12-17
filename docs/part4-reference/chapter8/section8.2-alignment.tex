@@ -1,0 +1,45 @@
+\section{Alignment}
+
+Alignment specifies byte boundaries for memory access:
+
+\begin{lstlisting}[style=ts]
+const load = new LoadInst({
+  name: "val",
+  type: i64,
+  pointerType: ptr,
+  pointer: "ptr",
+  align: 8  // 8-byte alignment for 64-bit integers
+});
+// Generates: %val = load i64, ptr %ptr, align 8
+\end{lstlisting}
+
+\textbf{Why alignment matters:}
+\begin{itemize}[noitemsep]
+  \item \textbf{\acr{x86}}: Misaligned access is slow (extra memory cycles)
+  \item \textbf{\acr{ARM}}: Misaligned access may trap (SIGBUS crash)
+  \item \textbf{\acr{GPU}}: Coalesced memory access requires alignment
+\end{itemize}
+
+\textbf{Common alignments:}
+\begin{longtable}{|p{3cm}|p{3cm}|p{7cm}|}
+\hline
+\textbf{Type} & \textbf{Alignment} & \textbf{Reason} \\
+\hline
+\texttt{i8} & 1 byte & Single byte, no alignment needed \\
+\hline
+\texttt{i16} & 2 bytes & 16-bit values must be 2-byte aligned \\
+\hline
+\texttt{i32} & 4 bytes & 32-bit values must be 4-byte aligned \\
+\hline
+\texttt{i64} & 8 bytes & 64-bit values must be 8-byte aligned \\
+\hline
+\texttt{float} & 4 bytes & IEEE 754 single precision (32-bit) \\
+\hline
+\texttt{double} & 8 bytes & IEEE 754 double precision (64-bit) \\
+\hline
+\texttt{ptr} & 8 bytes (64-bit) & Pointer size depends on architecture \\
+\hline
+Struct & Largest member & Structs align to their largest field \\
+\hline
+\end{longtable}
+
