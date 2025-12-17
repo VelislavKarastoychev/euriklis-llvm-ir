@@ -1,0 +1,59 @@
+\section{Memory Operations}
+
+\textbf{Stack allocation:}
+\begin{lstlisting}[style=ts]
+import { AllocaInst } from "@euriklis/llvm-ir";
+
+const alloc = new AllocaInst({
+  name: "ptr",
+  allocatedType: LLVMCodegen.types.i32,
+  align: 4
+});
+// Generates: %ptr = alloca i32, align 4
+\end{lstlisting}
+
+\textbf{Load from memory:}
+\begin{lstlisting}[style=ts]
+import { LoadInst } from "@euriklis/llvm-ir";
+
+const load = new LoadInst({
+  name: "val",
+  type: LLVMCodegen.types.i32,
+  pointerType: LLVMCodegen.types.ptr,
+  pointer: "ptr",
+  align: 4
+});
+// Generates: %val = load i32, ptr %ptr, align 4
+\end{lstlisting}
+
+\textbf{Store to memory:}
+\begin{lstlisting}[style=ts]
+import { StoreInst } from "@euriklis/llvm-ir";
+
+const store = new StoreInst({
+  valueType: LLVMCodegen.types.i32,
+  value: 42,
+  pointerType: LLVMCodegen.types.ptr,
+  pointer: "ptr",
+  align: 4
+});
+// Generates: store i32 42, ptr %ptr, align 4
+\end{lstlisting}
+
+\textbf{Array/struct indexing (GetElementPtr):}
+\begin{lstlisting}[style=ts]
+import { GetElementPtrInst } from "@euriklis/llvm-ir";
+
+const gep = new GetElementPtrInst({
+  name: "elem_ptr",
+  baseType: LLVMCodegen.types.i32,
+  ptrType: LLVMCodegen.types.ptr,
+  pointer: "array",
+  indices: [
+    { type: LLVMCodegen.types.i32, value: 0 },
+    { type: LLVMCodegen.types.i32, value: "idx" }
+  ]
+});
+// Generates: %elem_ptr = getelementptr i32, ptr %array, i32 0, i32 %idx
+\end{lstlisting}
+
