@@ -1,0 +1,26 @@
+\section{What We're Waiting For}
+
+Apple has two paths to enable this package's Metal support:
+
+\textbf{Option 1: Open the \acr{AIR} format specification}
+
+If Apple documents how \acr{AIR} works\cite{airformat}, we could:
+\begin{lstlisting}[style=ts]
+import { MetalCodegen } from "@euriklis/llvm-ir";
+
+const codegen = new MetalCodegen("my_kernel");
+codegen.targetTriple = "air64-apple-macosx";
+// Generate AIR directly, just like we do for NVPTX
+\end{lstlisting}
+
+\textbf{Option 2: Stable Metal Shading Language generation}
+
+Alternatively, we could generate \texttt{.metal} source files programmatically\cite{metaltools}:
+\begin{lstlisting}[style=ts]
+const codegen = new MetalCodegen("my_kernel");
+const metalSource = codegen.toMetalSource();  // Generate .metal text
+// User compiles: xcrun metal -c kernel.metal
+\end{lstlisting}
+
+This is less elegant than \acr{LLVM} \acr{IR} generation, but would work.
+
