@@ -1,0 +1,27 @@
+\section{Type Shortcuts for Cleaner Code}
+
+Throughout this handbook, we use type shortcuts for brevity:
+
+\begin{lstlisting}[style=ts]
+import { LLVMCodegen } from "@euriklis/llvm-ir";
+
+// Destructure common types
+const { i32, i64, float, double, ptr, void: voidType } = LLVMCodegen.types;
+
+// Now use directly
+const add = new BinaryInst({
+  name: "sum",
+  opcode: LLVMCodegen.opcodes.add,
+  type: i32,  // Instead of LLVMCodegen.types.i32
+  lhs: "a",
+  rhs: "b"
+});
+\end{lstlisting}
+
+These are equivalent to their fully-qualified names:
+\begin{itemize}[noitemsep]
+  \item \texttt{i32} = \texttt{LLVMCodegen.types.i32}
+  \item \texttt{float} = \texttt{LLVMCodegen.types.float}
+  \item \texttt{ptr} = \texttt{LLVMCodegen.types.ptr}
+\end{itemize}
+
