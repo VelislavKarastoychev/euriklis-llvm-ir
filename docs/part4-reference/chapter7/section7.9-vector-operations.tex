@@ -1,0 +1,46 @@
+\section{Vector Operations}
+
+\begin{lstlisting}[style=ts]
+import {
+  InsertElementInst,
+  ExtractElementInst,
+  ShuffleVectorInst,
+  VectorType
+} from "@euriklis/llvm-ir";
+
+const vec4 = new VectorType({ elementType: float, count: 4 });
+
+// Insert element
+const insert = new InsertElementInst({
+  name: "v2",
+  vectorType: vec4,
+  vector: "v1",
+  element: 3.14,
+  elementType: float,
+  index: 0,
+  indexType: i32
+});
+// Generates: %v2 = insertelement <4 x float> %v1, float 3.14, i32 0
+
+// Extract element
+const extract = new ExtractElementInst({
+  name: "elem",
+  vectorType: vec4,
+  vector: "v",
+  index: 2,
+  indexType: i32
+});
+// Generates: %elem = extractelement <4 x float> %v, i32 2
+
+// Shuffle vector
+const shuffle = new ShuffleVectorInst({
+  name: "result",
+  vectorType: vec4,
+  vector1: "v1",
+  vector2: "v2",
+  mask: [0, 1, 6, 7]
+});
+// Generates: %result = shufflevector <4 x float> %v1, <4 x float> %v2,
+//                                     <4 x i32> <i32 0, i32 1, i32 6, i32 7>
+\end{lstlisting}
+
