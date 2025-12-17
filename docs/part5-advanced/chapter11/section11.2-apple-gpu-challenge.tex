@@ -1,0 +1,14 @@
+\section{The Apple \acr{GPU} Challenge}
+
+Apple M3/M5 chips have powerful \acr{GPU}s that are excellent for \acr{AI} and parallel computing. However, unlike NVIDIA and \acr{AMD}, Apple uses a \textbf{proprietary \acr{GPU} architecture}:
+
+\textbf{How \acr{GPU} compilation works:}
+
+\begin{itemize}[noitemsep]
+  \item \textbf{NVIDIA}: Your code → \acr{LLVM} \acr{IR} (\acr{NVPTX}) → \acr{PTX} → \acr{CUDA} binary (supported)
+  \item \textbf{\acr{AMD}}: Your code → \acr{LLVM} \acr{IR} (\acr{AMDGPU}) → \acr{GCN}/\acr{RDNA} binary (supported)
+  \item \textbf{Apple}: Your code → Metal Shading Language\cite{metalspec} → \textbf{\acr{AIR} (proprietary)} → Metal binary (not supported)
+\end{itemize}
+
+\textbf{The problem:} \acr{AIR} is based on \acr{LLVM} \acr{IR}, but Apple keeps the format \textbf{closed and undocumented}\cite{airformat}. We cannot generate it directly.
+
