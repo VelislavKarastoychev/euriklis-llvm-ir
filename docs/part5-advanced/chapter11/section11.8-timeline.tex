@@ -1,0 +1,13 @@
+\section{Timeline}
+
+\textbf{When \acr{AIR} becomes public or Apple provides stable \acr{LLVM} \acr{IR} → Metal tooling}, we will add:
+
+\begin{itemize}[noitemsep]
+  \item \texttt{MetalCodegen} class matching the \acr{API} of \texttt{NVVMCodegen}, \texttt{AMDGPUCodegen}
+  \item Metal-specific intrinsics (\texttt{threadgroup} memory, barriers, \acr{SIMD}-groups)
+  \item Complete examples for Apple \acr{GPU} programming
+  \item Validation with Apple's Metal compiler
+\end{itemize}
+
+We're monitoring Apple's developer documentation and \acr{LLVM} commits for any changes. If you have insights into Metal's \acr{IR} generation, please contribute!
+
