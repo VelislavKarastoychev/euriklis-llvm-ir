@@ -1,0 +1,22 @@
+\section{Constant Memory (Address Space 4)}
+
+Constant memory is read-only and cached:
+
+\begin{lstlisting}[style=ts]
+const constants = new GlobalVariable({
+  name: "coefficients",
+  type: new ArrayType({ elementType: float, size: 64 }),
+  addressSpace: 4,  // Constant memory
+  linkage: "internal",
+  isConstant: true
+});
+// Generates: @coefficients = internal addrspace(4) constant [64 x float]
+\end{lstlisting}
+
+\textbf{When to use:}
+\begin{itemize}[noitemsep]
+  \item Filter coefficients (convolution)
+  \item Lookup tables
+  \item Configuration parameters
+\end{itemize}
+
