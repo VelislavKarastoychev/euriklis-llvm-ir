@@ -1,0 +1,35 @@
+\section{Atomic Operations}
+
+\begin{lstlisting}[style=ts]
+import { AtomicRMWInst, AtomicCmpXchgInst, FenceInst } from "@euriklis/llvm-ir";
+
+// Atomic read-modify-write
+const atomicAdd = new AtomicRMWInst({
+  name: "old_val",
+  operation: "add",
+  pointer: "counter",
+  pointerType: ptr,
+  value: 1,
+  valueType: i32,
+  ordering: "seq_cst"
+});
+// Generates: %old_val = atomicrmw add ptr %counter, i32 1 seq_cst
+
+// Compare-and-swap
+const cas = new AtomicCmpXchgInst({
+  name: "result",
+  pointer: "lock",
+  pointerType: ptr,
+  cmp: 0,
+  new: 1,
+  valueType: i32,
+  successOrdering: "seq_cst",
+  failureOrdering: "acquire"
+});
+// Generates: %result = cmpxchg ptr %lock, i32 0, i32 1 seq_cst acquire
+
+// Memory fence
+const fence = new FenceInst({ ordering: "seq_cst" });
+// Generates: fence seq_cst
+\end{lstlisting}
+
