@@ -1,0 +1,141 @@
+\section{Example 3: Loops with \acr{PHI} Nodes}
+
+\textbf{TypeScript equivalent:}
+\begin{lstlisting}[style=ts]
+function sum(n: number): number {
+  let total = 0;
+  for (let i = 0; i < n; i++) {
+    total += i;
+  }
+  return total;
+}
+\end{lstlisting}
+
+\textbf{\acr{LLVM} \acr{IR} generation with loops:}
+\begin{lstlisting}[style=ts]
+import {
+  LLVMCodegen,
+  LLVMFunction,
+  Parameter,
+  BasicBlock,
+  PhiInst,
+  ICmpInst,
+  BinaryInst,
+  BrInst,
+  RetInst
+} from "@euriklis/llvm-ir";
+
+const codegen = new LLVMCodegen("loop");
+
+const sumFunc = new LLVMFunction({
+  name: "sum",
+  returnType: LLVMCodegen.types.i32
+});
+
+sumFunc.addParameter(new Parameter({
+  type: LLVMCodegen.types.i32,
+  name: "n"
+}));
+
+const entry = new BasicBlock("entry");
+const loop = new BasicBlock("loop");
+const exit = new BasicBlock("exit");
+
+// entry: unconditional jump to loop
+entry.setTerminator(new BrInst({ target: loop }));
+
+// loop: PHI nodes for i and total
+loop.addInstruction(new PhiInst({
+  name: "i",
+  type: LLVMCodegen.types.i32,
+  incomingValues: [
+    { value: 0, block: entry },
+    { value: "i.next", block: loop }
+  ]
+}));
+
+loop.addInstruction(new PhiInst({
+  name: "total",
+  type: LLVMCodegen.types.i32,
+  incomingValues: [
+    { value: 0, block: entry },
+    { value: "total.next", block: loop }
+  ]
+}));
+
+// total.next = total + i
+loop.addInstruction(new BinaryInst({
+  name: "total.next",
+  opcode: LLVMCodegen.opcodes.add,
+  type: LLVMCodegen.types.i32,
+  lhs: "total",
+  rhs: "i"
+}));
+
+// i.next = i + 1
+loop.addInstruction(new BinaryInst({
+  name: "i.next",
+  opcode: LLVMCodegen.opcodes.add,
+  type: LLVMCodegen.types.i32,
+  lhs: "i",
+  rhs: 1
+}));
+
+// cmp = (i.next < n)
+loop.addInstruction(new ICmpInst({
+  name: "cmp",
+  predicate: LLVMCodegen.predicates.slt,
+  type: LLVMCodegen.types.i32,
+  lhs: "i.next",
+  rhs: "n"
+}));
+
+// if cmp, continue loop; else exit
+loop.setTerminator(new BrInst({
+  condition: "cmp",
+  conditionType: LLVMCodegen.types.i1,
+  target: loop,
+  falseTarget: exit
+}));
+
+// exit: return total
+exit.setTerminator(new RetInst({
+  type: LLVMCodegen.types.i32,
+  value: "total"
+}));
+
+sumFunc.addBasicBlock(entry);
+sumFunc.addBasicBlock(loop);
+sumFunc.addBasicBlock(exit);
+codegen.getModule().addFunction(sumFunc);
+
+console.log(codegen.toString());
+\end{lstlisting}
+
+\textbf{Generated \acr{LLVM} \acr{IR}:}
+\begin{lstlisting}[style=ir]
+define i32 @sum(i32 %n) {
+entry:
+  br label %loop
+
+loop:
+  %i = phi i32 [ 0, %entry ], [ %i.next, %loop ]
+  %total = phi i32 [ 0, %entry ], [ %total.next, %loop ]
+  %total.next = add i32 %total, %i
+  %i.next = add i32 %i, 1
+  %cmp = icmp slt i32 %i.next, %n
+  br i1 %cmp, label %loop, label %exit
+
+exit:
+  ret i32 %total
+}
+\end{lstlisting}
+
+\textbf{Key concepts:}
+\begin{itemize}[noitemsep]
+  \item \texttt{PhiInst}: Merge values from different control flow paths
+  \item Loop structure: \texttt{entry} → \texttt{loop} → (\texttt{loop} or \texttt{exit})
+  \item \acr{SSA} form maintained: \texttt{i}, \texttt{i.next}, \texttt{total}, \texttt{total.next} are all unique
+  \item Back-edge: \texttt{loop} can branch to itself
+\end{itemize}
+
