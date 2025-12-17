@@ -1,0 +1,11 @@
+\section{Introduction}
+
+\acr{LLVM} supports \acr{GPU} targets via architecture-specific backends:
+\begin{itemize}[noitemsep]
+  \item \textbf{NVIDIA}: \acr{NVPTX} backend (\acr{CUDA})
+  \item \textbf{\acr{AMD}}: \acr{AMDGPU} backend (\acr{ROCm})
+  \item \textbf{Intel/\acr{OpenCL}}: \acr{SPIR-V} backend
+\end{itemize}
+
+This chapter shows how to write the same algorithm (vector addition) for all three \acr{GPU} architectures using this library's unified \acr{API}.
+
