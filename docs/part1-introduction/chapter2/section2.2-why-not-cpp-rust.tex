@@ -1,0 +1,18 @@
+\section{Why Not Just Use C++ or Rust?}
+
+The traditional approach is to write performance-critical code in C++/Rust and bind it to JavaScript via Node.js addons, WebAssembly, or \acr{FFI}. This works but introduces friction:
+
+\begin{enumerate}[noitemsep]
+  \item Write core algorithm in C++/Rust
+  \item Compile for multiple platforms (Windows, macOS, Linux, maybe mobile)
+  \item Bind to JavaScript with \acr{FFI}
+  \item Debug across language boundaries
+\end{enumerate}
+
+This workflow has friction:
+\begin{itemize}[noitemsep]
+  \item \textbf{Separate toolchains}: npm + cargo/cmake + wasm-pack
+  \item \textbf{Build complexity}: native compilation per platform
+  \item \textbf{Type mismatches}: JavaScript objects $\leftrightarrow$ C structs
+  \item \textbf{Limited \acr{GPU} access}: \acr{WebGPU} is new; \acr{CUDA} requires native code
+\end{itemize}
