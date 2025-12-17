@@ -1,0 +1,40 @@
+\section{Arithmetic Operations}
+
+\textbf{Integer arithmetic:}
+\begin{longtable}{|p{3cm}|p{5cm}|p{5cm}|}
+\hline
+\textbf{Instruction} & \textbf{TypeScript} & \textbf{\acr{LLVM} \acr{IR}} \\
+\hline
+Addition & \texttt{BinaryInst\{opcode: "add"\}} & \texttt{\%r = add i32 \%a, \%b} \\
+\hline
+Subtraction & \texttt{BinaryInst\{opcode: "sub"\}} & \texttt{\%r = sub i32 \%a, \%b} \\
+\hline
+Multiplication & \texttt{BinaryInst\{opcode: "mul"\}} & \texttt{\%r = mul i32 \%a, \%b} \\
+\hline
+Division (signed) & \texttt{BinaryInst\{opcode: "sdiv"\}} & \texttt{\%r = sdiv i32 \%a, \%b} \\
+\hline
+Division (unsigned) & \texttt{BinaryInst\{opcode: "udiv"\}} & \texttt{\%r = udiv i32 \%a, \%b} \\
+\hline
+Remainder (signed) & \texttt{BinaryInst\{opcode: "srem"\}} & \texttt{\%r = srem i32 \%a, \%b} \\
+\hline
+Remainder (unsigned) & \texttt{BinaryInst\{opcode: "urem"\}} & \texttt{\%r = urem i32 \%a, \%b} \\
+\hline
+\end{longtable}
+
+\textbf{Floating-point arithmetic:}
+\begin{longtable}{|p{3cm}|p{5cm}|p{5cm}|}
+\hline
+\textbf{Instruction} & \textbf{TypeScript} & \textbf{\acr{LLVM} \acr{IR}} \\
+\hline
+Addition & \texttt{BinaryInst\{opcode: "fadd"\}} & \texttt{\%r = fadd float \%a, \%b} \\
+\hline
+Subtraction & \texttt{BinaryInst\{opcode: "fsub"\}} & \texttt{\%r = fsub float \%a, \%b} \\
+\hline
+Multiplication & \texttt{BinaryInst\{opcode: "fmul"\}} & \texttt{\%r = fmul float \%a, \%b} \\
+\hline
+Division & \texttt{BinaryInst\{opcode: "fdiv"\}} & \texttt{\%r = fdiv float \%a, \%b} \\
+\hline
+Remainder & \texttt{BinaryInst\{opcode: "frem"\}} & \texttt{\%r = frem float \%a, \%b} \\
+\hline
+\end{longtable}
+
