@@ -1,0 +1,44 @@
+\section{Address Spaces (\acr{GPU} Memory)}
+
+GPUs use \textbf{address spaces} to distinguish between memory types:
+
+\begin{longtable}{|p{2cm}|p{3.5cm}|p{2.5cm}|p{5cm}|}
+\hline
+\textbf{Space} & \textbf{Name} & \textbf{Scope} & \textbf{Performance} \\
+\hline
+0 & Generic & All & Compiler chooses \\
+\hline
+1 & Global & All threads & Slow (\acr{DRAM}) \\
+\hline
+3 & Shared (\acr{CUDA}/\acr{AMD}) & Thread block & Fast (on-chip) \\
+\hline
+4 & Constant & All threads & Fast (cached) \\
+\hline
+5 & Local (\acr{CUDA}) & Single thread & Varies (register spill) \\
+\hline
+\end{longtable}
+
+\textbf{Declaring global memory (address space 1):}
+\begin{lstlisting}[style=ts]
+import { GlobalVariable } from "@euriklis/llvm-ir";
+
+const globalArray = new GlobalVariable({
+  name: "global_data",
+  type: new ArrayType({ elementType: float, size: 1024 }),
+  addressSpace: 1,  // Global memory
+  linkage: "external"
+});
+// Generates: @global_data = external addrspace(1) global [1024 x float]
+\end{lstlisting}
+
+\textbf{Declaring shared memory (address space 3):}
+\begin{lstlisting}[style=ts]
+const sharedMem = new GlobalVariable({
+  name: "shared_tile",
+  type: new ArrayType({ elementType: float, size: 256 }),
+  addressSpace: 3,  // Shared memory (CUDA __shared__)
+  linkage: "internal"
+});
+// Generates: @shared_tile = internal addrspace(3) global [256 x float]
+\end{lstlisting}
+
