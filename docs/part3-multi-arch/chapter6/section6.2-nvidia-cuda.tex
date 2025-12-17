@@ -1,0 +1,113 @@
+\section{Vector Addition: NVIDIA \acr{CUDA}}
+
+\textbf{\acr{CUDA} C equivalent:}
+\begin{lstlisting}[style=ir]
+__global__ void vectorAdd(float* a, float* b, float* c, int n) {
+  int idx = blockIdx.x * blockDim.x + threadIdx.x;
+  if (idx < n) {
+    c[idx] = a[idx] + b[idx];
+  }
+}
+\end{lstlisting}
+
+\textbf{TypeScript with NVVMCodegen:}
+\begin{lstlisting}[style=ts]
+import {
+  NVVMCodegen,
+  LLVMFunction,
+  Parameter,
+  BasicBlock,
+  BinaryInst,
+  ICmpInst,
+  BrInst,
+  LoadInst,
+  StoreInst,
+  GetElementPtrInst,
+  RetInst,
+  LLVMCodegen,
+  FloatType
+} from "@euriklis/llvm-ir";
+
+const codegen = new NVVMCodegen("vector_add");
+const module = codegen.getModule();
+
+const floatType = new FloatType("float");
+
+const kernel = new LLVMFunction({
+  name: "vectorAdd",
+  returnType: LLVMCodegen.types.void
+});
+
+kernel.addParameter(new Parameter({ type: LLVMCodegen.types.ptr, name: "a" }));
+kernel.addParameter(new Parameter({ type: LLVMCodegen.types.ptr, name: "b" }));
+kernel.addParameter(new Parameter({ type: LLVMCodegen.types.ptr, name: "c" }));
+kernel.addParameter(new Parameter({ type: LLVMCodegen.types.i32, name: "n" }));
+
+const entry = new BasicBlock("entry");
+const compute = new BasicBlock("compute");
+const exit = new BasicBlock("exit");
+
+// Get thread ID using CUDA intrinsics
+const blockIdx = NVVMCodegen.cuda.blockIdxX("blockIdx.x");
+const blockDim = NVVMCodegen.cuda.blockDimX("blockDim.x");
+const threadIdx = NVVMCodegen.cuda.threadIdxX("threadIdx.x");
+
+entry.addInstruction(blockIdx);
+entry.addInstruction(blockDim);
+entry.addInstruction(threadIdx);
+
+// idx = blockIdx.x * blockDim.x + threadIdx.x
+const mul = new BinaryInst({
+  name: "mul",
+  opcode: LLVMCodegen.opcodes.mul,
+  type: LLVMCodegen.types.i32,
+  lhs: blockIdx,
+  rhs: blockDim
+});
+entry.addInstruction(mul);
+
+const idx = new BinaryInst({
+  name: "idx",
+  opcode: LLVMCodegen.opcodes.add,
+  type: LLVMCodegen.types.i32,
+  lhs: mul,
+  rhs: threadIdx
+});
+entry.addInstruction(idx);
+
+// Bounds check: idx < n
+const cmp = new ICmpInst({
+  name: "cmp",
+  predicate: LLVMCodegen.predicates.slt,
+  type: LLVMCodegen.types.i32,
+  lhs: idx,
+  rhs: "n"
+});
+entry.addInstruction(cmp);
+
+entry.setTerminator(new BrInst({
+  condition: cmp,
+  conditionType: LLVMCodegen.types.i1,
+  target: compute,
+  falseTarget: exit
+}));
+
+// Compute: c[idx] = a[idx] + b[idx]
+// ... (full implementation in repository examples)
+
+kernel.addBasicBlock(entry);
+kernel.addBasicBlock(compute);
+kernel.addBasicBlock(exit);
+module.addFunction(kernel);
+
+console.log(codegen.toString());
+\end{lstlisting}
+
+\textbf{Key \acr{CUDA} intrinsics:}
+\begin{itemize}[noitemsep]
+  \item \texttt{NVVMCodegen.cuda.threadIdxX/Y/Z}: Thread index within block
+  \item \texttt{NVVMCodegen.cuda.blockIdxX/Y/Z}: Block index within grid
+  \item \texttt{NVVMCodegen.cuda.blockDimX/Y/Z}: Block dimensions
+  \item \texttt{NVVMCodegen.cuda.syncThreads()}: Barrier synchronization
+\end{itemize}
+
