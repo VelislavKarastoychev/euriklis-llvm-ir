@@ -1,0 +1,13 @@
+\section{Pointer Types}
+
+In \acr{LLVM} \acr{IR}, pointers are opaque (no element type in modern \acr{LLVM}):
+
+\begin{lstlisting}[style=ts]
+const ptr = LLVMCodegen.types.ptr;  // Opaque pointer
+// Generates: ptr
+
+// Address space variant
+const ptr_addrspace3 = new PointerType(3);  // ptr addrspace(3)
+// Generates: ptr addrspace(3) (CUDA shared memory)
+\end{lstlisting}
+
