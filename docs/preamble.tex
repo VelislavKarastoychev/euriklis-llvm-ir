@@ -56,8 +56,20 @@
     pdfsubject={LLVM IR, TypeScript, GPU Programming},
     pdfkeywords={LLVM, TypeScript, GPU, CUDA, ROCm, Metal, WebAssembly},
     colorlinks=true,
-    linkcolor=blue,
+    linkcolor=black,
     citecolor=blue,
     urlcolor=blue
+}
+
+% Custom command for linking acronyms to abbreviations list
+% Hyperlinks to abbreviations - use link color (black in body, will be blue in TOC)
+\DeclareRobustCommand{\acr}[1]{\texorpdfstring{\hyperlink{abbr:#1}{#1}}{#1}}
+
+% Make TOC entries blue
+\let\oldcontentsline\contentsline
+\renewcommand{\contentsline}[4]{%
+  \hypersetup{linkcolor=blue}%
+  \oldcontentsline{#1}{#2}{#3}{#4}%
+  \hypersetup{linkcolor=black}%
 }
 
