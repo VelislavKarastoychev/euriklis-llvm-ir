@@ -1,0 +1,11 @@
+\section{Current Workarounds}
+
+Until Apple opens \acr{AIR} or provides better tooling, TypeScript/JavaScript developers targeting Apple GPUs should:
+
+\begin{enumerate}[noitemsep]
+  \item \textbf{Use high-level frameworks}: PyTorch \acr{MPS}, TensorFlow, Core \acr{ML}
+  \item \textbf{Write Metal Shading Language directly}: Create \texttt{.metal} files for custom kernels
+  \item \textbf{Use this package for \acr{CPU} \acr{SIMD}}: \acr{ARM}/\acr{NEON} support works today
+  \item \textbf{Prototype on NVIDIA/\acr{AMD}}: Develop with this package's \acr{GPU} support, deploy to Apple via Metal ports
+\end{enumerate}
+
