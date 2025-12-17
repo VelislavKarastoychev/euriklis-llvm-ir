@@ -1,0 +1,58 @@
+\section{Memory Fences}
+
+\textbf{What are memory fences?}
+
+In JavaScript/TypeScript, when you write \texttt{array[i] = 42;}, it happens immediately and in order. But in GPUs and CPUs, the hardware can reorder memory operations for performance. A \textbf{memory fence} is like saying ``wait, make sure all pending writes are actually visible before continuing.''
+
+\textbf{Barriers vs. Fences:}
+
+Think of them like this:
+\begin{itemize}[noitemsep]
+  \item \textbf{Barrier} (\texttt{syncThreads()}): ``Everyone stop and wait here. Don't proceed until all threads arrive.'' (Synchronization + memory ordering)
+  \item \textbf{Fence} (\texttt{threadfence()}): ``Make my writes visible, but don't wait for other threads.'' (Memory ordering only)
+\end{itemize}
+
+\textbf{When to use fences:}
+
+Use fences for lock-free algorithms and atomic operations where you need memory ordering guarantees but don't want the overhead of waiting for all threads.
+
+\textbf{Example: \acr{GPU} memory fences}
+
+\begin{lstlisting}[style=ts]
+import { FenceInst, CallInst } from "@euriklis/llvm-ir";
+
+// Standard LLVM fence (works on all architectures)
+const fence = new FenceInst({
+  ordering: "seq_cst"  // Sequential consistency (strongest)
+});
+// Generates: fence seq_cst
+
+// CUDA threadfence (block-level) - ensures writes visible to block
+const fenceBlock = new CallInst({
+  functionName: "llvm.nvvm.membar.cta",
+  returnType: voidType,
+  args: []
+});
+// Generates: call void @llvm.nvvm.membar.cta()
+
+// CUDA threadfence (global-level) - ensures writes visible globally
+const fenceGlobal = new CallInst({
+  functionName: "llvm.nvvm.membar.gl",
+  returnType: voidType,
+  args: []
+});
+// Generates: call void @llvm.nvvm.membar.gl()
+\end{lstlisting}
+
+\textbf{Memory ordering levels:}
+
+\texttt{FenceInst} supports different ordering strengths (from weakest to strongest):
+\begin{itemize}[noitemsep]
+  \item \texttt{"acquire"}: Ensures reads after fence see all writes before
+  \item \texttt{"release"}: Ensures writes before fence are visible after
+  \item \texttt{"acq\_rel"}: Both acquire and release
+  \item \texttt{"seq\_cst"}: Sequentially consistent (default, safest)
+\end{itemize}
+
+For most use cases, use \texttt{"seq\_cst"} (sequential consistency). Only use weaker orderings if you understand low-level memory models and need the performance.
+
