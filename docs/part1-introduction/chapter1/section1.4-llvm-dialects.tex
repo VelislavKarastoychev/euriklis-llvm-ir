@@ -1,0 +1,167 @@
+\section{\acr{LLVM} Dialects and Target Backends}
+
+While \acr{LLVM} \acr{IR} provides a unified intermediate representation, the compiler infrastructure must ultimately generate native machine code for diverse hardware architectures. This transformation is accomplished through \textbf{target backends}---architecture-specific code generators that translate \acr{LLVM} \acr{IR} into assembly or machine code for particular processors. In some contexts, especially when working with domain-specific extensions or \acr{GPU} programming, these backends are referred to as \textbf{\acr{LLVM} dialects}---variations of \acr{LLVM} \acr{IR} with specialized intrinsics, address space semantics, or instruction sets tailored to specific hardware capabilities.
+
+\subsection{What Are \acr{LLVM} Backends and Dialects?}
+
+An \acr{LLVM} \textbf{backend} is a collection of target-specific components responsible for:
+
+\begin{itemize}[noitemsep]
+  \item \textbf{Instruction selection}: Mapping \acr{LLVM} \acr{IR} instructions to target machine instructions
+  \item \textbf{Register allocation}: Assigning virtual registers to physical hardware registers
+  \item \textbf{Instruction scheduling}: Reordering instructions to minimize pipeline stalls and maximize throughput
+  \item \textbf{Code emission}: Generating assembly or object files in the target's native format
+\end{itemize}
+
+The term \textbf{dialect} is often used when the \acr{IR} itself is extended or constrained for a specific domain. For example, \acr{NVVM} \acr{IR} is technically a \textit{dialect} of \acr{LLVM} \acr{IR}---it follows \acr{LLVM} syntax but adds \acr{GPU}-specific intrinsics and imposes restrictions on certain features (e.g., address space usage, function calling conventions).
+
+\subsection{Supported \acr{LLVM} Target Architectures}
+
+As of \acr{LLVM} 16, the compiler infrastructure supports a comprehensive range of instruction set architectures for \acr{CPU}s, \acr{GPU}s, and specialized processors~\cite{llvmwikipedia}:
+
+\subsubsection*{\acr{CPU} Architectures}
+
+\begin{description}[leftmargin=3.5cm,labelwidth=3cm,style=nextline]
+  \item[\textbf{\acr{x86} (IA-32)}] Intel 32-bit architecture (legacy, but still supported)
+  \item[\textbf{\acr{x86}-64 (AMD64)}] 64-bit extension of \acr{x86} (Intel, \acr{AMD}) --- most mature backend
+  \item[\textbf{\acr{ARM}}] 32-bit and 64-bit \acr{ARM} architectures (AArch32, AArch64) --- used in mobile devices, Apple Silicon, \acr{AWS} Graviton
+  \item[\textbf{PowerPC}] IBM PowerPC (32/64-bit) --- used in older Mac hardware, embedded systems
+  \item[\textbf{\acr{RISC}-V}] Open-source \acr{RISC} architecture (officially supported since \acr{LLVM} 7)
+  \item[\textbf{MIPS}] MIPS 32/64-bit architectures (routers, embedded systems)
+  \item[\textbf{SPARC}] Oracle/Sun SPARC processors
+  \item[\textbf{z/Architecture}] IBM mainframe architecture (SystemZ backend)
+  \item[\textbf{LoongArch}] Chinese LoongArch architecture
+  \item[\textbf{Hexagon}] Qualcomm Hexagon \acr{DSL} processors
+  \item[\textbf{M68K}] Motorola 68000 family (legacy support)
+  \item[\textbf{XCore}] XMOS XCore processors
+\end{description}
+
+\subsubsection*{\acr{GPU} and Accelerator Architectures}
+
+\begin{description}[leftmargin=3.5cm,labelwidth=3cm,style=nextline]
+  \item[\textbf{\acr{NVPTX}/\acr{NVVM}}] NVIDIA \acr{GPU}s via \acr{PTX} (Parallel Thread Execution) intermediate assembly
+  \item[\textbf{\acr{AMDGPU}}] \acr{AMD} \acr{GPU}s (GCN, RDNA, CDNA architectures) via \acr{ROCm} stack
+  \item[\textbf{AMD R600}] Legacy \acr{AMD} TeraScale \acr{GPU}s (deprecated in recent \acr{LLVM} versions)
+\end{description}
+
+\subsubsection*{Web and Virtual Targets}
+
+\begin{description}[leftmargin=3.5cm,labelwidth=3cm,style=nextline]
+  \item[\textbf{\acr{WASM}}] WebAssembly --- enables compiled code execution in web browsers and server-side \acr{WASM} runtimes
+  \item[\textbf{\acr{SPIR}-V}] Standard Portable Intermediate Representation for Vulkan and \acr{OpenCL} (primarily through \acr{MLIR} toolchain)
+\end{description}
+
+\subsubsection*{Deprecated Backends}
+
+Several backends have been removed from \acr{LLVM} due to obsolete hardware or insufficient maintenance resources~\cite{llvmwikipedia}:
+
+\begin{itemize}[noitemsep]
+  \item C backend (compile \acr{LLVM} \acr{IR} to C source code)
+  \item Cell SPU (Sony/IBM Cell processor)
+  \item MicroBlaze (Xilinx soft processor)
+  \item DEC/Compaq Alpha (Alpha AXP)
+  \item Nios2 (Intel/Altera soft processor)
+\end{itemize}
+
+A single Clang compiler binary typically contains \textit{all} supported backends, enabling seamless cross-compilation without installing separate toolchains for each target architecture~\cite{llvmwikipedia}.
+
+\subsection{\acr{GPU} Dialects: \acr{NVVM}, \acr{AMDGPU}, and \acr{SPIR}-V}
+
+\acr{GPU} programming introduces unique challenges compared to traditional \acr{CPU} compilation: massive parallelism, specialized memory hierarchies (global, shared, local), \acr{SIMD}-style execution models (warps/wavefronts), and hardware-specific features (tensor cores, ray tracing units). To address these requirements, \acr{LLVM} provides specialized dialects and backends for major \acr{GPU} vendors.
+
+\subsubsection{\acr{NVVM} \acr{IR} Dialect (NVIDIA \acr{GPU}s)}
+
+\acr{NVVM} \acr{IR} is a compiler intermediate representation based on \acr{LLVM} \acr{IR}, specifically designed to represent \acr{GPU} compute kernels such as \acr{CUDA} kernels~\cite{nvvmirspec}. The relationship between \acr{NVVM} \acr{IR} and \acr{LLVM} \acr{IR} is formally defined as:
+
+\begin{quote}
+\textit{``\acr{NVVM} \acr{IR} is \acr{LLVM} \acr{IR} with a set of rules, restrictions, and conventions, plus a set of supported intrinsic functions. A program specified in \acr{NVVM} \acr{IR} is always a legal \acr{LLVM} program. A legal \acr{LLVM} program may not be a legal \acr{NVVM} program.''}~\cite{nvvmirspec}
+\end{quote}
+
+\textbf{Key Characteristics of \acr{NVVM} \acr{IR}:}
+
+\begin{itemize}[noitemsep]
+  \item \textbf{Address space semantics}: \acr{NVVM} enforces strict address space usage (generic, global, shared, local, constant) corresponding to \acr{CUDA} memory hierarchy
+  \item \textbf{Intrinsic functions}: Provides hundreds of intrinsics for thread indexing (\texttt{llvm.nvvm.read.ptx.sreg.tid.x}), synchronization (\texttt{llvm.nvvm.barrier0}), memory operations (\texttt{llvm.nvvm.ldg.*}), and hardware features (tensor cores, warp-level primitives)
+  \item \textbf{Calling conventions}: Special conventions for kernel launches and device function calls
+  \item \textbf{Metadata annotations}: Target architecture (SM version), kernel attributes (launch bounds, shared memory usage)
+\end{itemize}
+
+\textbf{\acr{NVVM} Dialects:}
+
+NVIDIA defines two \acr{NVVM} \acr{IR} dialects~\cite{nvvmirspec}:
+
+\begin{enumerate}[noitemsep]
+  \item \textbf{\acr{LLVM} 7 dialect}: Based on \acr{LLVM} 7.0.1 --- supports older \acr{GPU} architectures (Kepler, Maxwell, Pascal, Volta, Turing, Ampere)
+  \item \textbf{Modern dialect}: Based on \acr{LLVM} 20.1.0 --- supports Blackwell and later architectures with updated intrinsics and optimizations
+\end{enumerate}
+
+The \acr{NVVM} compiler (part of the \acr{CUDA} Toolkit) translates \acr{NVVM} \acr{IR} into \acr{PTX} (Parallel Thread Execution) assembly, which is then compiled to \acr{SASS} (native \acr{GPU} machine code) by the \acr{GPU} driver at runtime or ahead-of-time.
+
+\textbf{Compilation Flow:}
+\begin{center}
+\texttt{CUDA C/C++} $\rightarrow$ \texttt{NVVM IR} $\rightarrow$ \texttt{PTX} $\rightarrow$ \texttt{SASS (cubin)}
+\end{center}
+
+\subsubsection{\acr{AMDGPU} Backend (\acr{AMD} \acr{GPU}s)}
+
+The \acr{AMDGPU} backend targets \acr{AMD} Radeon and Instinct \acr{GPU}s through the \acr{ROCm} (Radeon Open Compute) platform. Unlike NVIDIA's proprietary \acr{NVVM} approach, \acr{AMD} provides an open-source \acr{LLVM} backend integrated directly into the mainline \acr{LLVM} project.
+
+\textbf{Key Characteristics of \acr{AMDGPU} Backend:}
+
+\begin{itemize}[noitemsep]
+  \item \textbf{Architecture support}: Targets GCN (Graphics Core Next), RDNA (gaming), and CDNA (compute) architectures
+  \item \textbf{Address spaces}: Similar to \acr{NVVM}, defines generic, global, LDS (Local Data Share), private, and constant address spaces
+  \item \textbf{Intrinsics}: \acr{LLVM} intrinsics for wave operations (\texttt{llvm.amdgcn.wave.*}), workgroup synchronization, atomic operations, and hardware-specific features (matrix cores)
+  \item \textbf{Code object format}: Generates \acr{HSACO} (HSA Code Object) files containing executable kernels
+\end{itemize}
+
+\textbf{Compilation Flow:}
+\begin{center}
+\texttt{HIP/OpenCL C} $\rightarrow$ \texttt{LLVM IR (AMDGPU)} $\rightarrow$ \texttt{GCN/RDNA/CDNA ISA} $\rightarrow$ \texttt{HSACO}
+\end{center}
+
+The \acr{AMDGPU} backend is maintained as part of the official \acr{LLVM} codebase, ensuring tight integration with \acr{LLVM} optimization passes and consistent updates with new \acr{LLVM} releases.
+
+\subsubsection{\acr{SPIR}-V (Cross-Vendor Portable \acr{GPU} Code)}
+
+\acr{SPIR}-V (Standard Portable Intermediate Representation - Vulkan) is a binary intermediate language for graphics shaders and compute kernels, designed by the Khronos Group to enable cross-vendor portability for Vulkan and \acr{OpenCL}~\cite{spirvkhronos}.
+
+\textbf{Key Characteristics of \acr{SPIR}-V:}
+
+\begin{itemize}[noitemsep]
+  \item \textbf{Vendor-neutral}: Not tied to NVIDIA or \acr{AMD}---runs on any Vulkan or \acr{OpenCL} conformant \acr{GPU}
+  \item \textbf{Binary format}: Unlike \acr{LLVM} \acr{IR} (text-based), \acr{SPIR}-V is a compact binary encoding
+  \item \textbf{Graphics and compute}: Supports both graphics shaders (vertex, fragment, geometry) and compute kernels
+  \item \textbf{\acr{MLIR} toolchain}: \acr{LLVM}'s \acr{MLIR} (Multi-Level Intermediate Representation) framework provides a \acr{SPIR}-V dialect for generating \acr{SPIR}-V binaries
+\end{itemize}
+
+\textbf{Compilation Flow:}
+\begin{center}
+\texttt{GLSL/HLSL/OpenCL C} $\rightarrow$ \texttt{SPIR-V} $\rightarrow$ \texttt{Vendor-specific ISA (runtime JIT)}
+\end{center}
+
+\acr{SPIR}-V enables ``write once, run anywhere'' for \acr{GPU} compute, but sacrifices some vendor-specific optimizations compared to \acr{NVVM} or \acr{AMDGPU}.
+
+\subsection{Scope of This Handbook: Supported \acr{GPU} Dialects}
+
+This handbook and the accompanying \texttt{euriklis-llvm-ir} TypeScript library focus on \textbf{heterogeneous computing and \acr{GPU}-accelerated workloads}. To maintain practical scope and ensure robust implementation, we provide comprehensive support for the following \acr{GPU} dialects:
+
+\begin{enumerate}[noitemsep]
+  \item \textbf{\acr{NVVM} \acr{IR} (NVIDIA \acr{GPU}s)}: Full support for \acr{CUDA} kernel generation targeting NVIDIA \acr{GPU}s (Pascal, Volta, Turing, Ampere, Hopper, Blackwell architectures)
+  \item \textbf{\acr{AMDGPU} (AMD \acr{GPU}s)}: Support for \acr{ROCm}-based \acr{GPU} programming on \acr{AMD} Radeon and Instinct \acr{GPU}s
+  \item \textbf{\acr{SPIR}-V (Cross-Vendor)}: Portable \acr{GPU} code generation for Vulkan and \acr{OpenCL} environments
+\end{enumerate}
+
+\textbf{What this means for TypeScript developers:}
+
+Using the \texttt{euriklis-llvm-ir} package, you can write TypeScript code that generates \acr{LLVM} \acr{IR} for these \acr{GPU} targets, enabling:
+
+\begin{itemize}[noitemsep]
+  \item High-performance numerical computing (linear algebra, optimization, machine learning)
+  \item Custom \acr{GPU} kernels for domain-specific workloads (cryptography, signal processing, scientific simulation)
+  \item Portable compute shaders that run across NVIDIA, \acr{AMD}, and Intel \acr{GPU}s (via \acr{SPIR}-V)
+\end{itemize}
+
+While \acr{LLVM} supports many additional architectures (\acr{CPU}s, embedded processors, \acr{WASM}), this handbook emphasizes \acr{GPU} programming because it represents the most significant performance opportunity for computationally intensive TypeScript applications. Chapters~\ref{ch:multi-arch} (Multi-Architecture Compilation) and~\ref{ch:gpu-programming} (\acr{GPU} Programming) provide detailed guidance on generating code for each supported \acr{GPU} dialect.
+
+\textbf{Future extensions:} The \texttt{euriklis-llvm-ir} project welcomes community contributions for additional backends (\acr{CPU} architectures, Apple Metal via \acr{AIR}, specialized accelerators). See Chapter~\ref{ch:future-work} for roadmap details and contribution guidelines.
