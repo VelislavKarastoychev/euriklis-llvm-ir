@@ -36,22 +36,22 @@
         % TypeScript (center top)
         \node[inner sep=0pt] (ts) at (0,2) {\includegraphics[width=2cm]{typescript.png}};
 
-        % LLVM IR (center)
+        % \acr{LLVM} \acr{IR} (center)
         \node[inner sep=0pt] (llvm) at (0,0) {\includegraphics[width=2cm]{LLVM_logo.png}};
 
         % Common style for lower nodes
         \tikzset{archnode/.style={ellipse, draw=white, line width=1pt, minimum width=2.4cm, minimum height=1.4cm, inner sep=2pt}}
 
-        % NVIDIA NVVM (left bottom)
+        % NVIDIA \acr{NVVM} (left bottom)
         \node[archnode] (nvvm) at (-3.5,-2) {\includegraphics[width=1.4cm]{Nvidia_logo.svg.png}};
 
-        % AMD (center-left bottom)
+        % \acr{AMD} (center-left bottom)
         \node[archnode] (amd) at (-1.5,-2) {\includegraphics[width=1.4cm]{amd-logo-wallpaper.jpg}};
 
-        % SPIR-V (center-right bottom)
+        % \acr{SPIR-V} (center-right bottom)
         \node[archnode] (spirv) at (1.5,-2) {\includegraphics[width=1.4cm]{spirv.png}};
 
-        % ARM (right bottom)
+        % \acr{ARM} (right bottom)
         \node[archnode] (arm) at (3.5,-2) {\includegraphics[width=1.4cm]{ARM.png}};
 
         % Arrows connecting the technologies
@@ -98,7 +98,7 @@
     \vspace*{3cm}
 
     % Book title
-    {\Large\bfseries Programming LLVM IR with TypeScript\par}
+    {\Large\bfseries Programming \acr{LLVM} \acr{IR} with TypeScript\par}
 
     \vspace{0.5cm}
 
