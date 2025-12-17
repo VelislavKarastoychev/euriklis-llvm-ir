@@ -1,0 +1,23 @@
+\section{Global Memory (Address Space 1)}
+
+Global memory is large (GBs) but slow (hundreds of cycles latency):
+
+\begin{lstlisting}[style=ts]
+import { GlobalVariable, ArrayType } from "@euriklis/llvm-ir";
+
+const globalData = new GlobalVariable({
+  name: "large_array",
+  type: new ArrayType({ elementType: float, size: 1048576 }),  // 1M floats
+  addressSpace: 1,  // Global memory
+  linkage: "external"
+});
+// Generates: @large_array = external addrspace(1) global [1048576 x float]
+\end{lstlisting}
+
+\textbf{Access patterns matter:}
+\begin{itemize}[noitemsep]
+  \item \textbf{Coalesced access}: Threads access consecutive addresses → 1 memory transaction
+  \item \textbf{Strided access}: Threads access every Nth element → multiple transactions
+  \item \textbf{Random access}: Worst case → many transactions
+\end{itemize}
+
