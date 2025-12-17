@@ -1,91 +1,110 @@
 \babel@toc {english}{}\relax 
 \contentsline {chapter}{Preface}{i}{chapter*.1}%
+\contentsline {chapter}{List of Abbreviations}{ii}{chapter*.2}%
 \contentsline {part}{I\hspace {1em}Introduction}{1}{part.1}%
-\contentsline {chapter}{\numberline {1}What is LLVM IR and Why Is It Useful?}{2}{chapter.1}%
-\contentsline {section}{\numberline {1.1}The Compiler Problem}{2}{section.1.1}%
-\contentsline {section}{\numberline {1.2}What is LLVM IR?}{2}{section.1.2}%
-\contentsline {section}{\numberline {1.3}Static Single Assignment (SSA) Form}{3}{section.1.3}%
-\contentsline {section}{\numberline {1.4}Basic Blocks and Control Flow}{3}{section.1.4}%
-\contentsline {section}{\numberline {1.5}The PHI Instruction}{4}{section.1.5}%
-\contentsline {section}{\numberline {1.6}Modules, Functions, and Targets}{4}{section.1.6}%
-\contentsline {section}{\numberline {1.7}Why LLVM IR Is Useful}{5}{section.1.7}%
-\contentsline {chapter}{\numberline {2}Why LLVM for the TypeScript and JavaScript Ecosystem?}{6}{chapter.2}%
-\contentsline {section}{\numberline {2.1}The Rise of Performance-Critical JavaScript}{6}{section.2.1}%
-\contentsline {section}{\numberline {2.2}Why Not Just Use C++ or Rust?}{6}{section.2.2}%
-\contentsline {section}{\numberline {2.3}LLVM as the Universal Backend}{6}{section.2.3}%
-\contentsline {section}{\numberline {2.4}Use Cases in the JavaScript Ecosystem}{8}{section.2.4}%
-\contentsline {section}{\numberline {2.5}Why a TypeScript API Instead of C Bindings?}{8}{section.2.5}%
-\contentsline {section}{\numberline {2.6}@euriklis/llvm-ir Design Philosophy}{8}{section.2.6}%
-\contentsline {section}{\numberline {2.7}Summary}{9}{section.2.7}%
-\contentsline {part}{II\hspace {1em}Getting Started with LLVM IR}{10}{part.2}%
-\contentsline {chapter}{\numberline {3}Installation and Setup}{11}{chapter.3}%
-\contentsline {chapter}{\numberline {4}Implementing TypeScript Functions as LLVM IR}{12}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Example 1: Simple Arithmetic}{12}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Example 2: Conditional Logic (if-else)}{13}{section.4.2}%
-\contentsline {section}{\numberline {4.3}Example 3: Loops with PHI Nodes}{15}{section.4.3}%
-\contentsline {section}{\numberline {4.4}Type Shortcuts for Cleaner Code}{17}{section.4.4}%
-\contentsline {part}{III\hspace {1em}Multi-Architecture Compilation}{19}{part.3}%
-\contentsline {chapter}{\numberline {5}Compiling LLVM IR for Different CPU Architectures}{20}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Target Triples}{20}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Compiling with llc}{20}{section.5.2}%
-\contentsline {section}{\numberline {5.3}Architecture-Specific Code with this Library}{21}{section.5.3}%
-\contentsline {section}{\numberline {5.4}Data Layout Strings}{21}{section.5.4}%
-\contentsline {section}{\numberline {5.5}Cross-Compilation Example}{22}{section.5.5}%
-\contentsline {chapter}{\numberline {6}GPU Programming: Same Function Across All Architectures}{23}{chapter.6}%
-\contentsline {section}{\numberline {6.1}Vector Addition: NVIDIA CUDA}{23}{section.6.1}%
-\contentsline {section}{\numberline {6.2}Vector Addition: AMD ROCm}{25}{section.6.2}%
-\contentsline {section}{\numberline {6.3}Vector Addition: Intel GPU (OpenCL)}{25}{section.6.3}%
-\contentsline {section}{\numberline {6.4}GPU Architecture Comparison}{26}{section.6.4}%
-\contentsline {section}{\numberline {6.5}Compiling GPU LLVM IR to Machine Code}{26}{section.6.5}%
-\contentsline {subsection}{\numberline {6.5.1}NVIDIA: Compiling NVVM IR to PTX}{27}{subsection.6.5.1}%
-\contentsline {subsection}{\numberline {6.5.2}AMD: Compiling AMDGPU IR to GCN/RDNA}{27}{subsection.6.5.2}%
-\contentsline {subsection}{\numberline {6.5.3}Intel/OpenCL: Compiling to SPIR-V Binary}{28}{subsection.6.5.3}%
-\contentsline {subsection}{\numberline {6.5.4}GPU Compilation Workflow Summary}{28}{subsection.6.5.4}%
-\contentsline {part}{IV\hspace {1em}Reference}{29}{part.4}%
-\contentsline {chapter}{\numberline {7}Instruction Reference}{30}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Arithmetic Operations}{30}{section.7.1}%
-\contentsline {section}{\numberline {7.2}Bitwise Operations}{31}{section.7.2}%
-\contentsline {section}{\numberline {7.3}Comparison Operations}{31}{section.7.3}%
-\contentsline {section}{\numberline {7.4}Memory Operations}{31}{section.7.4}%
-\contentsline {section}{\numberline {7.5}Control Flow}{32}{section.7.5}%
-\contentsline {section}{\numberline {7.6}Type Conversions}{33}{section.7.6}%
-\contentsline {section}{\numberline {7.7}Function Calls}{34}{section.7.7}%
-\contentsline {section}{\numberline {7.8}Vector Operations}{34}{section.7.8}%
-\contentsline {section}{\numberline {7.9}Atomic Operations}{35}{section.7.9}%
-\contentsline {chapter}{\numberline {8}Memory Model and Address Spaces}{36}{chapter.8}%
-\contentsline {section}{\numberline {8.1}Stack vs Heap}{36}{section.8.1}%
-\contentsline {section}{\numberline {8.2}Alignment}{37}{section.8.2}%
-\contentsline {section}{\numberline {8.3}Address Spaces (GPU Memory)}{37}{section.8.3}%
-\contentsline {section}{\numberline {8.4}GetElementPtr (GEP) Operations}{38}{section.8.4}%
-\contentsline {section}{\numberline {8.5}Volatile Access}{38}{section.8.5}%
-\contentsline {section}{\numberline {8.6}Atomic Operations}{39}{section.8.6}%
-\contentsline {chapter}{\numberline {9}Type System Reference}{40}{chapter.9}%
-\contentsline {section}{\numberline {9.1}Integer Types}{40}{section.9.1}%
-\contentsline {section}{\numberline {9.2}Floating-Point Types}{40}{section.9.2}%
-\contentsline {section}{\numberline {9.3}Pointer Types}{41}{section.9.3}%
-\contentsline {section}{\numberline {9.4}Array Types}{41}{section.9.4}%
-\contentsline {section}{\numberline {9.5}Struct Types}{41}{section.9.5}%
-\contentsline {section}{\numberline {9.6}Vector Types}{42}{section.9.6}%
-\contentsline {section}{\numberline {9.7}Function Types}{42}{section.9.7}%
-\contentsline {section}{\numberline {9.8}Void Type}{43}{section.9.8}%
-\contentsline {section}{\numberline {9.9}Type Compatibility}{43}{section.9.9}%
-\contentsline {part}{V\hspace {1em}Advanced Topics}{44}{part.5}%
-\contentsline {chapter}{\numberline {10}GPU Memory Hierarchies and Thread Synchronization}{45}{chapter.10}%
-\contentsline {section}{\numberline {10.1}The GPU Memory Hierarchy}{45}{section.10.1}%
-\contentsline {section}{\numberline {10.2}Global Memory (Address Space 1)}{45}{section.10.2}%
-\contentsline {section}{\numberline {10.3}Shared Memory (Address Space 3)}{46}{section.10.3}%
-\contentsline {section}{\numberline {10.4}Constant Memory (Address Space 4)}{46}{section.10.4}%
-\contentsline {section}{\numberline {10.5}Thread Synchronization}{46}{section.10.5}%
-\contentsline {section}{\numberline {10.6}Memory Fences}{48}{section.10.6}%
-\contentsline {section}{\numberline {10.7}Tiled Matrix Multiplication Example}{49}{section.10.7}%
-\contentsline {section}{\numberline {10.8}Key Takeaways}{50}{section.10.8}%
-\contentsline {chapter}{\numberline {11}Future Work: Apple Silicon GPU Support}{51}{chapter.11}%
-\contentsline {section}{\numberline {11.1}Current State}{51}{section.11.1}%
-\contentsline {section}{\numberline {11.2}The Apple GPU Challenge}{51}{section.11.2}%
-\contentsline {section}{\numberline {11.3}Why This Matters for TypeScript Developers}{51}{section.11.3}%
-\contentsline {section}{\numberline {11.4}How PyTorch and TensorFlow Do It}{52}{section.11.4}%
-\contentsline {section}{\numberline {11.5}What We're Waiting For}{52}{section.11.5}%
-\contentsline {section}{\numberline {11.6}Current Workarounds}{52}{section.11.6}%
-\contentsline {section}{\numberline {11.7}Unified Memory Advantage}{53}{section.11.7}%
-\contentsline {section}{\numberline {11.8}Timeline}{53}{section.11.8}%
-\contentsline {section}{\numberline {11.9}Community Contributions Welcome}{53}{section.11.9}%
+\contentsline {chapter}{\numberline {1}What is \acr {LLVM} \acr {IR} and Why Is It Useful?}{2}{chapter.1}%
+\contentsline {section}{\numberline {1.1}The Post-\acr {PC} Era and New Computational Requirements}{2}{section.1.1}%
+\contentsline {section}{\numberline {1.2}The Compiler Problem and \acr {LLVM}'s Solution}{4}{section.1.2}%
+\contentsline {section}{\numberline {1.3}What is \acr {LLVM} \acr {IR}?}{7}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Core Concepts and \acr {LLVM} Syntax}{9}{section.1.4}%
+\contentsline {subsection}{\numberline {1.4.1}Static Single Assignment (\acr {SSA}) Form}{9}{subsection.1.4.1}%
+\contentsline {subsection}{\numberline {1.4.2}Modules and Target Specification}{9}{subsection.1.4.2}%
+\contentsline {subsection}{\numberline {1.4.3}Functions}{12}{subsection.1.4.3}%
+\contentsline {subsection}{\numberline {1.4.4}Basic Blocks and Labels}{12}{subsection.1.4.4}%
+\contentsline {subsection}{\numberline {1.4.5}Global and Local Variables}{13}{subsection.1.4.5}%
+\contentsline {subsection}{\numberline {1.4.6}Type System}{14}{subsection.1.4.6}%
+\contentsline {subsection}{\numberline {1.4.7}Instructions and Opcodes}{14}{subsection.1.4.7}%
+\contentsline {subsection}{\numberline {1.4.8}The \acr {PHI} Instruction}{15}{subsection.1.4.8}%
+\contentsline {section}{\numberline {1.5}\acr {LLVM} Dialects and Target Backends}{16}{section.1.5}%
+\contentsline {subsection}{\numberline {1.5.1}What Are \acr {LLVM} Backends and Dialects?}{17}{subsection.1.5.1}%
+\contentsline {subsection}{\numberline {1.5.2}Supported \acr {LLVM} Target Architectures}{17}{subsection.1.5.2}%
+\contentsline {subsection}{\numberline {1.5.3}\acr {GPU} Dialects: \acr {NVVM}, \acr {AMDGPU}, and \acr {SPIR}-V}{18}{subsection.1.5.3}%
+\contentsline {subsubsection}{\acr {NVVM} \acr {IR} Dialect (NVIDIA \acr {GPU}s)}{18}{subsection.1.5.3}%
+\contentsline {subsubsection}{\acr {AMDGPU} Backend (\acr {AMD} \acr {GPU}s)}{19}{Item.9}%
+\contentsline {subsubsection}{\acr {SPIR}-V (Cross-Vendor Portable \acr {GPU} Code)}{19}{Item.9}%
+\contentsline {subsection}{\numberline {1.5.4}Scope of This Handbook: Supported \acr {GPU} Dialects}{20}{subsection.1.5.4}%
+\contentsline {chapter}{\numberline {2}Why \acr {LLVM} for the TypeScript and JavaScript Ecosystem?}{21}{chapter.2}%
+\contentsline {section}{\numberline {2.1}The Rise of Performance-Critical JavaScript}{21}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Why Not Just Use C++ or Rust?}{21}{section.2.2}%
+\contentsline {section}{\numberline {2.3}\acr {LLVM} as the Universal Backend}{21}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Use Cases in the JavaScript Ecosystem}{22}{section.2.4}%
+\contentsline {section}{\numberline {2.5}Why a TypeScript \acr {API} Instead of C Bindings?}{23}{section.2.5}%
+\contentsline {section}{\numberline {2.6}@euriklis/llvm-ir Design Philosophy}{23}{section.2.6}%
+\contentsline {section}{\numberline {2.7}Summary}{24}{section.2.7}%
+\contentsline {part}{II\hspace {1em}Getting Started with \acr {LLVM} \acr {IR}}{25}{part.2}%
+\contentsline {chapter}{\numberline {3}Installation and Setup}{26}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Installation}{26}{section.3.1}%
+\contentsline {chapter}{\numberline {4}Implementing TypeScript Functions as \acr {LLVM} \acr {IR}}{27}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Introduction}{27}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Example 1: Simple Arithmetic}{27}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Example 2: Conditional Logic (if-else)}{28}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Example 3: Loops with \acr {PHI} Nodes}{30}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Type Shortcuts for Cleaner Code}{32}{section.4.5}%
+\contentsline {part}{III\hspace {1em}Multi-Architecture Compilation}{34}{part.3}%
+\contentsline {chapter}{\numberline {5}Compiling \acr {LLVM} \acr {IR} for Different \acr {CPU} Architectures}{35}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Target Triples}{35}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Compiling with llc}{35}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Architecture-Specific Code with this Library}{36}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Data Layout Strings}{36}{section.5.4}%
+\contentsline {section}{\numberline {5.5}Cross-Compilation Example}{37}{section.5.5}%
+\contentsline {chapter}{\numberline {6}\acr {GPU} Programming: Same Function Across All Architectures}{38}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Introduction}{38}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Vector Addition: NVIDIA \acr {CUDA}}{38}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Vector Addition: \acr {AMD} \acr {ROCm}}{40}{section.6.3}%
+\contentsline {section}{\numberline {6.4}Vector Addition: Intel \acr {GPU} (\acr {OpenCL})}{41}{section.6.4}%
+\contentsline {section}{\numberline {6.5}\acr {GPU} Architecture Comparison}{41}{section.6.5}%
+\contentsline {section}{\numberline {6.6}Compiling \acr {GPU} \acr {LLVM} \acr {IR} to Machine Code}{41}{section.6.6}%
+\contentsline {subsection}{\numberline {6.6.1}NVIDIA: Compiling \acr {NVVM} \acr {IR} to \acr {PTX}}{42}{subsection.6.6.1}%
+\contentsline {subsection}{\numberline {6.6.2}\acr {AMD}: Compiling \acr {AMDGPU} \acr {IR} to \acr {GCN}/\acr {RDNA}}{42}{subsection.6.6.2}%
+\contentsline {subsection}{\numberline {6.6.3}Intel/\acr {OpenCL}: Compiling to \acr {SPIR-V} Binary}{43}{subsection.6.6.3}%
+\contentsline {subsection}{\numberline {6.6.4}\acr {GPU} Compilation Workflow Summary}{43}{subsection.6.6.4}%
+\contentsline {part}{IV\hspace {1em}Reference}{44}{part.4}%
+\contentsline {chapter}{\numberline {7}Instruction Reference}{45}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Introduction}{45}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Arithmetic Operations}{45}{section.7.2}%
+\contentsline {section}{\numberline {7.3}Bitwise Operations}{46}{section.7.3}%
+\contentsline {section}{\numberline {7.4}Comparison Operations}{46}{section.7.4}%
+\contentsline {section}{\numberline {7.5}Memory Operations}{47}{section.7.5}%
+\contentsline {section}{\numberline {7.6}Control Flow}{48}{section.7.6}%
+\contentsline {section}{\numberline {7.7}Type Conversions}{48}{section.7.7}%
+\contentsline {section}{\numberline {7.8}Function Calls}{49}{section.7.8}%
+\contentsline {section}{\numberline {7.9}Vector Operations}{49}{section.7.9}%
+\contentsline {section}{\numberline {7.10}Atomic Operations}{50}{section.7.10}%
+\contentsline {chapter}{\numberline {8}Memory Model and Address Spaces}{51}{chapter.8}%
+\contentsline {section}{\numberline {8.1}Stack vs Heap}{51}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Alignment}{52}{section.8.2}%
+\contentsline {section}{\numberline {8.3}Address Spaces (\acr {GPU} Memory)}{52}{section.8.3}%
+\contentsline {section}{\numberline {8.4}GetElementPtr (\acr {GEP}) Operations}{53}{section.8.4}%
+\contentsline {section}{\numberline {8.5}Volatile Access}{53}{section.8.5}%
+\contentsline {section}{\numberline {8.6}Atomic Operations}{54}{section.8.6}%
+\contentsline {chapter}{\numberline {9}Type System Reference}{55}{chapter.9}%
+\contentsline {section}{\numberline {9.1}Introduction}{55}{section.9.1}%
+\contentsline {section}{\numberline {9.2}Integer Types}{55}{section.9.2}%
+\contentsline {section}{\numberline {9.3}Floating-Point Types}{55}{section.9.3}%
+\contentsline {section}{\numberline {9.4}Pointer Types}{56}{section.9.4}%
+\contentsline {section}{\numberline {9.5}Array Types}{56}{section.9.5}%
+\contentsline {section}{\numberline {9.6}Struct Types}{56}{section.9.6}%
+\contentsline {section}{\numberline {9.7}Vector Types}{57}{section.9.7}%
+\contentsline {section}{\numberline {9.8}Function Types}{57}{section.9.8}%
+\contentsline {section}{\numberline {9.9}Void Type}{58}{section.9.9}%
+\contentsline {section}{\numberline {9.10}Type Compatibility}{58}{section.9.10}%
+\contentsline {part}{V\hspace {1em}Advanced Topics}{59}{part.5}%
+\contentsline {chapter}{\numberline {10}\acr {GPU} Memory Hierarchies and Thread Synchronization}{60}{chapter.10}%
+\contentsline {section}{\numberline {10.1}The \acr {GPU} Memory Hierarchy}{60}{section.10.1}%
+\contentsline {section}{\numberline {10.2}Global Memory (Address Space 1)}{60}{section.10.2}%
+\contentsline {section}{\numberline {10.3}Shared Memory (Address Space 3)}{61}{section.10.3}%
+\contentsline {section}{\numberline {10.4}Constant Memory (Address Space 4)}{61}{section.10.4}%
+\contentsline {section}{\numberline {10.5}Thread Synchronization}{61}{section.10.5}%
+\contentsline {section}{\numberline {10.6}Memory Fences}{63}{section.10.6}%
+\contentsline {section}{\numberline {10.7}Tiled Matrix Multiplication Example}{64}{section.10.7}%
+\contentsline {section}{\numberline {10.8}Key Takeaways}{65}{section.10.8}%
+\contentsline {chapter}{\numberline {11}Future Work: Apple Silicon \acr {GPU} Support}{66}{chapter.11}%
+\contentsline {section}{\numberline {11.1}Current State}{66}{section.11.1}%
+\contentsline {section}{\numberline {11.2}The Apple \acr {GPU} Challenge}{66}{section.11.2}%
+\contentsline {section}{\numberline {11.3}Why This Matters for TypeScript Developers}{66}{section.11.3}%
+\contentsline {section}{\numberline {11.4}How PyTorch and TensorFlow Do It}{67}{section.11.4}%
+\contentsline {section}{\numberline {11.5}What We're Waiting For}{67}{section.11.5}%
+\contentsline {section}{\numberline {11.6}Current Workarounds}{67}{section.11.6}%
+\contentsline {section}{\numberline {11.7}Unified Memory Advantage}{68}{section.11.7}%
+\contentsline {section}{\numberline {11.8}Timeline}{68}{section.11.8}%
+\contentsline {section}{\numberline {11.9}Community Contributions Welcome}{68}{section.11.9}%
