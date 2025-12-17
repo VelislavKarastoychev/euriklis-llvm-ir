@@ -1,0 +1,103 @@
+\section{Example 2: Conditional Logic (if-else)}
+
+\textbf{TypeScript equivalent:}
+\begin{lstlisting}[style=ts]
+function max(a: number, b: number): number {
+  if (a > b) {
+    return a;
+  } else {
+    return b;
+  }
+}
+\end{lstlisting}
+
+\textbf{\acr{LLVM} \acr{IR} generation with control flow:}
+\begin{lstlisting}[style=ts]
+import {
+  LLVMCodegen,
+  LLVMFunction,
+  Parameter,
+  BasicBlock,
+  ICmpInst,
+  BrInst,
+  RetInst
+} from "@euriklis/llvm-ir";
+
+const codegen = new LLVMCodegen("conditional");
+
+const maxFunc = new LLVMFunction({
+  name: "max",
+  returnType: LLVMCodegen.types.i32
+});
+
+maxFunc.addParameter(new Parameter({
+  type: LLVMCodegen.types.i32,
+  name: "a"
+}));
+maxFunc.addParameter(new Parameter({
+  type: LLVMCodegen.types.i32,
+  name: "b"
+}));
+
+const entry = new BasicBlock("entry");
+const ifThen = new BasicBlock("if.then");
+const ifElse = new BasicBlock("if.else");
+
+// entry: compare a > b
+entry.addInstruction(new ICmpInst({
+  name: "cmp",
+  predicate: LLVMCodegen.predicates.sgt,  // signed greater than
+  type: LLVMCodegen.types.i32,
+  lhs: "a",
+  rhs: "b"
+}));
+entry.setTerminator(new BrInst({
+  condition: "cmp",
+  conditionType: LLVMCodegen.types.i1,
+  target: ifThen,
+  falseTarget: ifElse
+}));
+
+// if.then: return a
+ifThen.setTerminator(new RetInst({
+  type: LLVMCodegen.types.i32,
+  value: "a"
+}));
+
+// if.else: return b
+ifElse.setTerminator(new RetInst({
+  type: LLVMCodegen.types.i32,
+  value: "b"
+}));
+
+maxFunc.addBasicBlock(entry);
+maxFunc.addBasicBlock(ifThen);
+maxFunc.addBasicBlock(ifElse);
+codegen.getModule().addFunction(maxFunc);
+
+console.log(codegen.toString());
+\end{lstlisting}
+
+\textbf{Generated \acr{LLVM} \acr{IR}:}
+\begin{lstlisting}[style=ir]
+define i32 @max(i32 %a, i32 %b) {
+entry:
+  %cmp = icmp sgt i32 %a, %b
+  br i1 %cmp, label %if.then, label %if.else
+
+if.then:
+  ret i32 %a
+
+if.else:
+  ret i32 %b
+}
+\end{lstlisting}
+
+\textbf{Key concepts:}
+\begin{itemize}[noitemsep]
+  \item \texttt{ICmpInst}: Integer comparison (returns \texttt{i1} boolean)
+  \item \texttt{BrInst}: Conditional branch (if-else in \acr{LLVM})
+  \item Multiple basic blocks: Each path gets its own block
+  \item Control flow graph: \texttt{entry} → \texttt{if.then} or \texttt{if.else}
+\end{itemize}
+
