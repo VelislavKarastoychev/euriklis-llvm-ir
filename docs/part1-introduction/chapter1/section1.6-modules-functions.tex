@@ -1,0 +1,24 @@
+\section{Modules, Functions, and Targets}
+
+\acr{LLVM} \acr{IR} is organized hierarchically:
+\begin{itemize}[noitemsep]
+  \item \textbf{Module}: Top-level container (one per compilation unit)
+  \item \textbf{Functions}: Named code units with parameters and return types
+  \item \textbf{Basic blocks}: Control flow nodes within functions
+  \item \textbf{Instructions}: Individual operations (add, load, store, etc.)
+\end{itemize}
+
+Each module specifies its \textbf{target}:
+\begin{lstlisting}[style=ir]
+target triple = "x86_64-unknown-linux-gnu"
+target datalayout = "e-m:e-p270:32:32-i64:64-f80:128-n8:16:32:64-S128"
+\end{lstlisting}
+
+The triple format is \texttt{architecture-vendor-os}:
+\begin{itemize}[noitemsep]
+  \item \texttt{\acr{x86}\_64-apple-darwin} - macOS on Intel
+  \item \texttt{aarch64-unknown-linux-gnu} - Linux on \acr{ARM} (Apple Silicon, \acr{AWS} Graviton)
+  \item \texttt{nvptx64-nvidia-cuda} - NVIDIA GPUs
+  \item \texttt{amdgcn-amd-amdhsa} - \acr{AMD} GPUs
+  \item \texttt{wasm32-unknown-unknown} - WebAssembly
+\end{itemize}
