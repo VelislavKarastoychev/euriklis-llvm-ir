@@ -1,0 +1,26 @@
+\section{Target Triples}
+
+One of \acr{LLVM} \acr{IR}'s key strengths is \textbf{write once, compile anywhere}. The same \acr{IR} can target \acr{x86}-64, \acr{ARM}, \acr{RISC-V}, or WebAssembly by changing the compilation flags.
+
+A target triple specifies the architecture, vendor, and operating system:
+
+\begin{lstlisting}[style=ts]
+import { LLVMCodegen } from "@euriklis/llvm-ir";
+
+const codegen = new LLVMCodegen("my_module");
+codegen.targetTriple = "x86_64-unknown-linux-gnu";  // x86-64 Linux
+codegen.dataLayout = "e-m:e-p270:32:32-i64:64-f80:128-n8:16:32:64-S128";
+\end{lstlisting}
+
+Common triples:
+\begin{lstlisting}[style=ir]
+x86_64-unknown-linux-gnu       # Linux x86-64
+x86_64-apple-darwin            # macOS Intel
+aarch64-unknown-linux-gnu      # Linux ARM64 (Raspberry Pi, AWS Graviton)
+aarch64-apple-darwin           # macOS Apple Silicon (M1/M2/M3)
+armv7-unknown-linux-gnueabihf  # ARM 32-bit (Raspberry Pi 3)
+riscv64-unknown-linux-gnu      # RISC-V 64-bit
+wasm32-unknown-unknown         # WebAssembly 32-bit
+wasm64-unknown-unknown         # WebAssembly 64-bit
+\end{lstlisting}
+
