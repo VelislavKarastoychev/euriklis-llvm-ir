@@ -1,0 +1,24 @@
+\section{Compiling with llc}
+
+Once you have \acr{LLVM} \acr{IR}, compile it with \texttt{llc} (\acr{LLVM} static compiler):
+
+\begin{lstlisting}[style=ir]
+# Generate x86-64 assembly
+llc -march=x86-64 -filetype=asm -o output.s module.ll
+
+# Generate ARM64 object file
+llc -march=aarch64 -filetype=obj -o output.o module.ll
+
+# Generate RISC-V binary
+llc -march=riscv64 -filetype=obj -o output.o module.ll
+
+# Generate WebAssembly
+llc -march=wasm32 -filetype=obj -o output.wasm module.ll
+\end{lstlisting}
+
+Or use \texttt{clang} to link directly:
+\begin{lstlisting}[style=ir]
+clang -o program module.ll
+./program
+\end{lstlisting}
+
