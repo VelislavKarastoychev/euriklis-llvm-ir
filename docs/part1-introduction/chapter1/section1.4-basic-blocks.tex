@@ -1,0 +1,24 @@
+\section{Basic Blocks and Control Flow}
+
+\acr{LLVM} organizes code into \textbf{basic blocks}—straight-line sequences of instructions with no branches except at the end:
+
+\begin{lstlisting}[style=ir]
+define i32 @max(i32 %a, i32 %b) {
+entry:
+  %cmp = icmp sgt i32 %a, %b  // Compare: a > b?
+  br i1 %cmp, label %if.then, label %if.else
+
+if.then:
+  ret i32 %a
+
+if.else:
+  ret i32 %b
+}
+\end{lstlisting}
+
+Each basic block:
+\begin{enumerate}[noitemsep]
+  \item Has a unique label (\texttt{entry}, \texttt{if.then}, \texttt{if.else})
+  \item Contains sequential instructions (no control flow in the middle)
+  \item Ends with a \textbf{terminator} (\texttt{ret}, \texttt{br}, \texttt{switch})
+\end{enumerate}
