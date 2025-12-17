@@ -1,0 +1,79 @@
+\section{Thread Synchronization}
+
+When using shared memory, threads must synchronize to avoid race conditions.
+
+\textbf{Barrier synchronization:}
+\begin{lstlisting}[style=ts]
+import { CallInst } from "@euriklis/llvm-ir";
+
+// CUDA: __syncthreads()
+const barrier = new CallInst({
+  functionName: "llvm.nvvm.barrier0",
+  returnType: voidType,
+  args: []
+});
+// Generates: call void @llvm.nvvm.barrier0()
+
+// AMD ROCm: barrier()
+const barrierAMD = new CallInst({
+  functionName: "llvm.amdgcn.s.barrier",
+  returnType: voidType,
+  args: []
+});
+// Generates: call void @llvm.amdgcn.s.barrier()
+
+// OpenCL: barrier(CLK_LOCAL_MEM_FENCE)
+const barrierOCL = new CallInst({
+  functionName: "_Z7barrierj",  // OpenCL barrier
+  returnType: voidType,
+  args: [{ type: i32, value: 1 }]  // CLK_LOCAL_MEM_FENCE
+});
+\end{lstlisting}
+
+\textbf{Package-provided helper functions:}
+
+Instead of manually creating \texttt{CallInst} objects, the package provides convenient helper methods:
+
+\begin{lstlisting}[style=ts]
+import { NVVMCodegen, AMDGPUCodegen, SPIRVCodegen } from "@euriklis/llvm-ir";
+
+// CUDA: Use the helper (recommended)
+const barrier = NVVMCodegen.cuda.syncThreads();
+// Returns a CallInst configured for llvm.nvvm.barrier0()
+
+// AMD ROCm: Use the helper
+const barrierAMD = AMDGPUCodegen.rocm.barrier();
+// Returns a CallInst for llvm.amdgcn.s.barrier()
+
+// OpenCL: Use the helper
+const barrierOCL = SPIRVCodegen.opencl.barrier();
+// Returns a CallInst for _Z7barrierj with correct arguments
+
+// All helpers return CallInst objects ready to add to your basic blocks
+entry.addInstruction(barrier);
+\end{lstlisting}
+
+These helpers ensure correct intrinsic names and arguments, making your code cleaner and less error-prone.
+
+\textbf{What barriers do:}
+\begin{enumerate}[noitemsep]
+  \item All threads in the block wait at the barrier
+  \item No thread proceeds until ALL threads arrive
+  \item Ensures memory operations before barrier are visible after
+\end{enumerate}
+
+\textbf{Critical rule:} Barriers must be in uniform control flow—all threads must execute the same barrier, or deadlock occurs.
+
+\begin{lstlisting}[style=ts]
+// WRONG: Conditional barrier (DEADLOCK!)
+if (threadIdx.x < 16) {
+  barrier();  // Only some threads hit barrier!
+}
+
+// CORRECT: All threads hit barrier
+barrier();  // Everyone waits
+if (threadIdx.x < 16) {
+  // Now safe to use synchronized data
+}
+\end{lstlisting}
+
