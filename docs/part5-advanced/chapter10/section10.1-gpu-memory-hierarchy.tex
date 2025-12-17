@@ -1,0 +1,24 @@
+\section{The \acr{GPU} Memory Hierarchy}
+
+\acr{GPU} programming requires understanding the memory hierarchy and synchronization primitives to achieve high performance.
+
+\acr{GPU}s have a complex memory hierarchy with vastly different performance characteristics:
+
+\begin{longtable}{|p{3cm}|p{2.5cm}|p{3cm}|p{4.5cm}|}
+\hline
+\textbf{Memory Type} & \textbf{Latency} & \textbf{Bandwidth} & \textbf{Use Case} \\
+\hline
+Registers & 1 cycle & >10 TB/s & Loop counters, temporaries \\
+\hline
+Shared/\acr{LDS} & 20-30 cycles & 1-2 TB/s & Tile caching, reductions \\
+\hline
+L1 Cache & 50-100 cycles & 500 GB/s - 1 TB/s & Automatic caching \\
+\hline
+L2 Cache & 100-200 cycles & 200-500 GB/s & Automatic caching \\
+\hline
+Global/\acr{VRAM} & 200-400 cycles & 500 GB/s - 2 TB/s & Large datasets \\
+\hline
+\end{longtable}
+
+The key to \acr{GPU} performance is \textbf{minimizing global memory access} by using registers and shared memory.
+
