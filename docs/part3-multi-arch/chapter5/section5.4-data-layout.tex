@@ -1,0 +1,21 @@
+\section{Data Layout Strings}
+
+The data layout string specifies memory alignment, pointer sizes, and endianness:
+
+\begin{lstlisting}[style=ir]
+e-m:e-p270:32:32-i64:64-f80:128-n8:16:32:64-S128
+\end{lstlisting}
+
+Breakdown:
+\begin{itemize}[noitemsep]
+  \item \texttt{e}: Little-endian (Intel, \acr{ARM}). \texttt{E} would be big-endian.
+  \item \texttt{m:e}: \acr{ELF} mangling (Linux).
+  \item \texttt{p270:32:32}: Pointers in address space 270 are 32-bit with 32-bit alignment.
+  \item \texttt{i64:64}: 64-bit integers have 64-bit alignment.
+  \item \texttt{f80:128}: 80-bit floats (x87) have 128-bit alignment.
+  \item \texttt{n8:16:32:64}: Native integer widths (\acr{CPU} can operate on these efficiently).
+  \item \texttt{S128}: Stack alignment is 128 bits (16 bytes).
+\end{itemize}
+
+Each architecture has its own data layout. The library sets these automatically when you use architecture-specific code generators.
+
