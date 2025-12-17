@@ -1,0 +1,20 @@
+\section{Bitwise Operations}
+
+\begin{longtable}{|p{3cm}|p{5cm}|p{5cm}|}
+\hline
+\textbf{Instruction} & \textbf{TypeScript} & \textbf{\acr{LLVM} \acr{IR}} \\
+\hline
+Bitwise AND & \texttt{BinaryInst\{opcode: "and"\}} & \texttt{\%r = and i32 \%a, \%b} \\
+\hline
+Bitwise OR & \texttt{BinaryInst\{opcode: "or"\}} & \texttt{\%r = or i32 \%a, \%b} \\
+\hline
+Bitwise XOR & \texttt{BinaryInst\{opcode: "xor"\}} & \texttt{\%r = xor i32 \%a, \%b} \\
+\hline
+Shift left & \texttt{BinaryInst\{opcode: "shl"\}} & \texttt{\%r = shl i32 \%a, \%b} \\
+\hline
+Logical shift right & \texttt{BinaryInst\{opcode: "lshr"\}} & \texttt{\%r = lshr i32 \%a, \%b} \\
+\hline
+Arithmetic shift right & \texttt{BinaryInst\{opcode: "ashr"\}} & \texttt{\%r = ashr i32 \%a, \%b} \\
+\hline
+\end{longtable}
+
