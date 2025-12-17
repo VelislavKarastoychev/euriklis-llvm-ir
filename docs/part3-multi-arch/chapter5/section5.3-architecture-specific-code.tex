@@ -1,0 +1,34 @@
+\section{Architecture-Specific Code with this Library}
+
+The \texttt{@euriklis/llvm-ir} package provides architecture-specific code generators:
+
+\textbf{\acr{x86}-64 (default):}
+\begin{lstlisting}[style=ts]
+import { LLVMCodegen } from "@euriklis/llvm-ir";
+const codegen = new LLVMCodegen("x86_module");
+// Targets x86-64 by default
+\end{lstlisting}
+
+\textbf{\acr{ARM}/AArch64:}
+\begin{lstlisting}[style=ts]
+import { ARMCodegen } from "@euriklis/llvm-ir";
+const codegen = new ARMCodegen("arm_module", true);  // true = 64-bit
+// Generates: target triple = "aarch64-unknown-linux-gnu"
+\end{lstlisting}
+
+\textbf{\acr{RISC-V}:}
+\begin{lstlisting}[style=ts]
+import { RISCVCodegen } from "@euriklis/llvm-ir";
+const codegen = new RISCVCodegen("riscv_module");
+// Generates: target triple = "riscv64-unknown-elf"
+\end{lstlisting}
+
+\textbf{WebAssembly:}
+\begin{lstlisting}[style=ts]
+import { WASMCodegen } from "@euriklis/llvm-ir";
+const codegen = new WASMCodegen("wasm_module");
+// Generates: target triple = "wasm32-unknown-unknown"
+\end{lstlisting}
+
+All use the same \acr{API}—only the code generator class changes.
+
