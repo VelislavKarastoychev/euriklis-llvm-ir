@@ -1,0 +1,58 @@
+\section{Vector Addition: Intel \acr{GPU} (\acr{OpenCL})}
+
+\textbf{\acr{OpenCL} kernel:}
+\begin{lstlisting}[style=ir]
+__kernel void vectorAdd(__global float* a, __global float* b,
+                        __global float* c, int n) {
+  int idx = get_global_id(0);
+  if (idx < n) {
+    c[idx] = a[idx] + b[idx];
+  }
+}
+\end{lstlisting}
+
+\textbf{TypeScript with SPIRVCodegen:}
+\begin{lstlisting}[style=ts]
+import { SPIRVCodegen } from "@euriklis/llvm-ir";
+
+const codegen = new SPIRVCodegen("vector_add");
+
+// OpenCL provides global ID directly
+const globalId = SPIRVCodegen.opencl.getGlobalIdX("gid");
+// Note: Returns i64, may need ZExtInst for conversions
+
+// Rest similar to CUDA/AMD versions
+\end{lstlisting}
+
+\textbf{Key \acr{OpenCL} intrinsics:}
+\begin{itemize}[noitemsep]
+  \item \texttt{SPIRVCodegen.opencl.getGlobalIdX/Y/Z}: Global work-item ID (i64)
+  \item \texttt{SPIRVCodegen.opencl.getLocalIdX/Y/Z}: Local work-item ID
+  \item \texttt{SPIRVCodegen.opencl.getGroupIdX/Y/Z}: Work-group ID
+  \item \texttt{SPIRVCodegen.opencl.barrier()}: Work-group barrier
+\end{itemize}
+
+\section{\acr{GPU} Architecture Comparison}
+
+\begin{longtable}{|p{3cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}|}
+\hline
+\textbf{Concept} & \textbf{NVIDIA (\acr{NVPTX})} & \textbf{\acr{AMD} (\acr{AMDGPU})} & \textbf{Intel (\acr{SPIR-V})} \\
+\hline
+Thread ID & \texttt{threadIdx} & \texttt{workitemId} & \texttt{get\_local\_id} \\
+\hline
+Block/Group ID & \texttt{blockIdx} & \texttt{workgroupId} & \texttt{get\_group\_id} \\
+\hline
+Block/Group Size & \texttt{blockDim} & (parameter) & \texttt{get\_local\_size} \\
+\hline
+Global ID & \texttt{blockIdx * blockDim + threadIdx} & (computed) & \texttt{get\_global\_id} \\
+\hline
+\acr{SIMD} Width & Warp (32) & Wavefront (64) & Sub-group (8-32) \\
+\hline
+Synchronization & \texttt{\_\_syncthreads} & \texttt{barrier} & \texttt{barrier} \\
+\hline
+Shared Memory & \texttt{\_\_shared\_\_} (addr space 3) & \texttt{\_\_local} (addr space 3) & \texttt{\_\_local} (addr space 3) \\
+\hline
+\end{longtable}
+
+All three dialects are production-ready with comprehensive intrinsic libraries and \texttt{llc}-validated \acr{IR} generation. See the repository's \texttt{src/} directory for complete working examples.
+
