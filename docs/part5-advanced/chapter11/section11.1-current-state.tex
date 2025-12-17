@@ -1,0 +1,18 @@
+\section{Current State}
+
+This package currently supports Apple Silicon \textbf{CPUs} via the \acr{ARM}/AArch64 backend:
+
+\begin{lstlisting}[style=ts]
+import { ARMCodegen } from "@euriklis/llvm-ir";
+
+// Target Apple M3/M5 CPU cores
+const codegen = new ARMCodegen("apple_module", true);  // 64-bit
+codegen.targetTriple = "arm64-apple-macosx";
+
+// Use NEON SIMD for vectorization (128-bit vectors)
+const vec4 = new VectorType({ elementType: float, count: 4 });
+// Generates efficient ARM NEON instructions
+\end{lstlisting}
+
+This works well for \acr{CPU}-bound computations with \acr{SIMD} acceleration.
+
