@@ -1,0 +1,38 @@
+\section{Atomic Operations}
+
+For thread-safe memory access, use atomic instructions:
+
+\begin{lstlisting}[style=ts]
+const atomicLoad = new LoadInst({
+  name: "val",
+  type: i32,
+  pointerType: ptr,
+  pointer: "shared_var",
+  align: 4,
+  atomic: true,
+  ordering: "acquire"
+});
+// Generates: %val = load atomic i32, ptr %shared_var acquire, align 4
+
+const atomicStore = new StoreInst({
+  valueType: i32,
+  value: 42,
+  pointerType: ptr,
+  pointer: "shared_var",
+  align: 4,
+  atomic: true,
+  ordering: "release"
+});
+// Generates: store atomic i32 42, ptr %shared_var release, align 4
+\end{lstlisting}
+
+\textbf{Memory orderings:}
+\begin{itemize}[noitemsep]
+  \item \texttt{unordered}: No synchronization (fastest)
+  \item \texttt{monotonic}: Single total order (still weak)
+  \item \texttt{acquire}: Synchronize-with release (for loads)
+  \item \texttt{release}: Synchronize-with acquire (for stores)
+  \item \texttt{acq\_rel}: Both acquire and release
+  \item \texttt{seq\_cst}: Sequentially consistent (safest, slowest)
+\end{itemize}
+
