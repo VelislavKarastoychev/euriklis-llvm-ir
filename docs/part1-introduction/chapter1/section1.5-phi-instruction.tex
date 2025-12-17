@@ -1,0 +1,21 @@
+\section{The \acr{PHI} Instruction}
+
+When control flow merges, \acr{SSA} form requires a special instruction to select the correct value:
+
+\begin{lstlisting}[style=ir]
+define i32 @abs(i32 %x) {
+entry:
+  %is_neg = icmp slt i32 %x, 0
+  br i1 %is_neg, label %negate, label %done
+
+negate:
+  %neg = sub i32 0, %x
+  br label %done
+
+done:
+  %result = phi i32 [ %x, %entry ], [ %neg, %negate ]
+  ret i32 %result
+}
+\end{lstlisting}
+
+The \texttt{phi} instruction says: "If we came from \texttt{\%entry}, use \texttt{\%x}; if we came from \texttt{\%negate}, use \texttt{\%neg}."
