@@ -1,0 +1,703 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex)
+ restricted \write18 enabled.
+entering extended mode
+(./handbook.tex
+LaTeX2e <2023-11-01> patch level 1
+L3 programming layer <2024-01-22>
+(./preamble.tex (/usr/share/texlive/texmf-dist/tex/latex/base/book.cls
+Document Class: book 2023/05/17 v1.4n Standard LaTeX document class
+(/usr/share/texlive/texmf-dist/tex/latex/base/bk11.clo))
+(/usr/share/texlive/texmf-dist/tex/latex/base/fontenc.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/base/inputenc.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/babel/babel.sty
+(/usr/share/texlive/texmf-dist/tex/generic/babel/txtbabel.def)
+(/usr/share/texlive/texmf-dist/tex/generic/babel-english/english.ldf))
+(/usr/share/texlive/texmf-dist/tex/generic/babel/locale/en/babel-english.tex)
+(/usr/share/texlive/texmf-dist/tex/latex/geometry/geometry.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/keyval.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/iftex/ifvtex.sty
+(/usr/share/texlive/texmf-dist/tex/generic/iftex/iftex.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsmath.sty
+For additional information on amsmath, use the `?' option.
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amstext.sty
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsgen.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsbsy.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsopn.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amssymb.sty
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amsfonts.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/microtype.sty
+(/usr/share/texlive/texmf-dist/tex/latex/etoolbox/etoolbox.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/microtype-pdftex.def)
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/microtype.cfg))
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hyperref.sty
+(/usr/share/texlive/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/pdfescape/pdfescape.sty
+(/usr/share/texlive/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+(/usr/share/texlive/texmf-dist/tex/generic/infwarerr/infwarerr.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/hycolor/hycolor.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/auxhook/auxhook.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
+(/usr/share/texlive/texmf-dist/tex/latex/refcount/refcount.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
+(/usr/share/texlive/texmf-dist/tex/latex/kvoptions/kvoptions.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/pd1enc.def)
+(/usr/share/texlive/texmf-dist/tex/generic/intcalc/intcalc.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/puenc.def)
+(/usr/share/texlive/texmf-dist/tex/latex/url/url.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/bitset/bitset.sty
+(/usr/share/texlive/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/base/atbegshi-ltx.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hpdftex.def
+(/usr/share/texlive/texmf-dist/tex/latex/base/atveryend-ltx.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+(/usr/share/texlive/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/tools/longtable.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/tools/array.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/listings/listings.sty
+(/usr/share/texlive/texmf-dist/tex/latex/listings/lstmisc.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/listings/listings.cfg))
+(/usr/share/texlive/texmf-dist/tex/latex/xcolor/xcolor.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/color.cfg)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-def/pdftex.def)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/mathcolor.ltx))
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphicx.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphics.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/trig.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/graphics.cfg)))
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/frontendlayer/tikz.sty
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/basiclayer/pgf.sty
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/utilities/pgfrcs.sty
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/utilities/pgfutil-common.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/utilities/pgfutil-latex.def)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/utilities/pgfrcs.code.tex
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/pgf.revision.tex)))
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/basiclayer/pgfcore.sty
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/systemlayer/pgfsys.sty
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/systemlayer/pgfsys.code.tex
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code.tex
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/utilities/pgfkeyslibraryfiltered
+.code.tex)) (/usr/share/texlive/texmf-dist/tex/generic/pgf/systemlayer/pgf.cfg)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-pdftex.def
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-common-pdf.de
+f)))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/systemlayer/pgfsyssoftpath.code.
+tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/systemlayer/pgfsysprotocol.code.
+tex))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcore.code.tex
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathutil.code.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathparser.code.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.code.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.basic.code
+.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.trigonomet
+ric.code.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.random.cod
+e.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.comparison
+.code.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.base.code.
+tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.round.code
+.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.misc.code.
+tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.integerari
+thmetics.code.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathcalc.code.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfloat.code.tex))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfint.code.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepoints.code.te
+x)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathconstruct.
+code.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathusage.code
+.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorescopes.code.te
+x)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcoregraphicstate.c
+ode.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransformation
+s.code.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorequick.code.tex
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreobjects.code.t
+ex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathprocessing
+.code.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorearrows.code.te
+x)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreshade.code.tex
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreimage.code.tex
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreexternal.code.
+tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorelayers.code.te
+x)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransparency.c
+ode.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepatterns.code.
+tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorerdf.code.tex))
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/modules/pgfmoduleshapes.code.tex
+) (/usr/share/texlive/texmf-dist/tex/generic/pgf/modules/pgfmoduleplot.code.tex
+)
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-0-65
+.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-1-18
+.sty)) (/usr/share/texlive/texmf-dist/tex/latex/pgf/utilities/pgffor.sty
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/utilities/pgfkeys.sty
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code.tex))
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/math/pgfmath.sty
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/utilities/pgffor.code.tex))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/tikz.code.tex
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/libraries/pgflibraryplothandlers
+.code.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/modules/pgfmodulematrix.code.tex
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibrarytopaths.code.tex)))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibraryshadings.code.tex
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/libraries/pgflibraryshadings.cod
+e.tex))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibraryshadows.code.tex
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibraryfadings.code.tex
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/libraries/pgflibraryfadings.code
+.tex)))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibrarypositioning.code.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibraryshapes.geometric.code.tex
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/libraries/shapes/pgflibraryshape
+s.geometric.code.tex))
+(/usr/share/texlive/texmf-dist/tex/latex/titlesec/titlesec.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/enumitem/enumitem.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def)
+No file handbook.aux.
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-cmr.cfg)
+(/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+) (/usr/share/texlive/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
+(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg))
+(./cover.tex
+
+LaTeX Font Warning: Font shape `T1/cmr/m/n' in size <40> not available
+(Font)              size <35.83> substituted on input line 74.
+
+
+LaTeX Font Warning: Font shape `T1/cmr/bx/n' in size <40> not available
+(Font)              size <35.83> substituted on input line 74.
+
+[1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texmf/fonts/en
+c/dvips/cm-super/cm-super-t1.enc} <./typescript.png> <./LLVM_logo.png> <./Nvidi
+a_logo.svg.png> <./amd-logo-wallpaper.jpg> <./spirv.png> <./ARM.png>]
+(/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-msa.cfg)
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-msb.cfg))
+(./frontmatter/preface.tex
+pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has 
+been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.1 \frontmatter
+                 [1 <./465218720_8763616726992194_1789456364342463852_n.jpg>]
+(./frontmatter/abbreviations.tex [1] [2] [3]) [4]
+No file handbook.toc.
+[5]) (./introduction/part.tex
+pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has 
+been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.1 \part{Introduction}
+                        [1]) (./introduction/what-is-llvm-ir.tex
+Chapter 1.
+(./introduction/what-is-llvm-ir/introduction.tex
+
+LaTeX Warning: Citation `meyerovichrabkin' on page 2 undefined on input line 7.
+
+
+[2]
+
+LaTeX Warning: Citation `pattersonhennessy' on page 3 undefined on input line 6
+2.
+
+[3]) (./introduction/what-is-llvm-ir/compiler-problem.tex
+
+LaTeX Warning: Citation `dragon2006' on page 4 undefined on input line 14.
+
+[4]
+
+LaTeX Warning: Citation `dragon2006' on page 5 undefined on input line 17.
+
+
+LaTeX Warning: Citation `cooper2023' on page 5 undefined on input line 17.
+
+
+LaTeX Warning: Citation `fischerpaterson1974' on page 5 undefined on input line
+ 17.
+
+
+LaTeX Warning: Citation `appel2004' on page 5 undefined on input line 17.
+
+
+LaTeX Warning: Citation `acmtokenization2024' on page 5 undefined on input line
+ 17.
+
+
+LaTeX Warning: Citation `acmtokenization2024' on page 5 undefined on input line
+ 17.
+
+
+LaTeX Warning: Citation `appel2004' on page 5 undefined on input line 19.
+
+
+LaTeX Warning: Citation `cooper2023' on page 5 undefined on input line 19.
+
+[5] [6]
+
+LaTeX Warning: Citation `dragon2006' on page 7 undefined on input line 21.
+
+
+LaTeX Warning: Citation `cooper2023' on page 7 undefined on input line 21.
+
+
+LaTeX Warning: Citation `appel2004' on page 7 undefined on input line 21.
+
+
+LaTeX Warning: Citation `dragon2006' on page 7 undefined on input line 23.
+
+
+LaTeX Warning: Citation `cooper2023' on page 7 undefined on input line 23.
+
+
+LaTeX Warning: Citation `appel2004' on page 7 undefined on input line 23.
+
+[7] [8]) (./introduction/what-is-llvm-ir/what-is-llvm-ir.tex [9] [10]
+
+LaTeX Warning: Reference `sec:llvm-optimization-flags' on page 11 undefined on 
+input line 43.
+
+
+LaTeX Warning: Reference `sec:gpu-compilation' on page 11 undefined on input li
+ne 43.
+
+) (./introduction/what-is-llvm-ir/core-concepts.tex [11]
+
+LaTeX Warning: Citation `llvmlangref' on page 12 undefined on input line 52.
+
+
+LaTeX Warning: Citation `lopesauler2014' on page 12 undefined on input line 52.
+
+
+
+LaTeX Warning: Citation `llvmessentials' on page 12 undefined on input line 52.
+
+
+
+LaTeX Warning: Citation `llvmlangref' on page 12 undefined on input line 56.
+
+[12{/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-ts1.enc}]
+
+LaTeX Warning: Citation `llvmlangref' on page 13 undefined on input line 64.
+
+
+LaTeX Warning: Citation `llvmlangref' on page 13 undefined on input line 76.
+
+
+LaTeX Warning: Citation `llvmlangref' on page 13 undefined on input line 87.
+
+
+LaTeX Warning: Citation `lopesauler2014' on page 13 undefined on input line 102
+.
+
+
+LaTeX Warning: Citation `llvmlangref' on page 13 undefined on input line 104.
+
+
+LaTeX Warning: Citation `llvmlangref' on page 13 undefined on input line 119.
+
+[13]
+
+LaTeX Warning: Citation `llvmlangref' on page 14 undefined on input line 129.
+
+
+LaTeX Warning: Citation `llvmlangref' on page 14 undefined on input line 139.
+
+
+LaTeX Warning: Citation `llvmlangref' on page 14 undefined on input line 147.
+
+
+LaTeX Warning: Citation `llvmlangref' on page 14 undefined on input line 156.
+
+
+LaTeX Warning: Citation `lopesauler2014' on page 14 undefined on input line 169
+.
+
+
+LaTeX Warning: Citation `llvmessentials' on page 14 undefined on input line 171
+.
+
+
+LaTeX Warning: Citation `lopesauler2014' on page 14 undefined on input line 171
+.
+
+[14] [15] [16] [17] [18]) (./introduction/what-is-llvm-ir/llvm-dialects.tex
+[19]
+
+LaTeX Warning: Citation `llvmwikipedia' on page 20 undefined on input line 20.
+
+
+LaTeX Warning: Citation `llvmwikipedia' on page 20 undefined on input line 56.
+
+[20]
+
+LaTeX Warning: Citation `llvmwikipedia' on page 21 undefined on input line 66.
+
+
+LaTeX Warning: Citation `nvvmirspec' on page 21 undefined on input line 74.
+
+
+LaTeX Warning: Citation `nvvmirspec' on page 21 undefined on input line 77.
+
+
+Overfull \hbox (83.95947pt too wide) in paragraph at lines 84--85
+[]\T1/cmr/bx/n/10.95 (-20) Intrinsic func-tions\T1/cmr/m/n/10.95 (-20) : Pro-vi
+des hun-dreds of in-trin-sics for thread in-dex-ing (\T1/cmtt/m/n/10.95 llvm.nv
+vm.read.ptx.sreg.tid.x\T1/cmr/m/n/10.95 (-20) ),
+
+LaTeX Warning: Citation `nvvmirspec' on page 21 undefined on input line 91.
+
+[21]
+
+LaTeX Warning: Citation `spirvkhronos' on page 22 undefined on input line 127.
+
+[22]
+
+LaTeX Warning: Reference `ch:multi-arch' on page 23 undefined on input line 165
+.
+
+
+LaTeX Warning: Reference `ch:gpu-programming' on page 23 undefined on input lin
+e 165.
+
+
+LaTeX Warning: Reference `ch:future-work' on page 23 undefined on input line 16
+7.
+
+)) (./introduction/why-llvm-for-typescript.tex [23]
+Chapter 2.
+(./introduction/why-llvm-for-typescript/rise-of-performance.tex)
+(./introduction/why-llvm-for-typescript/why-not-cpp-rust.tex)
+(./introduction/why-llvm-for-typescript/llvm-backend.tex [24])
+(./introduction/why-llvm-for-typescript/use-cases.tex [25])
+(./introduction/why-llvm-for-typescript/typescript-api.tex
+
+LaTeX Warning: Citation `llvmnode' on page 26 undefined on input line 3.
+
+
+LaTeX Warning: Citation `llvmbindings' on page 26 undefined on input line 3.
+
+
+LaTeX Warning: Citation `nodellvmc' on page 26 undefined on input line 3.
+
+) (./introduction/why-llvm-for-typescript/design-philosophy.tex)
+(./introduction/why-llvm-for-typescript/summary.tex [26]))
+(./getting-started/part.tex [27] [28]) (./getting-started/installation.tex
+Chapter 3.
+(./getting-started/installation/installation.tex))
+(./getting-started/implementing-functions.tex [29]
+Chapter 4.
+(./getting-started/implementing-functions/introduction.tex)
+(./getting-started/implementing-functions/simple-arithmetic.tex [30])
+(./getting-started/implementing-functions/conditional-logic.tex [31] [32])
+(./getting-started/implementing-functions/loops-phi-nodes.tex [33] [34])
+(./getting-started/implementing-functions/type-shortcuts.tex [35]))
+(./multi-arch/part.tex [36] [37]) (./multi-arch/compiling-architectures.tex
+Chapter 5.
+(./multi-arch/compiling-architectures/target-triples.tex)
+(./multi-arch/compiling-architectures/compiling-with-llc.tex [38])
+(./multi-arch/compiling-architectures/architecture-specific-code.tex)
+(./multi-arch/compiling-architectures/data-layout.tex)
+(./multi-arch/compiling-architectures/cross-compilation.tex [39]))
+(./multi-arch/gpu-programming.tex [40]
+Chapter 6.
+(./multi-arch/gpu-programming/introduction.tex)
+(./multi-arch/gpu-programming/nvidia-cuda.tex [41]
+Overfull \hbox (14.57593pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 6.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS AL
+L ARCHITECTURES \T1/cmr/m/n/10.95 42
+[42]) (./multi-arch/gpu-programming/amd-rocm.tex)
+(./multi-arch/gpu-programming/intel-opencl.tex
+Overfull \hbox (14.57593pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 6.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS AL
+L ARCHITECTURES \T1/cmr/m/n/10.95 43
+[43]
+Underfull \hbox (badness 10000) in paragraph at lines 39--39
+[]|\T1/cmr/bx/n/10.95 (+20) NVIDIA
+
+Underfull \hbox (badness 10000) in paragraph at lines 39--39
+[]|[][]\T1/cmr/bx/n/10.95 (+20) AMD[][]
+
+Underfull \hbox (badness 10000) in paragraph at lines 47--47
+[]|\T1/cmtt/m/n/10.95 blockIdx *
+
+Underfull \hbox (badness 10000) in paragraph at lines 47--47
+\T1/cmtt/m/n/10.95 blockDim +
+
+Underfull \hbox (badness 10000) in paragraph at lines 53--53
+[]|\T1/cmtt/m/n/10.95 __shared__ \T1/cmr/m/n/10.95 (+20) (addr
+) (./multi-arch/gpu-programming/gpu-compilation.tex
+Overfull \hbox (14.57593pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 6.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS AL
+L ARCHITECTURES \T1/cmr/m/n/10.95 44
+[44]
+Overfull \hbox (14.57593pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 6.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS AL
+L ARCHITECTURES \T1/cmr/m/n/10.95 45
+[45]
+Underfull \hbox (badness 10000) in paragraph at lines 113--114
+[]|\T1/cmtt/m/n/10.95 llc -march=nvptx64 -mcpu=sm_XX
+
+Underfull \hbox (badness 10000) in paragraph at lines 115--116
+[]|\T1/cmtt/m/n/10.95 llc -march=amdgcn
+
+Underfull \hbox (badness 10000) in paragraph at lines 117--118
+[]|\T1/cmtt/m/n/10.95 llc -march=spir64 | llvm-spirv
+)) (./reference/part.tex
+Overfull \hbox (14.57593pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 6.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS AL
+L ARCHITECTURES \T1/cmr/m/n/10.95 46
+[46] [47]) (./reference/instruction-reference.tex
+Chapter 7.
+(./reference/instruction-reference/introduction.tex)
+(./reference/instruction-reference/arithmetic-operations.tex
+Underfull \hbox (badness 10000) in paragraph at lines 8--8
+[]|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
+
+Underfull \hbox (badness 10000) in paragraph at lines 10--10
+[]|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
+
+Underfull \hbox (badness 10000) in paragraph at lines 12--12
+[]|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
+
+Underfull \hbox (badness 10000) in paragraph at lines 14--14
+[]|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
+
+Underfull \hbox (badness 10000) in paragraph at lines 16--16
+[]|\T1/cmr/m/n/10.95 (+20) Division
+
+Underfull \hbox (badness 10000) in paragraph at lines 16--16
+[]|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
+
+Underfull \hbox (badness 10000) in paragraph at lines 18--18
+[]|\T1/cmr/m/n/10.95 (+20) Remainder
+
+Underfull \hbox (badness 10000) in paragraph at lines 18--18
+[]|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
+
+Underfull \hbox (badness 10000) in paragraph at lines 20--20
+[]|\T1/cmr/m/n/10.95 (+20) Remainder
+
+Underfull \hbox (badness 10000) in paragraph at lines 20--20
+[]|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
+
+Underfull \hbox (badness 10000) in paragraph at lines 29--29
+[]|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
+
+Underfull \hbox (badness 10000) in paragraph at lines 31--31
+[]|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
+
+Underfull \hbox (badness 10000) in paragraph at lines 33--33
+[]|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
+
+Underfull \hbox (badness 10000) in paragraph at lines 35--35
+[]|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
+
+Underfull \hbox (badness 10000) in paragraph at lines 37--37
+[]|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
+[48]) (./reference/instruction-reference/bitwise-operations.tex
+Underfull \hbox (badness 10000) in paragraph at lines 7--7
+[]|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
+
+Underfull \hbox (badness 10000) in paragraph at lines 11--11
+[]|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
+
+Underfull \hbox (badness 10000) in paragraph at lines 13--13
+[]|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
+
+Underfull \hbox (badness 10000) in paragraph at lines 15--15
+[]|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
+
+Underfull \hbox (badness 10000) in paragraph at lines 17--17
+[]|\T1/cmr/m/n/10.95 (+20) Arithmetic shift
+
+Underfull \hbox (badness 10000) in paragraph at lines 17--17
+[]|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
+) (./reference/instruction-reference/comparison-operations.tex
+Underfull \hbox (badness 10000) in paragraph at lines 22--22
+[]|\T1/cmr/m/n/10.95 (+20) Unsigned
+
+Underfull \hbox (badness 7888) in paragraph at lines 26--26
+[]|\T1/cmr/m/n/10.95 (+20) Unsigned less/e-
+
+Underfull \hbox (badness 10000) in paragraph at lines 45--45
+[]|\T1/cmr/m/n/10.95 (+20) Ordered
+[49]) (./reference/instruction-reference/memory-operations.tex)
+(./reference/instruction-reference/control-flow.tex [50])
+(./reference/instruction-reference/type-conversions.tex
+Underfull \hbox (badness 10000) in paragraph at lines 13--14
+[]|\T1/cmtt/m/n/10.95 %r = fptrunc double %a to
+
+Underfull \hbox (badness 10000) in paragraph at lines 15--16
+[]|\T1/cmtt/m/n/10.95 %r = fpext float %a to
+
+Underfull \hbox (badness 10000) in paragraph at lines 17--18
+[]|\T1/cmtt/m/n/10.95 %r = bitcast i32 %a to
+[51]) (./reference/instruction-reference/function-calls.tex)
+(./reference/instruction-reference/vector-operations.tex [52])
+(./reference/instruction-reference/atomic-operations.tex))
+(./reference/memory-model.tex [53]
+Chapter 8.
+(./reference/memory-model/stack-vs-heap.tex)
+(./reference/memory-model/alignment.tex [54])
+(./reference/memory-model/address-spaces.tex
+Underfull \hbox (badness 10000) in paragraph at lines 13--13
+[]|\T1/cmr/m/n/10.95 (+20) Shared
+[55]) (./reference/memory-model/getelementptr.tex)
+(./reference/memory-model/volatile-access.tex [56])
+(./reference/memory-model/atomic-operations.tex)) (./reference/type-system.tex
+[57]
+Chapter 9.
+(./reference/type-system/introduction.tex)
+(./reference/type-system/integer-types.tex)
+(./reference/type-system/floating-point-types.tex [58])
+(./reference/type-system/pointer-types.tex)
+(./reference/type-system/array-types.tex)
+(./reference/type-system/struct-types.tex [59])
+(./reference/type-system/vector-types.tex)
+(./reference/type-system/function-types.tex [60])
+(./reference/type-system/void-type.tex)
+(./reference/type-system/type-compatibility.tex)) (./advanced/part.tex [61]
+[62]) (./advanced/gpu-memory.tex
+Chapter 10.
+(./advanced/gpu-memory/gpu-memory-hierarchy.tex)
+(./advanced/gpu-memory/global-memory.tex)
+(./advanced/gpu-memory/shared-memory.tex [63])
+(./advanced/gpu-memory/constant-memory.tex)
+(./advanced/gpu-memory/thread-synchronization.tex [64])
+(./advanced/gpu-memory/memory-fences.tex [65])
+(./advanced/gpu-memory/tiled-matrix-multiplication.tex [66] [67])
+(./advanced/gpu-memory/key-takeaways.tex)) (./advanced/future-work.tex [68]
+Chapter 11.
+(./advanced/future-work/current-state.tex)
+(./advanced/future-work/apple-gpu-challenge.tex
+
+LaTeX Warning: Citation `metalspec' on page 69 undefined on input line 10.
+
+
+LaTeX Warning: Citation `airformat' on page 69 undefined on input line 13.
+
+) (./advanced/future-work/typescript-developers.tex [69])
+(./advanced/future-work/pytorch-tensorflow.tex
+
+LaTeX Warning: Citation `pytorchmps' on page 70 undefined on input line 3.
+
+
+LaTeX Warning: Citation `applepytorch' on page 70 undefined on input line 3.
+
+
+LaTeX Warning: Citation `metaldocs' on page 70 undefined on input line 6.
+
+
+LaTeX Warning: Citation `metalspec' on page 70 undefined on input line 9.
+
+) (./advanced/future-work/waiting-for.tex
+
+LaTeX Warning: Citation `airformat' on page 70 undefined on input line 7.
+
+
+LaTeX Warning: Citation `metaltools' on page 70 undefined on input line 18.
+
+) (./advanced/future-work/current-workarounds.tex [70])
+(./advanced/future-work/unified-memory.tex)
+(./advanced/future-work/timeline.tex)
+(./advanced/future-work/community-contributions.tex [71]
+Underfull \hbox (badness 2326) in paragraph at lines 35--36
+[]\T1/cmr/m/n/10.95 (+20) Apple Inc. \T1/cmr/m/it/10.95 (+20) Metal Pro-gram-mi
+ng Guide\T1/cmr/m/n/10.95 (+20) . Ap-ple De-vel-oper Doc-u-men-ta-tion Archive,
+
+
+Underfull \hbox (badness 3769) in paragraph at lines 38--39
+[]\T1/cmr/m/n/10.95 (+20) Apple Inc. \T1/cmr/m/it/10.95 (+20) Metal Shad-ing La
+n-guage Spec-i-fi-ca-tion, Ver-sion 4\T1/cmr/m/n/10.95 (+20) . Ap-ple De-vel-op
+er
+
+Underfull \hbox (badness 10000) in paragraph at lines 38--39
+\T1/cmr/m/n/10.95 (+20) Doc-u-men-ta-tion, 2025. Avail-able at: [][]$\T1/cmtt/m
+/n/10.95 https : / / developer . apple . com / metal /
+[72]
+Underfull \hbox (badness 10000) in paragraph at lines 68--69
+[]\T1/cmr/m/n/10.95 (+20) SamoZ256. \T1/cmr/m/it/10.95 (+20) Break-ing down Met
+al's in-ter-me-di-ate rep-re-sen-ta-tion for-
+
+Underfull \hbox (badness 10000) in paragraph at lines 68--69
+\T1/cmr/m/it/10.95 (+20) mat\T1/cmr/m/n/10.95 (+20) . Medium, 2024. Avail-able 
+at: [][]$\T1/cmtt/m/n/10.95 https : / / medium . com / @samuliak /
+)) (./backcover.tex [73] [74]) (./handbook.aux)
+
+LaTeX Font Warning: Size substitutions with differences
+(Font)              up to 4.17pt have occurred.
+
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+
+Package rerunfilecheck Warning: File `handbook.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+ )
+(see the transcript file for additional information)</usr/share/texlive/texmf-d
+ist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fo
+nts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/typ
+e1/public/amsfonts/cm/cmmi9.pfb></usr/share/texlive/texmf-dist/fonts/type1/publ
+ic/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsf
+onts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/
+cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.p
+fb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></us
+r/share/texmf/fonts/type1/public/cm-super/sfbi1095.pfb></usr/share/texmf/fonts/
+type1/public/cm-super/sfbx0900.pfb></usr/share/texmf/fonts/type1/public/cm-supe
+r/sfbx1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx1200.pfb></usr
+/share/texmf/fonts/type1/public/cm-super/sfbx1440.pfb></usr/share/texmf/fonts/t
+ype1/public/cm-super/sfbx2074.pfb></usr/share/texmf/fonts/type1/public/cm-super
+/sfbx2488.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx3583.pfb></usr/
+share/texmf/fonts/type1/public/cm-super/sfrm0600.pfb></usr/share/texmf/fonts/ty
+pe1/public/cm-super/sfrm0800.pfb></usr/share/texmf/fonts/type1/public/cm-super/
+sfrm0900.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1095.pfb></usr/s
+hare/texmf/fonts/type1/public/cm-super/sfrm1200.pfb></usr/share/texmf/fonts/typ
+e1/public/cm-super/sfrm1440.pfb></usr/share/texmf/fonts/type1/public/cm-super/s
+fsl1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfti0900.pfb></usr/sh
+are/texmf/fonts/type1/public/cm-super/sfti1095.pfb></usr/share/texmf/fonts/type
+1/public/cm-super/sfti1728.pfb></usr/share/texmf/fonts/type1/public/cm-super/sf
+tt0900.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt1000.pfb></usr/sha
+re/texmf/fonts/type1/public/cm-super/sftt1095.pfb></usr/share/texmf/fonts/type1
+/public/cm-super/sftt1200.pfb>
+Output written on handbook.pdf (81 pages, 1219263 bytes).
+Transcript written on handbook.log.
