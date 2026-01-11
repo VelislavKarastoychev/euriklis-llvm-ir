@@ -16,8 +16,11 @@ target datalayout = "e-m:e-p270:32:32-i64:64-f80:128-n8:16:32:64-S128"
 
 The triple format is \texttt{architecture-vendor-os}:
 \begin{itemize}[noitemsep]
+  \item \texttt{x86\_64-unknown-linux-gnu} - Linux on x86-64
   \item \texttt{\acr{x86}\_64-apple-darwin} - macOS on Intel
   \item \texttt{aarch64-unknown-linux-gnu} - Linux on \acr{ARM} (Apple Silicon, \acr{AWS} Graviton)
+  \item \texttt{i686-unknown-linux-gnu} - Linux on x86 32-bit
+  \item \texttt{riscv64-unknown-linux-gnu} - Linux on \acr{RISC-V} 64-bit
   \item \texttt{nvptx64-nvidia-cuda} - NVIDIA GPUs
   \item \texttt{amdgcn-amd-amdhsa} - \acr{AMD} GPUs
   \item \texttt{wasm32-unknown-unknown} - WebAssembly
