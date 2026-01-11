@@ -44,3 +44,184 @@ Older \acr{LLVM} versions used typed pointers (\texttt{i32*}, \texttt{float*}), 
 i32 (i32, i32)                ; Takes two i32, returns i32
 void (ptr, i64)               ; Takes pointer and i64, returns void
 \end{lstlisting}
+
+\subsubsection*{Linkage Types}
+
+All global variables and functions in \acr{LLVM} have a linkage type that controls their visibility and behavior when linking multiple modules together.
+Understanding linkage is essential for managing symbol visibility, avoiding naming conflicts, and enabling optimizations across translation units.
+
+\textbf{private}
+
+The symbol is only accessible within the current module and does not appear in the object file's symbol table.
+The linker can freely rename private symbols to avoid collisions when linking modules.
+This is the strongest form of encapsulation---no external code can reference this symbol by name.
+
+\begin{lstlisting}[style=ir]
+@private_counter = private global i32 0
+
+define private i32 @helper_function(i32 %x) {
+  %result = add i32 %x, 1
+  ret i32 %result
+}
+\end{lstlisting}
+
+Use case: Internal implementation details that should never be exposed to other modules, such as lookup tables, helper functions, or cached values.
+
+\textbf{internal}
+
+Similar to \texttt{private}, but the symbol appears as a local symbol in the object file (equivalent to C's \texttt{static} keyword). The symbol is not visible to the linker when resolving external references, but debuggers and other tools can see it.
+
+\begin{lstlisting}[style=ir]
+@internal_buffer = internal global [256 x i8] zeroinitializer
+
+define internal void @init_module() {
+  ; Module initialization logic
+  ret void
+}
+\end{lstlisting}
+
+Use case: Module-local functions and variables that should not be exported but may be useful for debugging or profiling. This is the \acr{LLVM} equivalent of file-scope \texttt{static} in C.
+
+\textbf{available\_externally}
+
+The definition exists in the current module for optimization purposes only and is never emitted into the object file.
+The linker sees this as an external declaration.
+This allows the optimizer to inline the function or fold constants, knowing the definition will be provided by another module at link time.
+
+\begin{lstlisting}[style=ir]
+; Imported from another module for inlining
+define available_externally i32 @fast_math(i32 %x) {
+  %squared = mul i32 %x, %x
+  ret i32 %squared
+}
+
+define i32 @caller(i32 %n) {
+  %result = call i32 @fast_math(i32 %n)  ; Can be inlined
+  ret i32 %result
+}
+\end{lstlisting}
+
+Use case: When you have the full definition of an external function and want to enable aggressive optimizations like inlining, but the actual implementation will be linked from another module.
+
+\textbf{linkonce}
+
+Multiple modules can define the same symbol, and the linker will keep only one definition (discarding duplicates).
+Unreferenced \texttt{linkonce} symbols can be discarded entirely.
+This is commonly used for inline functions and templates, where each translation unit may generate its own copy.
+
+\begin{lstlisting}[style=ir]
+; Each module may define this, linker picks one
+define linkonce i32 @generic_max(i32 %a, i32 %b) {
+  %cmp = icmp sgt i32 %a, %b
+  %result = select i1 %cmp, i32 %a, i32 %b
+  ret i32 %result
+}
+\end{lstlisting}
+
+Use case: Template instantiations or inline functions that may be defined in multiple translation units.
+The linker merges all definitions, keeping one arbitrary copy.
+Note that the optimizer cannot assume all definitions are identical, limiting inlining opportunities---use \texttt{linkonce\_odr} when definitions are guaranteed identical.
+
+\textbf{weak}
+
+Similar to \texttt{linkonce}, but unreferenced \texttt{weak} symbols cannot be discarded. The linker merges multiple definitions, keeping one. This corresponds to C's \texttt{\_\_attribute\_\_((weak))}.
+
+\begin{lstlisting}[style=ir]
+; Weak definition can be overridden by strong definition
+define weak i32 @default_allocator(i32 %size) {
+  ; Default implementation
+  %ptr = call ptr @malloc(i64 %size)
+  ret i32 0
+}
+\end{lstlisting}
+
+Use case: Providing default implementations that can be overridden by the user. If another module defines a strong (non-weak) version of the same symbol, the linker will use that instead.
+
+\textbf{common}
+
+Used for tentative definitions in C (e.g., \texttt{int x;} at global scope without \texttt{extern} or an initializer).
+Multiple \texttt{common} symbols are merged, with the linker choosing the largest size.
+Common symbols must have zero initializers, cannot be marked constant, and cannot have explicit sections.
+Only applies to global variables, not functions.
+
+\begin{lstlisting}[style=ir]
+; Tentative definition (uninitialized global)
+@shared_config = common global i32 0
+
+; Another module might declare:
+; @shared_config = common global i32 0
+; Linker merges them into a single symbol
+\end{lstlisting}
+
+Use case: Legacy C code with tentative definitions. Modern code should use \texttt{external} for declarations or provide explicit initializers.
+
+\textbf{appending}
+
+Only valid for global variables of array type. When linking, the linker concatenates all arrays with the same name into a single array. This is \acr{LLVM}'s type-safe mechanism for merging sections.
+
+\begin{lstlisting}[style=ir]
+; Module A defines:
+@llvm.global_ctors = appending global [1 x { i32, ptr }] [
+  { i32, ptr } { i32 65535, ptr @init_a }
+]
+
+; Module B defines:
+@llvm.global_ctors = appending global [1 x { i32, ptr }] [
+  { i32, ptr } { i32 65535, ptr @init_b }
+]
+
+; After linking: array contains both initializers
+\end{lstlisting}
+
+Use case: Special \acr{LLVM} arrays like \texttt{llvm.global\_ctors} (constructor functions) and \texttt{llvm.global\_dtors} (destructor functions) that must be merged across modules.
+
+\textbf{extern\_weak}
+
+The symbol is weakly linked. If the symbol is not defined in any linked module, references to it become null pointers instead of causing linker errors. This follows ELF object file semantics.
+
+\begin{lstlisting}[style=ir]
+; Optional external function
+declare extern_weak i32 @optional_plugin_init()
+
+define void @startup() {
+  %fptr = ptrtoint ptr @optional_plugin_init to i64
+  %is_null = icmp eq i64 %fptr, 0
+  br i1 %is_null, label %no_plugin, label %call_plugin
+
+call_plugin:
+  call i32 @optional_plugin_init()
+  br label %done
+
+no_plugin:
+  ; Plugin not available, skip initialization
+  br label %done
+
+done:
+  ret void
+}
+\end{lstlisting}
+
+Use case: Optional functionality that may or may not be present at link time, such as plugins, platform-specific features, or debugging hooks.
+
+\textbf{linkonce\_odr, weak\_odr}
+
+The \texttt{\_odr} suffix stands for "one definition rule" and indicates that all definitions with the same name are semantically identical.
+This guarantee allows the optimizer to perform aggressive inlining and constant folding, since it knows all definitions are interchangeable.
+These linkages behave like their non-\texttt{odr} counterparts (\texttt{linkonce} and \texttt{weak}), but with additional optimization opportunities.
+
+\begin{lstlisting}[style=ir]
+; Template instantiation (all definitions identical)
+define linkonce_odr i32 @max_i32(i32 %a, i32 %b) {
+  %cmp = icmp sgt i32 %a, %b
+  %result = select i1 %cmp, i32 %a, i32 %b
+  ret i32 %result
+}
+
+; Inline function (C++ inline semantics)
+define weak_odr void @log_message(ptr %msg) {
+  call i32 @puts(ptr %msg)
+  ret void
+}
+\end{lstlisting}
+
+Use case: C++ templates, inline functions, and other cases where multiple translation units generate identical definitions. The optimizer can safely inline these functions and merge constants, significantly improving performance compared to non-\texttt{odr} linkages.

@@ -8,7 +8,9 @@ define <return_type> @function_name(<param_type> %param1, ...) {
 }
 \end{lstlisting}
 
-The observant reader has probably noticed that the naming convention for functions in \acr{LLVM} matches that of global variables---both use the \texttt{@} prefix. This similarity is not coincidental: \textbf{functions are global values} in \acr{LLVM} \acr{IR}. Like global variables, functions are:
+The observant reader has probably noticed that the naming convention for functions in \acr{LLVM} matches that of global variables---both use the \texttt{@} prefix.
+This similarity is not coincidental: \textbf{functions are global values} in \acr{LLVM} \acr{IR}.
+Like global variables, functions are:
 
 \begin{itemize}[noitemsep]
   \item Declared at \textbf{module scope} (not inside other functions)
@@ -48,20 +50,2141 @@ In \acr{LLVM}'s type hierarchy, both \texttt{Function} and \texttt{GlobalVariabl
 
 See section \ref{sec:type-system} for more information.
 
-\textbf{Function attributes} modify compilation behavior:
+\subsubsection{Function Attributes}
+
+Function attributes communicate additional information about a function.
+Function attributes are considered to be part of the function, not of the function type, so functions with different function attributes can have the same function type.
+
+Function attributes are simple keywords or strings that follow the specified type.
+Multiple attributes, when required, are separated by spaces:
 
 \begin{lstlisting}[style=ir]
-define i32 @pure_function(i32 %x) nounwind readnone {
+define void @f() noinline { ... }
+define void @f() alwaysinline { ... }
+define void @f() alwaysinline optsize { ... }
+define void @f() optsize { ... }
+define void @f() "no-sse" { ... }
+\end{lstlisting}
+
+\textbf{alignstack(<n>)}
+
+This attribute indicates that, when emitting the prologue and epilogue, the backend should forcibly align the stack pointer.
+Specify the desired alignment, which must be a power of two, in parentheses.
+
+\begin{lstlisting}[style=ir]
+define void @stack_intensive() alignstack(16) {
+  ; Stack will be aligned to 16-byte boundary
+  ret void
+}
+\end{lstlisting}
+
+Use case: Functions that require specific stack alignment for SIMD operations or platform ABI requirements.
+
+\textbf{"alloc-family"="FAMILY"}
+
+This indicates which "family" an allocator function is part of.
+To avoid collisions, the family name should match the mangled name of the primary allocator function.
+Valid family names include \texttt{"malloc"} for malloc/calloc/realloc/free, \texttt{"\_Znwm"} for \texttt{::operator::new} and \texttt{::operator::delete}, and \texttt{"\_ZnwmSt11align\_val\_t"} for aligned \texttt{::operator::new} and \texttt{::operator::delete}.
+Matching malloc/realloc/free calls within a family can be optimized, but mismatched ones will be left alone.
+
+\begin{lstlisting}[style=ir]
+declare ptr @malloc(i64) "alloc-family"="malloc"
+declare ptr @calloc(i64, i64) "alloc-family"="malloc"
+declare void @free(ptr) "alloc-family"="malloc"
+\end{lstlisting}
+
+Use case: Enables the optimizer to track and optimize allocator families, ensuring safe transformations across related allocation functions.
+
+\textbf{allockind("KIND")}
+
+Describes the behavior of an allocation function.
+The KIND string contains comma-separated entries from the following options:
+
+\begin{itemize}[noitemsep]
+  \item \texttt{"alloc"}: the function returns a new block of memory or null.
+  \item \texttt{"realloc"}: the function returns a new block of memory or null.
+  If the result is non-null the memory contents from the start of the block up to the smaller of the original allocation size and the new allocation size will match that of the allocptr argument.
+  The allocptr argument is invalidated, even if the function returns the same address.
+  \item \texttt{"free"}: the function frees the block of memory specified by allocptr. Functions marked as \texttt{"free"} allockind must return void.
+  \item \texttt{"uninitialized"}: Any newly-allocated memory (either a new block from a \texttt{"alloc"} function or the enlarged capacity from a \texttt{"realloc"} function) will be uninitialized.
+  \item \texttt{"zeroed"}: Any newly-allocated memory (either a new block from a \texttt{"alloc"} function or the enlarged capacity from a \texttt{"realloc"} function) will be zeroed.
+  \item \texttt{"aligned"}: the function returns memory aligned according to the allocalign parameter.
+\end{itemize}
+
+The first three options (\texttt{"alloc"}, \texttt{"realloc"}, \texttt{"free"}) are mutually exclusive, and the remaining options describe more details of how the function behaves.
+The remaining options are invalid for \texttt{"free"}-type functions.
+
+\begin{lstlisting}[style=ir]
+declare ptr @malloc(i64) allockind("alloc,uninitialized")
+declare ptr @calloc(i64, i64) allockind("alloc,zeroed")
+declare ptr @realloc(ptr, i64) allockind("realloc,uninitialized")
+declare void @free(ptr) allockind("free")
+\end{lstlisting}
+
+Use case: Provides precise semantics for memory allocation functions, enabling optimizations like dead store elimination and escape analysis.
+
+\textbf{"alloc-variant-zeroed"="FUNCTION"}
+
+This attribute indicates that another function is equivalent to an allocator function, but returns zeroed memory.
+The function must have \texttt{"zeroed"} allocation behavior, the same alloc-family, and take exactly the same arguments.
+
+\begin{lstlisting}[style=ir]
+declare ptr @malloc(i64) allockind("alloc,uninitialized") "alloc-family"="malloc"
+declare ptr @calloc(i64, i64) allockind("alloc,zeroed") "alloc-family"="malloc" "alloc-variant-zeroed"="malloc"
+\end{lstlisting}
+
+Use case: Allows the optimizer to recognize that calloc is a zero-initializing variant of malloc, enabling more aggressive optimization when switching between them.
+
+\textbf{allocsize(<EltSizeParam>[, <NumEltsParam>])}
+
+This attribute indicates that the annotated function will always return at least a given number of bytes (or null).
+Its arguments are zero-indexed parameter numbers.
+If one argument is provided, then it's assumed that at least \texttt{CallSite.Args[EltSizeParam]} bytes will be available at the returned pointer.
+If two are provided, then it's assumed that \texttt{CallSite.Args[EltSizeParam] * CallSite.Args[NumEltsParam]} bytes are available.
+The referenced parameters must be integer types.
+No assumptions are made about the contents of the returned block of memory.
+
+\begin{lstlisting}[style=ir]
+declare ptr @malloc(i64) allocsize(0)
+declare ptr @calloc(i64, i64) allocsize(0, 1)
+declare ptr @custom_alloc(i32, i64) allocsize(1)
+\end{lstlisting}
+
+Use case: Enables buffer overflow checking and size-based optimizations by informing the optimizer about the minimum size of allocated memory blocks.
+
+\textbf{alwaysinline}
+
+This attribute indicates that the inliner should attempt to inline this function into callers whenever possible, ignoring any active inlining size threshold for this caller.
+
+\begin{lstlisting}[style=ir]
+define i32 @critical_path(i32 %x) alwaysinline {
   %result = mul i32 %x, %x
+  ret i32 %result
+}
+
+define i32 @caller(i32 %n) {
+  %value = call i32 @critical_path(i32 %n)  ; Will be inlined
+  ret i32 %value
+}
+\end{lstlisting}
+
+Use case: Performance-critical functions that should always be inlined regardless of size, such as trivial accessors or hot path computations.
+
+\textbf{builtin}
+
+This indicates that the callee function at a call site should be recognized as a built-in function, even though the function's declaration uses the nobuiltin attribute.
+This is only valid at call sites for direct calls to functions that are declared with the nobuiltin attribute.
+
+\begin{lstlisting}[style=ir]
+declare ptr @memcpy(ptr, ptr, i64) nobuiltin
+
+define void @example(ptr %dest, ptr %src) {
+  call ptr @memcpy(ptr %dest, ptr %src, i64 100) builtin
+  ret void
+}
+\end{lstlisting}
+
+Use case: Allows selective use of built-in optimizations for specific call sites while preventing them elsewhere.
+
+\textbf{cold}
+
+This attribute indicates that this function is rarely called.
+When computing edge weights, basic blocks post-dominated by a cold function call are also considered to be cold and, thus, given a low weight.
+
+\begin{lstlisting}[style=ir]
+define void @error_handler() cold {
+  call void @log_error()
+  call void @cleanup()
+  ret void
+}
+
+define void @main_logic(i1 %error) {
+  br i1 %error, label %error_path, label %normal_path
+error_path:
+  call void @error_handler()  ; Marked as unlikely
+  ret void
+normal_path:
+  ; Hot path code
+  ret void
+}
+\end{lstlisting}
+
+Use case: Error handling and exceptional code paths that should be optimized for size rather than speed, improving branch prediction and code layout.
+
+\textbf{convergent}
+
+This attribute indicates that this function is convergent.
+When it appears on a call/invoke, the convergent attribute indicates that we should treat the call as though we're calling a convergent function.
+This is particularly useful on indirect calls; without this we may treat such calls as though the target is non-convergent.
+
+It is an error to call \texttt{llvm.experimental.convergence.entry} from a function that does not have this attribute.
+
+\begin{lstlisting}[style=ir]
+; GPU barrier function - threads must reach this together
+define void @barrier() convergent {
+  call void @llvm.nvvm.barrier0()
+  ret void
+}
+
+define void @gpu_kernel() {
+  ; Some parallel work
+  call void @barrier() convergent  ; All threads synchronize
+  ; More parallel work
+  ret void
+}
+\end{lstlisting}
+
+Use case: GPU programming and parallel algorithms where execution must be synchronized across threads, preventing optimizations that would violate convergence requirements.
+
+\textbf{disable\_sanitizer\_instrumentation}
+
+When instrumenting code with sanitizers, it can be important to skip certain functions to ensure no instrumentation is applied to them.
+
+This attribute is not always similar to absent \texttt{sanitize\_<name>} attributes: depending on the specific sanitizer, code can be inserted into functions regardless of the \texttt{sanitize\_<name>} attribute to prevent false positive reports.
+
+The \texttt{disable\_sanitizer\_instrumentation} attribute disables all kinds of instrumentation, taking precedence over the \texttt{sanitize\_<name>} attributes and other compiler flags.
+
+\begin{lstlisting}[style=ir]
+define void @low_level_allocator() disable_sanitizer_instrumentation {
+  ; Direct memory manipulation that would confuse sanitizers
+  ret void
+}
+
+define void @sanitizer_runtime() disable_sanitizer_instrumentation {
+  ; Sanitizer implementation itself
+  ret void
+}
+\end{lstlisting}
+
+Use case: Low-level runtime code, allocator implementations, and sanitizer runtime functions that must not be instrumented to avoid infinite recursion or false positives.
+
+\textbf{"dontcall-error"}
+
+This attribute denotes that an error diagnostic should be emitted when a call of a function with this attribute is not eliminated via optimization.
+Front ends can provide optional srcloc metadata nodes on call sites of such callees to attach information about where in the source language such a call came from.
+A string value can be provided as a note.
+
+\begin{lstlisting}[style=ir]
+declare void @deprecated_function() "dontcall-error"="This function is deprecated"
+
+define void @caller() {
+  ; If this call is not optimized away, compilation fails
+  call void @deprecated_function()
+  ret void
+}
+\end{lstlisting}
+
+Use case: Compile-time enforcement that certain functions must be eliminated through constant folding or inlining, ensuring they never appear in the final binary.
+
+\textbf{"dontcall-warn"}
+
+This attribute denotes that a warning diagnostic should be emitted when a call of a function with this attribute is not eliminated via optimization.
+Front ends can provide optional srcloc metadata nodes on call sites of such callees to attach information about where in the source language such a call came from.
+A string value can be provided as a note.
+
+\begin{lstlisting}[style=ir]
+declare void @debug_helper() "dontcall-warn"="Should be inlined in release builds"
+
+define void @performance_critical() {
+  ; Warning if this call survives optimization
+  call void @debug_helper()
+  ret void
+}
+\end{lstlisting}
+
+Use case: Performance-sensitive code where certain function calls should be optimized away, issuing warnings if optimization fails rather than hard errors.
+
+\textbf{fn\_ret\_thunk\_extern}
+
+This attribute tells the code generator that returns from functions should be replaced with jumps to externally-defined architecture-specific symbols.
+For X86, this symbol's identifier is \texttt{\_\_x86\_return\_thunk}.
+
+\begin{lstlisting}[style=ir]
+define i32 @secure_function(i32 %x) fn_ret_thunk_extern {
+  %result = add i32 %x, 42
+  ret i32 %result  ; Returns via __x86_return_thunk
+}
+\end{lstlisting}
+
+Use case: Mitigation for speculative execution vulnerabilities like Spectre, ensuring all function returns go through a secure thunk that prevents branch prediction attacks.
+
+\textbf{"frame-pointer"}
+
+This attribute tells the code generator whether the function should keep the frame pointer.
+The code generator may emit the frame pointer even if this attribute says the frame pointer can be eliminated.
+The allowed string values are:
+
+\begin{itemize}[noitemsep]
+  \item \texttt{"none"} (default): the frame pointer can be eliminated, and its register can be used for other purposes.
+  \item \texttt{"reserved"}: the frame pointer register must either be updated to point to a valid frame record for the current function, or not be modified.
+  \item \texttt{"non-leaf"}: the frame pointer should be kept if the function calls other functions.
+  \item \texttt{"all"}: the frame pointer should be kept.
+\end{itemize}
+
+\begin{lstlisting}[style=ir]
+; Allow elimination for performance
+define i32 @fast_computation(i32 %x) "frame-pointer"="none" {
+  %result = mul i32 %x, %x
+  ret i32 %result
+}
+
+; Keep for debugging
+define void @complex_logic() "frame-pointer"="all" {
+  call void @helper1()
+  call void @helper2()
+  ret void
+}
+
+; Keep only in non-leaf functions
+define i32 @conditional_fp(i32 %x) "frame-pointer"="non-leaf" {
+  %cmp = icmp sgt i32 %x, 0
+  br i1 %cmp, label %call_path, label %leaf_path
+
+call_path:
+  call void @other_function()  ; Frame pointer kept here
+  ret i32 1
+
+leaf_path:
+  ret i32 0  ; Frame pointer can be eliminated
+}
+\end{lstlisting}
+
+Use case: Debugging and profiling (with "all"), performance optimization (with "none"), or balanced approach for stack unwinding in exception handling (with "non-leaf").
+
+\textbf{hot}
+
+This attribute indicates that this function is a hot spot of the program execution.
+The function will be optimized more aggressively and will be placed into a special subsection of the text section to improve locality.
+
+When profile feedback is enabled, this attribute takes precedence over the profile information.
+By marking a function hot, users can work around the cases where the training input does not have good coverage on all the hot functions.
+
+\begin{lstlisting}[style=ir]
+define i32 @critical_loop(ptr %data, i64 %size) hot {
+  %sum = alloca i32
+  store i32 0, ptr %sum
+  br label %loop
+
+loop:
+  %i = phi i64 [ 0, %0 ], [ %next_i, %loop ]
+  %ptr = getelementptr i32, ptr %data, i64 %i
+  %val = load i32, ptr %ptr
+  %current = load i32, ptr %sum
+  %new_sum = add i32 %current, %val
+  store i32 %new_sum, ptr %sum
+  %next_i = add i64 %i, 1
+  %cond = icmp ult i64 %next_i, %size
+  br i1 %cond, label %loop, label %exit
+
+exit:
+  %result = load i32, ptr %sum
+  ret i32 %result
+}
+
+define void @main_loop() {
+  ; Frequently called hot function
+  %result = call i32 @critical_loop(ptr @data, i64 1000000) hot
+  ret void
+}
+\end{lstlisting}
+
+Use case: Performance-critical code paths identified through profiling or known algorithmic bottlenecks, ensuring maximum optimization effort and improved instruction cache locality.
+
+\textbf{inlinehint}
+
+This attribute indicates that the source code contained a hint that inlining this function is desirable (such as the \texttt{inline} keyword in C/C++).
+It is just a hint; it imposes no requirements on the inliner.
+
+\begin{lstlisting}[style=ir]
+define i32 @small_helper(i32 %x) inlinehint {
+  %result = add i32 %x, 1
+  ret i32 %result
+}
+
+define i32 @caller(i32 %n) {
+  %value = call i32 @small_helper(i32 %n)  ; Likely to be inlined
+  ret i32 %value
+}
+\end{lstlisting}
+
+Use case: Small utility functions that benefit from inlining but don't require the aggressive guarantee of \texttt{alwaysinline}, allowing the optimizer to make informed decisions.
+
+\textbf{jumptable}
+
+This attribute indicates that the function should be added to a jump-instruction table at code-generation time, and that all address-taken references to this function should be replaced with a reference to the appropriate jump-instruction-table function pointer.
+Note that this creates a new pointer for the original function, which means that code that depends on function-pointer identity can break.
+Any function annotated with \texttt{jumptable} must also be \texttt{unnamed\_addr}.
+
+\begin{lstlisting}[style=ir]
+define void @callback1() unnamed_addr jumptable {
+  call void @do_work1()
+  ret void
+}
+
+define void @callback2() unnamed_addr jumptable {
+  call void @do_work2()
+  ret void
+}
+
+@callbacks = global [2 x ptr] [ptr @callback1, ptr @callback2]
+\end{lstlisting}
+
+Use case: Security hardening through control-flow integrity, preventing attackers from hijacking function pointers by indirecting through a protected jump table.
+
+\textbf{memory(...)}
+
+This attribute specifies the possible memory effects of the call-site or function.
+It allows specifying the possible access kinds (\texttt{none}, \texttt{read}, \texttt{write}, or \texttt{readwrite}) for the possible memory location kinds (\texttt{argmem}, \texttt{inaccessiblemem}, \texttt{errnomem}, as well as a default).
+
+Common patterns:
+
+\begin{itemize}[noitemsep]
+  \item \texttt{memory(none)}: Does not access any memory.
+  \item \texttt{memory(read)}: May read (but not write) any memory.
+  \item \texttt{memory(write)}: May write (but not read) any memory.
+  \item \texttt{memory(readwrite)}: May read or write any memory.
+  \item \texttt{memory(argmem: read)}: May only read argument memory.
+  \item \texttt{memory(argmem: read, inaccessiblemem: write)}: May only read argument memory and only write inaccessible memory.
+  \item \texttt{memory(argmem: read, errnomem: write)}: May only read argument memory and only write errno.
+  \item \texttt{memory(read, argmem: readwrite)}: May read any memory (default mode) and additionally write argument memory.
+  \item \texttt{memory(readwrite, argmem: none)}: May access any memory apart from argument memory.
+\end{itemize}
+
+The supported access kinds are:
+
+\begin{itemize}[noitemsep]
+  \item \texttt{readwrite}: Any kind of access to the location is allowed.
+  \item \texttt{read}: The location is only read. Writing produces undefined behavior.
+  \item \texttt{write}: Only writes to the location are observable outside the function call.
+  \item \texttt{none}: No reads or writes to the location are observed outside the function.
+\end{itemize}
+
+\begin{lstlisting}[style=ir]
+; Pure mathematical function
+define i32 @pure_add(i32 %a, i32 %b) memory(none) {
+  %result = add i32 %a, %b
+  ret i32 %result
+}
+
+; Reads array elements
+define i32 @sum_array(ptr %arr, i64 %len) memory(argmem: read) {
+  ; Only reads from arr, no other memory effects
+  ret i32 0
+}
+
+; Allocator that writes to errno on failure
+declare ptr @malloc_with_errno(i64) memory(argmem: none, errnomem: write, inaccessiblemem: readwrite)
+
+; Modifies argument memory
+define void @increment_values(ptr %arr, i64 %len) memory(argmem: readwrite) {
+  ; Reads and writes array elements
+  ret void
+}
+\end{lstlisting}
+
+Use case: Enables aggressive optimization by precisely documenting memory effects, allowing reordering, elimination, and other transformations that would otherwise be unsafe.
+
+\textbf{minsize}
+
+This attribute suggests that optimization passes and code generator passes make choices that keep the code size of this function as small as possible and perform optimizations that may sacrifice runtime performance in order to minimize the size of the generated code.
+This attribute is incompatible with the \texttt{optdebug} and \texttt{optnone} attributes.
+
+\begin{lstlisting}[style=ir]
+; Optimize for size rather than speed
+define i32 @embedded_function(i32 %x) minsize {
+  %result = mul i32 %x, %x
+  %adjusted = add i32 %result, 42
+  ret i32 %adjusted
+}
+
+; Called frequently in size-constrained environments
+define void @utility_helper(ptr %data) minsize {
+  ; Compiler favors smaller instruction sequences
+  ; May use loops instead of unrolling, slower but smaller instructions
+  ret void
+}
+\end{lstlisting}
+
+Use case: Embedded systems, firmware, or applications with strict code size constraints where binary size matters more than execution speed.
+
+\textbf{naked}
+
+This attribute disables prologue/epilogue emission for the function.
+This can have very system-specific consequences.
+The arguments of a naked function can not be referenced through IR values.
+
+\begin{lstlisting}[style=ir]
+; Low-level function with manual stack management
+define void @interrupt_handler() naked {
+  ; No prologue: caller must save registers
+  ; No epilogue: must manually return
+  ; Cannot reference function parameters through normal IR
+  unreachable
+}
+
+; Inline assembly wrapper
+define void @boot_entry() naked {
+  ; Complete control over generated code
+  ; Used for bootloaders, interrupt vectors
+  unreachable
+}
+\end{lstlisting}
+
+Use case: Writing interrupt handlers, bootloader code, or other low-level functions requiring precise control over the generated assembly without compiler-inserted prologues/epilogues.
+
+\textbf{"no-inline-line-tables"}
+
+When this attribute is set to true, the inliner discards source locations when inlining code and instead uses the source location of the call site.
+Breakpoints set on code that was inlined into the current function will not fire during the execution of the inlined call sites.
+If the debugger stops inside an inlined call site, it will appear to be stopped at the outermost inlined call site.
+
+\begin{lstlisting}[style=ir]
+; Simplified debug info when inlined
+define i32 @compute(i32 %x) "no-inline-line-tables"="true" {
+  %squared = mul i32 %x, %x
+  ret i32 %squared
+}
+
+define i32 @caller(i32 %n) {
+  ; When compute() is inlined here, debugger shows this call site location
+  ; instead of the original source locations inside compute()
+  %result = call i32 @compute(i32 %n)
   ret i32 %result
 }
 \end{lstlisting}
 
-Common attributes:
-\begin{itemize}[noitemsep]
-  \item \texttt{nounwind} --- Function never throws exceptions
-  \item \texttt{readnone} --- Pure function, no memory access
-  \item \texttt{readonly} --- Function only reads memory
-  \item \texttt{alwaysinline} --- Force inlining
-  \item \texttt{noinline} --- Prevent inlining
+Use case: Reducing debug information size in heavily inlined code, or simplifying debugging by attributing inlined code to the call site rather than the original source.
+
+\textbf{no-jump-tables}
+
+When this attribute is set to true, the jump tables and lookup tables that can be generated from a switch case lowering are disabled.
+
+\begin{lstlisting}[style=ir]
+; Disable jump table optimization for switch statements
+define i32 @state_machine(i32 %state) "no-jump-tables"="true" {
+entry:
+  switch i32 %state, label %default [
+    i32 0, label %case0
+    i32 1, label %case1
+    i32 2, label %case2
+    i32 3, label %case3
+  ]
+
+case0:
+  ret i32 100
+case1:
+  ret i32 200
+case2:
+  ret i32 300
+case3:
+  ret i32 400
+default:
+  ret i32 -1
+}
+\end{lstlisting}
+
+Use case: Security-sensitive code where jump tables might create exploitable attack surfaces, or when predictable branch behavior is required for timing-critical applications.
+
+\textbf{nobuiltin}
+
+This indicates that the callee function at a call site is not recognized as a built-in function.
+LLVM will retain the original call and not replace it with equivalent code based on the semantics of the built-in function, unless the call site uses the \texttt{builtin} attribute.
+This is valid at call sites and on function declarations and definitions.
+
+\begin{lstlisting}[style=ir]
+; Custom malloc implementation, don't optimize as builtin
+declare ptr @malloc(i64) nobuiltin
+
+define ptr @allocate_buffer(i64 %size) {
+  ; Calls the actual malloc function, not replaced by builtin optimizations
+  %ptr = call ptr @malloc(i64 %size)
+  ret ptr %ptr
+}
+
+; Prevent memcpy optimization at call site
+define void @copy_data(ptr %dst, ptr %src, i64 %n) {
+  call void @memcpy(ptr %dst, ptr %src, i64 %n) nobuiltin
+  ret void
+}
+\end{lstlisting}
+
+Use case: Custom implementations of standard library functions where builtin optimizations would be incorrect, or when precise control over function calls is required.
+
+\textbf{nocallback}
+
+This attribute indicates that the function is only allowed to jump back into the caller's module by a return or an exception, and is not allowed to jump back by invoking a callback function, a direct, possibly transitive, external function call, use of \texttt{longjmp}, or other
+means.
+It is a compiler hint that is used at the module level to improve dataflow analysis, dropped during linking, and has no effect on functions defined in the current module.
+
+\begin{lstlisting}[style=ir]
+; Promise: this function won't invoke callbacks
+declare void @process_data(ptr %data, i64 %size) nocallback
+
+define void @safe_processor(ptr %buffer, i64 %len) {
+  ; Compiler knows process_data won't call back into this module
+  ; Enables better optimization and analysis
+  call void @process_data(ptr %buffer, i64 %len)
+  ret void
+}
+
+; External library function that only returns normally
+declare i32 @compute_checksum(ptr %data, i64 %len) nocallback
+\end{lstlisting}
+
+Use case: Documenting API contracts for external functions, enabling better interprocedural analysis and optimizations when the compiler knows a function cannot re-enter the caller's module.
+
+\textbf{nodivergencesource}
+
+A call to this function is not a source of divergence.
+In uniformity analysis, a source of divergence is an instruction that generates divergence even if its inputs are uniform.
+A call with no further information would normally be considered a source of divergence; setting this attribute on a function means that a call to it is not a source of divergence.
+
+\begin{lstlisting}[style=ir]
+; GPU kernel helper that doesn't introduce divergence
+declare i32 @uniform_helper(i32 %x) nodivergencesource
+
+define void @kernel(ptr addrspace(1) %out, i32 %uniform_value) {
+  ; All threads execute the same code path
+  ; uniform_helper doesn't cause divergence
+  %result = call i32 @uniform_helper(i32 %uniform_value)
+  %tid = call i32 @llvm.nvvm.read.ptx.sreg.tid.x()
+  %ptr = getelementptr i32, ptr addrspace(1) %out, i32 %tid
+  store i32 %result, ptr addrspace(1) %ptr
+  ret void
+}
+\end{lstlisting}
+
+Use case: GPU programming where uniformity analysis is critical for performance, allowing the compiler to optimize uniform control flow without assuming divergence from function calls.
+
+\textbf{noduplicate}
+
+This attribute indicates that calls to the function cannot be duplicated.
+A call to a \texttt{noduplicate} function may be moved within its parent function, but may not be duplicated within its parent function.
+
+A function containing a \texttt{noduplicate} call may still be an inlining candidate, provided that the call is not duplicated by inlining.
+That implies that the function has internal linkage and only has one call site, so the original call is dead after inlining.
+
+\begin{lstlisting}[style=ir]
+; GPU synchronization barrier must not be duplicated
+declare void @llvm.nvvm.barrier0() noduplicate
+
+define void @kernel_with_barrier(ptr addrspace(1) %data) {
+entry:
+  ; This barrier call cannot be duplicated by optimizations
+  call void @llvm.nvvm.barrier0()
+  ; Compiler won't duplicate the barrier even if it unrolls loops
+  ret void
+}
+
+; Special hardware operation that must execute exactly once
+declare void @hardware_reset() noduplicate
+\end{lstlisting}
+
+Use case: GPU barriers, hardware instructions, or operations with side effects that must execute exactly once per control-flow path, preventing optimization passes from creating multiple instances.
+
+\textbf{nofree}
+
+This function attribute indicates that the function does not, directly or transitively, call a memory-deallocation function (free, for example) on a memory allocation which existed before the call.
+
+As a result, uncaptured pointers that are known to be dereferenceable prior to a call to a function with the \texttt{nofree} attribute are still known to be dereferenceable after the call.
+The capturing condition is necessary in environments where the function might communicate the pointer to another thread which then deallocates the memory.
+Alternatively, \texttt{nosync} would ensure such communication cannot happen and even captured pointers cannot be freed by the function.
+
+A \texttt{nofree} function is explicitly allowed to free memory which it allocated or (if not \texttt{nosync}) arrange for another thread to free memory on its behalf.
+As a result, perhaps surprisingly, a \texttt{nofree} function can return a pointer to a previously deallocated allocated object.
+
+\begin{lstlisting}[style=ir]
+; Doesn't free any existing memory
+define void @process_array(ptr %arr, i64 %len) nofree {
+  ; Can read/write to arr, but won't free it
+  %value = load i32, ptr %arr
+  %new_value = add i32 %value, 42
+  store i32 %new_value, ptr %arr
+  ret void
+}
+
+; May allocate and free its own memory, but won't free caller's memory
+define ptr @create_copy(ptr %original, i64 %size) nofree {
+  %copy = call ptr @malloc(i64 %size)
+  ; Could free %copy before returning, but won't free %original
+  ret ptr %copy
+}
+\end{lstlisting}
+
+Use case: Enables pointer alias analysis and optimizations by guaranteeing that existing memory allocations remain valid, allowing the compiler to eliminate redundant loads and stores.
+
+\textbf{noimplicitfloat}
+
+Disallows implicit floating-point code.
+This inhibits optimizations that use floating-point code and floating-point registers for operations that are not nominally floating-point.
+LLVM instructions that perform floating-point operations or require access to floating-point registers may still cause floating-point code to be generated.
+
+Also inhibits optimizations that create SIMD/vector code and registers from scalar code such as vectorization or memcpy/memset optimization.
+This includes integer vectors.
+Vector instructions present in IR may still cause vector code to be generated.
+
+\begin{lstlisting}[style=ir]
+; Embedded system without FPU
+define i32 @integer_only_math(i32 %a, i32 %b) noimplicitfloat {
+  ; Compiler won't use FP registers for optimization
+  %result = add i32 %a, %b
+  ret i32 %result
+}
+
+; Kernel code that must not touch FP state
+define void @kernel_interrupt_handler() noimplicitfloat {
+  ; No FP code will be generated implicitly
+  ; Even for memcpy or other operations
+  ret void
+}
+\end{lstlisting}
+
+Use case: Embedded systems without floating-point hardware, kernel code that cannot modify FP state, or environments where saving/restoring FP registers is prohibitively expensive.
+
+\textbf{skipprofile}
+
+This function attribute prevents instrumentation-based profiling, used for coverage or profile based optimization, from being added to a function.
+This attribute does not restrict inlining, so instrumented instructions could end up in this function.
+
+\begin{lstlisting}[style=ir]
+; Exclude from profiling instrumentation
+define void @hot_path(ptr %data) skipprofile {
+  ; This function won't have profiling counters added
+  ; Performance-critical code without instrumentation overhead
+  ret void
+}
+
+; Library function that shouldn't be profiled
+define i32 @internal_helper(i32 %x) skipprofile {
+  %result = mul i32 %x, 2
+  ret i32 %result
+}
+\end{lstlisting}
+
+Use case: Excluding performance-critical functions from profiling overhead, or preventing instrumentation of internal library functions that would skew profile data.
+
+\textbf{noredzone}
+
+This attribute indicates that the code generator should not use a red zone, even if the target-specific ABI normally permits it.
+
+\begin{lstlisting}[style=ir]
+; Interrupt handler without red zone
+define void @irq_handler() noredzone {
+  ; Cannot use stack space below stack pointer
+  ; Required for code that might be interrupted
+  ret void
+}
+
+; Signal handler on x86-64
+define void @signal_handler(i32 %sig) noredzone {
+  ; Red zone would be unsafe: asynchronous signals could corrupt it
+  ret void
+}
+\end{lstlisting}
+
+Use case: Interrupt handlers and signal handlers where the 128-byte red zone on x86-64 could be corrupted by asynchronous events, requiring strict stack discipline.
+
+\textbf{indirect-tls-seg-refs}
+
+This attribute indicates that the code generator should not use direct TLS access through segment registers, even if the target-specific ABI normally permits it.
+
+\begin{lstlisting}[style=ir]
+; Force indirect TLS access
+define i32 @get_thread_id() indirect-tls-seg-refs {
+  ; Uses indirect TLS model instead of direct segment register access
+  ; Portable across different TLS implementations
+  ret i32 0
+}
+
+; Library code with portable TLS
+define ptr @get_tls_buffer() indirect-tls-seg-refs {
+  ; Avoids architecture-specific TLS optimizations
+  ret ptr null
+}
+\end{lstlisting}
+
+Use case: Shared libraries that need to work across different TLS models, or when direct segment register access would be incompatible with certain runtime environments.
+
+\textbf{noreturn}
+
+This function attribute indicates that the function never returns normally, hence through a return instruction.
+This produces undefined behavior at runtime if the function ever does dynamically return.
+Annotated functions may still raise an exception, i.a., \texttt{nounwind} is not implied.
+
+\begin{lstlisting}[style=ir]
+; Function that always exits
+declare void @exit(i32) noreturn
+
+define void @fatal_error(ptr %msg) noreturn {
+  call void @print_error(ptr %msg)
+  call void @exit(i32 1)
+  unreachable
+}
+
+; Infinite loop
+define void @event_loop() noreturn {
+entry:
+  br label %loop
+loop:
+  call void @process_events()
+  br label %loop
+}
+\end{lstlisting}
+
+Use case: Functions that terminate the program, throw exceptions, or run infinite loops, allowing the compiler to eliminate dead code after calls to these functions.
+
+\textbf{norecurse}
+
+This function attribute indicates that the function is not recursive and does not participate in recursion.
+This means that the function never occurs inside a cycle in the dynamic call graph.
+
+\begin{lstlisting}[style=ir]
+; Not recursive: only calls leaf functions
+define i32 @compute(i32 %x) norecurse {
+  %squared = call i32 @square(i32 %x)
+  %result = add i32 %squared, 1
+  ret i32 %result
+}
+
+; Helper function with no recursion
+define void @process_data(ptr %data, i64 %len) norecurse {
+  ; This function and its callees form no cycles
+  call void @validate(ptr %data)
+  call void @transform(ptr %data, i64 %len)
+  ret void
+}
+\end{lstlisting}
+
+Use case: Enables optimizations like more aggressive inlining and stack frame elimination when the compiler knows there are no recursive call chains.
+
+\textbf{willreturn}
+
+This function attribute indicates that a call of this function will either exhibit undefined behavior or comes back and continues execution at a point in the existing call stack that includes the current invocation.
+Annotated functions may still raise an exception, i.a., \texttt{nounwind} is not implied.
+If an invocation of an annotated function does not return control back to a point in the call stack, the behavior is undefined.
+
+\begin{lstlisting}[style=ir]
+; Pure computation that always returns
+define i32 @add(i32 %a, i32 %b) willreturn {
+  %result = add i32 %a, %b
+  ret i32 %result
+}
+
+; Bounded loop that always terminates
+define void @process_array(ptr %arr, i64 %len) willreturn {
+entry:
+  br label %loop
+loop:
+  %i = phi i64 [ 0, %entry ], [ %next, %loop.continue ]
+  %cmp = icmp ult i64 %i, %len
+  br i1 %cmp, label %loop.body, label %exit
+loop.body:
+  ; Process element
+  br label %loop.continue
+loop.continue:
+  %next = add i64 %i, 1
+  br label %loop
+exit:
+  ret void
+}
+\end{lstlisting}
+
+Use case: Functions guaranteed to return or throw an exception, allowing the compiler to optimize away code that handles non-terminating cases or infinite loops.
+
+\textbf{nosync}
+
+This function attribute indicates that the function does not synchronize with another thread in a way that other thread might observe.
+For example, a function with this attribute must not perform atomic operations that have \texttt{acquire}, \texttt{release}, or \texttt{sequentially consistent} memory ordering,
+or have any other observable synchronization effect.
+Note that this attribute does not rule out all inter-thread communication, merely the \emph{visible} synchronization.
+
+\begin{lstlisting}[style=ir]
+; Pure computation with no thread synchronization
+define i32 @compute_hash(ptr %data, i64 %len) nosync {
+entry:
+  %hash = call i32 @internal_hash(ptr %data, i64 %len)
+  ret i32 %hash
+}
+
+; Function that uses thread-local storage (no visible sync)
+@tls_counter = thread_local global i32 0
+
+define void @increment_local() nosync {
+  %old = load i32, ptr @tls_counter
+  %new = add i32 %old, 1
+  store i32 %new, ptr @tls_counter
+  ret void
+}
+\end{lstlisting}
+
+Use case: Enables optimizations in lock-free algorithms or pure computational functions that don't require thread synchronization, allowing more aggressive reordering and optimization.
+
+\textbf{nounwind}
+
+This function attribute indicates that the function never raises an exception. If the function does raise an exception, the behavior is undefined. This is particularly important for C++ code where exception handling can add significant overhead.
+
+\begin{lstlisting}[style=ir]
+; C function marked noexcept in source
+define i32 @safe_add(i32 %a, i32 %b) nounwind {
+  %result = add i32 %a, %b
+  ret i32 %result
+}
+
+; extern "C" function that never throws
+define void @process_data(ptr %buffer, i64 %size) nounwind {
+entry:
+  %cmp = icmp eq i64 %size, 0
+  br i1 %cmp, label %exit, label %process
+process:
+  ; Process buffer...
+  br label %exit
+exit:
+  ret void
+}
+\end{lstlisting}
+
+Use case: Eliminates exception handling overhead in performance-critical code paths and enables more aggressive inlining and optimization when the compiler knows no unwinding is necessary.
+
+\textbf{nosanitize\_bounds}
+
+On function level, this attribute indicates that bounds checking sanitizer instrumentation is disabled for this function.
+This is useful for low-level functions where bounds checks would be incorrect or redundant, such as memory allocators or functions that intentionally access memory outside conventional bounds for performance.
+
+\begin{lstlisting}[style=ir]
+; Custom memory allocator that manages raw memory
+define ptr @custom_malloc(i64 %size) nosanitize_bounds {
+entry:
+  %mem = call ptr @sys_mmap(i64 %size)
+  ; Internal bookkeeping may access adjacent memory regions
+  ret ptr %mem
+}
+
+; SIMD operation that accesses memory with specific alignment
+define void @simd_copy(ptr %dst, ptr %src, i64 %n) nosanitize_bounds {
+entry:
+  ; Vectorized copy operations that handle alignment internally
+  call void @internal_simd_memcpy(ptr %dst, ptr %src, i64 %n)
+  ret void
+}
+\end{lstlisting}
+
+Use case: Critical for implementing memory allocators, custom container implementations, or optimized SIMD code where sanitizer bounds checks would interfere with legitimate low-level memory operations.
+
+\textbf{nosanitize\_coverage}
+
+This function attribute indicates that SanitizerCoverage instrumentation is disabled for this function.
+SanitizerCoverage is typically used for fuzzing to track code coverage, but some functions should not be instrumented (e.g., the sanitizer runtime itself or extremely hot functions where instrumentation overhead is unacceptable).
+
+\begin{lstlisting}[style=ir]
+; Sanitizer runtime function - must not be instrumented
+define void @asan_report_error(ptr %addr) nosanitize_coverage {
+entry:
+  call void @print_error_message(ptr %addr)
+  call void @abort()
+  unreachable
+}
+
+; Performance-critical hot path where coverage overhead is too high
+define i32 @inner_loop_kernel(ptr %data, i64 %n) nosanitize_coverage {
+entry:
+  br label %loop
+loop:
+  %i = phi i64 [ 0, %entry ], [ %next, %loop ]
+  ; Tight loop that runs billions of times
+  %next = add i64 %i, 1
+  %cmp = icmp ult i64 %next, %n
+  br i1 %cmp, label %loop, label %exit
+exit:
+  ret i32 0
+}
+\end{lstlisting}
+
+Use case: Essential for sanitizer runtime functions to avoid infinite recursion and useful for performance-critical inner loops where fuzzing coverage instrumentation would skew performance measurements.
+
+\textbf{null\_pointer\_is\_valid}
+
+This function attribute indicates that the null pointer in address space 0 is valid for this function.
+By default, LLVM assumes the null pointer is invalid and uses this for optimizations.
+This attribute is needed for embedded systems or kernels where address 0 may be a valid memory location.
+
+\begin{lstlisting}[style=ir]
+; Embedded system function where NULL pointer is mapped to hardware
+define i32 @read_interrupt_vector() null_pointer_is_valid {
+entry:
+  ; In some embedded systems, address 0 contains interrupt vectors
+  %vec_ptr = inttoptr i64 0 to ptr
+  %value = load i32, ptr %vec_ptr
+  ret i32 %value
+}
+
+; Kernel function that may access low memory addresses
+define void @setup_bios_area() null_pointer_is_valid {
+entry:
+  ; BIOS data area starts at 0x0000 on x86
+  %bios_ptr = inttoptr i64 0 to ptr
+  store i32 0, ptr %bios_ptr
+  ret void
+}
+\end{lstlisting}
+
+Use case: Required for operating system kernels, bootloaders, and embedded systems where the null pointer is a legitimate memory address rather than an error sentinel value.
+
+\textbf{optdebug}
+
+This function attribute indicates that the function should be optimized, but debug information should be preserved as much as possible. This is useful during development when you want performance but still need meaningful stack traces and variable inspection.
+
+\begin{lstlisting}[style=ir]
+define i32 @debug_optimized_function(i32 %x) optdebug !dbg !12 {
+entry:
+  %doubled = mul i32 %x, 2, !dbg !13
+  %result = add i32 %doubled, 10, !dbg !14
+  ret i32 %result, !dbg !15
+}
+
+; Function with complex logic that needs optimization but debuggability
+define void @process_pipeline(ptr %input) optdebug !dbg !20 {
+entry:
+  %stage1 = call ptr @stage_one(ptr %input), !dbg !21
+  %stage2 = call ptr @stage_two(ptr %stage1), !dbg !22
+  call void @finalize(ptr %stage2), !dbg !23
+  ret void, !dbg !24
+}
+\end{lstlisting}
+
+Use case: Development and production debugging where you need both performance optimizations and the ability to debug with meaningful variable names, line numbers, and stack traces.
+
+\textbf{optforfuzzing}
+
+This function attribute indicates that the function should be optimized for fuzzing.
+The optimizer will prefer transformations that help fuzzing tools explore more code paths, even if they don't improve normal execution performance.
+This may include avoiding certain optimizations that merge branches or eliminate redundant checks.
+
+\begin{lstlisting}[style=ir]
+; Parser function optimized for fuzzer exploration
+define i32 @parse_input(ptr %data, i64 %len) optforfuzzing {
+entry:
+  %type = load i8, ptr %data
+  ; Fuzzer-friendly: keeps distinct branches for each case
+  switch i8 %type, label %default [
+    i8 0, label %case_zero
+    i8 1, label %case_one
+    i8 2, label %case_two
+  ]
+case_zero:
+  ret i32 0
+case_one:
+  ret i32 1
+case_two:
+  ret i32 2
+default:
+  ret i32 -1
+}
+\end{lstlisting}
+
+Use case: Testing infrastructure where functions are specifically compiled to maximize fuzzer effectiveness by preserving branch diversity and avoiding optimizations that reduce code coverage.
+
+\textbf{optnone}
+
+This function attribute indicates that most optimizations should be skipped for this function.
+The function will still undergo minimal processing to generate correct code, but aggressive transformations are disabled.
+This is equivalent to compiling with -O0 for just this function.
+
+\begin{lstlisting}[style=ir]
+; Debug function that should execute exactly as written
+define void @debug_checkpoint(i32 %state) optnone noinline {
+entry:
+  ; Deliberately unoptimized for debugging purposes
+  %val1 = add i32 %state, 1
+  %val2 = add i32 %val1, 1
+  %val3 = add i32 %val2, 1
+  call void @log_state(i32 %val3)
+  ret void
+}
+
+; Test harness function that should not be optimized
+define i32 @test_wrapper(i32 %input) optnone {
+entry:
+  %result = call i32 @function_under_test(i32 %input)
+  ret i32 %result
+}
+\end{lstlisting}
+
+Use case: Debugging problematic optimizations, ensuring test harnesses don't interfere with the code being tested, or maintaining exact source-level semantics for specific critical functions.
+
+\textbf{optsize}
+
+This function attribute indicates that the function should be optimized for code size rather than execution speed.
+The compiler will prefer smaller instruction sequences even if they execute more slowly.
+This is useful for embedded systems with limited code memory or when reducing binary size is more important than performance.
+
+\begin{lstlisting}[style=ir]
+; Embedded system initialization code (called once)
+define void @system_init() optsize {
+entry:
+  call void @init_peripherals()
+  call void @setup_interrupts()
+  call void @configure_clocks()
+  ret void
+}
+
+; Error handling path that should minimize code bloat
+define void @handle_error(i32 %code) optsize {
+entry:
+  %msg = call ptr @get_error_message(i32 %code)
+  call void @log_error(ptr %msg)
+  call void @cleanup_resources()
+  ret void
+}
+\end{lstlisting}
+
+Use case: Embedded systems with tight memory constraints, reducing cache pressure in large applications, or optimizing cold code paths where execution frequency is low but code size matters.
+
+\textbf{"patchable-function"}
+
+This function attribute indicates that the function should be compiled to support runtime patching.
+The compiler will ensure the function has a patchable prologue and possibly other characteristics that make it safe to replace at runtime.
+The specific requirements depend on the value of the attribute.
+
+\begin{lstlisting}[style=ir]
+; Function with patchable entry point for hot-patching
+define i32 @service_handler(i32 %request) "patchable-function"="prologue-short-redirect" {
+entry:
+  ; Compiler ensures enough space in prologue for a jump instruction
+  %response = call i32 @process_request(i32 %request)
+  ret i32 %response
+}
+
+; Instrumentation point that can be dynamically enabled
+define void @trace_event(i64 %event_id) "patchable-function"="prologue-short-redirect" {
+entry:
+  ; Can be patched to jump to instrumentation code or fall through
+  call void @record_event(i64 %event_id)
+  ret void
+}
+\end{lstlisting}
+
+Use case: Live patching systems for long-running services, dynamic instrumentation frameworks, or security monitoring systems that need to inject code at runtime without restarting the application.
+
+\textbf{"probe-stack"}
+
+This attribute indicates that the function will trigger a guard region in the end of the stack.
+It ensures that accesses to the stack must be no further apart than the size of the guard region to a previous access of the stack.
+It takes one required string value, the name of the stack probing function that will be called.
+
+If a function that has a \texttt{"probe-stack"} attribute is inlined into a function with another \texttt{"probe-stack"} attribute, the resulting function has the \texttt{"probe-stack"} attribute of the caller.
+If a function that has a \texttt{"probe-stack"} attribute is inlined into a function that has no \texttt{"probe-stack"} attribute at all, the resulting function has the \texttt{"probe-stack"} attribute of the callee.
+
+\begin{lstlisting}[style=ir]
+; Function with stack probing for large stack allocations
+define void @process_large_buffer() "probe-stack"="__rust_probestack" {
+entry:
+  ; Allocate 1MB on stack - will trigger stack probing
+  %buffer = alloca [262144 x i32]
+  call void @process(ptr %buffer)
+  ret void
+}
+
+; Kernel function with custom stack probe
+define void @kernel_allocate() "probe-stack"="__stack_chk" {
+entry:
+  %data = alloca [1024 x i64]
+  call void @initialize(ptr %data)
+  ret void
+}
+\end{lstlisting}
+
+Use case: Preventing stack overflow in programs with large stack allocations, essential for security-critical code and systems that need to detect stack exhaustion before corruption occurs.
+
+\textbf{"stack-probe-size"}
+
+This attribute controls the behavior of stack probes: either the \texttt{"probe-stack"} attribute, or ABI-required stack probes, if any.
+It defines the size of the guard region.
+It ensures that if the function may use more stack space than the size of the guard region, a stack probing sequence will be emitted.
+It takes one required integer value, which is 4096 by default.
+
+If a function that has a \texttt{"stack-probe-size"} attribute is inlined into a function with another \texttt{"stack-probe-size"} attribute, the resulting function has the \texttt{"stack-probe-size"} attribute that has the lower numeric value.
+If a function that has a \texttt{"stack-probe-size"} attribute is inlined into a function that has no \texttt{"stack-probe-size"} attribute at all, the resulting function has the \texttt{"stack-probe-size"} attribute of the callee.
+
+\begin{lstlisting}[style=ir]
+; Function with custom stack probe size (8KB guard region)
+define void @allocate_buffer() "stack-probe-size"="8192" {
+entry:
+  %buf = alloca [10000 x i8]
+  call void @fill_buffer(ptr %buf)
+  ret void
+}
+
+; Embedded system with smaller guard region (1KB)
+define void @embedded_function() "stack-probe-size"="1024" {
+entry:
+  %data = alloca [512 x i16]
+  ret void
+}
+\end{lstlisting}
+
+Use case: Fine-tuning stack overflow detection for different system constraints, balancing between security (smaller guard regions catch overflows sooner) and performance (larger regions reduce probing overhead).
+
+\textbf{"no-stack-arg-probe"}
+
+This attribute disables ABI-required stack probes, if any.
+
+\begin{lstlisting}[style=ir]
+; Performance-critical function where stack probes are unnecessary
+define fastcc void @hot_path(i32 %a, i32 %b, i32 %c) "no-stack-arg-probe" {
+entry:
+  %result = add i32 %a, %b
+  %final = add i32 %result, %c
+  call void @process(i32 %final)
+  ret void
+}
+
+; Low-level runtime function with known safe stack usage
+define void @runtime_init() "no-stack-arg-probe" {
+entry:
+  ; Minimal stack usage, probes not needed
+  ret void
+}
+\end{lstlisting}
+
+Use case: Optimizing performance-critical functions with known safe stack usage patterns or low-level runtime code where stack probe overhead is unacceptable.
+
+\textbf{returns\_twice}
+
+This attribute indicates that this function can return twice.
+The C \texttt{setjmp} is an example of such a function.
+The compiler disables some optimizations (like tail calls) in the caller of these functions.
+
+\begin{lstlisting}[style=ir]
+; setjmp implementation - can return twice
+declare i32 @setjmp(ptr) returns_twice
+
+define i32 @use_setjmp() {
+entry:
+  %jmpbuf = alloca [37 x i64]
+  ; First return: setjmp returns 0
+  ; Second return: longjmp causes setjmp to return non-zero
+  %val = call i32 @setjmp(ptr %jmpbuf)
+  %is_longjmp = icmp ne i32 %val, 0
+  br i1 %is_longjmp, label %longjmp_path, label %normal_path
+normal_path:
+  call void @do_work()
+  ret i32 0
+longjmp_path:
+  ret i32 %val
+}
+\end{lstlisting}
+
+Use case: Implementing non-local jumps, exception handling mechanisms, or coroutine systems where control flow can return to the same point multiple times with different states.
+
+\textbf{safestack}
+
+This attribute indicates that SafeStack protection is enabled for this function.
+
+If a function that has a \texttt{safestack} attribute is inlined into a function that doesn't have a \texttt{safestack} attribute or which has an \texttt{ssp}, \texttt{sspstrong} or \texttt{sspreq} attribute, then the resulting function will have a \texttt{safestack} attribute.
+
+\begin{lstlisting}[style=ir]
+; Function with SafeStack protection against buffer overflows
+define void @handle_user_input(ptr %input) safestack {
+entry:
+  %buffer = alloca [256 x i8]
+  ; Safe and unsafe objects separated into different stacks
+  call void @copy_input(ptr %buffer, ptr %input)
+  call void @process_buffer(ptr %buffer)
+  ret void
+}
+
+; Parser with SafeStack for security
+define i32 @parse_untrusted(ptr %data) safestack {
+entry:
+  %local = alloca [128 x i8]
+  %result = call i32 @parse(ptr %data, ptr %local)
+  ret i32 %result
+}
+\end{lstlisting}
+
+Use case: Protecting against stack-based buffer overflow attacks by separating safe stack allocations (return addresses, saved registers) from unsafe ones (buffers, arrays), critical for parsing untrusted input.
+
+\textbf{sanitize\_address}
+
+This attribute indicates that AddressSanitizer checks (dynamic address safety analysis) are enabled for this function.
+
+\begin{lstlisting}[style=ir]
+; Function instrumented for memory safety checking
+define void @memory_operations(ptr %ptr, i64 %size) sanitize_address {
+entry:
+  ; ASan will check for out-of-bounds access
+  %gep = getelementptr i8, ptr %ptr, i64 %size
+  store i8 0, ptr %gep
+  ret void
+}
+
+; Buffer manipulation with ASan protection
+define void @process_buffer(ptr %buf) sanitize_address {
+entry:
+  ; Detect heap buffer overflows, use-after-free, etc.
+  %val = load i32, ptr %buf
+  %next = getelementptr i32, ptr %buf, i64 1
+  store i32 %val, ptr %next
+  ret void
+}
+\end{lstlisting}
+
+Use case: Detecting memory safety bugs during development and testing, including buffer overflows, use-after-free, and other spatial and temporal memory errors.
+
+\textbf{sanitize\_memory}
+
+This attribute indicates that MemorySanitizer checks (dynamic detection of accesses to uninitialized memory) are enabled for this function.
+
+\begin{lstlisting}[style=ir]
+; Function instrumented to detect uninitialized memory reads
+define i32 @compute_value(ptr %ptr) sanitize_memory {
+entry:
+  ; MSan will detect if ptr points to uninitialized memory
+  %val = load i32, ptr %ptr
+  %result = add i32 %val, 10
+  ret i32 %result
+}
+
+; Conditional logic with uninitialized memory detection
+define i32 @conditional_compute(i1 %flag) sanitize_memory {
+entry:
+  %temp = alloca i32
+  br i1 %flag, label %init, label %use
+init:
+  store i32 42, ptr %temp
+  br label %use
+use:
+  ; MSan detects if temp is used uninitialized
+  %result = load i32, ptr %temp
+  ret i32 %result
+}
+\end{lstlisting}
+
+Use case: Finding uninitialized memory bugs that can lead to undefined behavior, information leaks, or security vulnerabilities, especially in complex control flow scenarios.
+
+\textbf{sanitize\_thread}
+
+This attribute indicates that ThreadSanitizer checks (dynamic thread safety analysis) are enabled for this function.
+
+\begin{lstlisting}[style=ir]
+; Function instrumented for data race detection
+@shared_counter = global i32 0
+
+define void @increment_counter() sanitize_thread {
+entry:
+  ; TSan will detect unsynchronized access from multiple threads
+  %old = load i32, ptr @shared_counter
+  %new = add i32 %old, 1
+  store i32 %new, ptr @shared_counter
+  ret void
+}
+
+; Thread-unsafe operation that TSan will flag
+define void @update_shared_data(ptr %data) sanitize_thread {
+entry:
+  %val = load i64, ptr %data
+  %incremented = add i64 %val, 1
+  store i64 %incremented, ptr %data
+  ret void
+}
+\end{lstlisting}
+
+Use case: Detecting data races, deadlocks, and other threading bugs in concurrent code during testing, essential for ensuring thread safety in multithreaded applications.
+
+\textbf{sanitize\_hwaddress}
+
+This attribute indicates that HWAddressSanitizer checks (dynamic address safety analysis based on tagged pointers) are enabled for this function.
+
+\begin{lstlisting}[style=ir]
+; Function with hardware-assisted address sanitization (ARM/AArch64)
+define void @tagged_memory_access(ptr %ptr) sanitize_hwaddress {
+entry:
+  ; HWASan uses pointer tagging in top byte
+  %val = load i32, ptr %ptr
+  %doubled = mul i32 %val, 2
+  store i32 %doubled, ptr %ptr
+  ret void
+}
+
+; Heap allocation with HWASan instrumentation
+define ptr @allocate_and_init(i64 %size) sanitize_hwaddress {
+entry:
+  %mem = call ptr @malloc(i64 %size)
+  ; HWASan tags the allocation for overflow detection
+  call void @llvm.memset.p0.i64(ptr %mem, i8 0, i64 %size, i1 false)
+  ret ptr %mem
+}
+\end{lstlisting}
+
+Use case: Memory safety checking with lower overhead than AddressSanitizer on ARM hardware with pointer authentication, suitable for production environments where performance is critical.
+
+\textbf{sanitize\_memtag}
+
+This attribute indicates that MemTagSanitizer checks (dynamic address safety analysis based on Armv8 MTE) are enabled for this function.
+
+\begin{lstlisting}[style=ir]
+; Function using ARM Memory Tagging Extension for safety
+define void @mte_protected_access(ptr %buffer, i64 %index) sanitize_memtag {
+entry:
+  ; MTE hardware tags memory and checks on each access
+  %ptr = getelementptr i8, ptr %buffer, i64 %index
+  %val = load i8, ptr %ptr
+  %incremented = add i8 %val, 1
+  store i8 %incremented, ptr %ptr
+  ret void
+}
+
+; Array bounds checking with hardware support
+define i32 @array_sum(ptr %arr, i64 %len) sanitize_memtag {
+entry:
+  br label %loop
+loop:
+  %i = phi i64 [ 0, %entry ], [ %next, %loop ]
+  %sum = phi i32 [ 0, %entry ], [ %new_sum, %loop ]
+  %ptr = getelementptr i32, ptr %arr, i64 %i
+  %val = load i32, ptr %ptr
+  %new_sum = add i32 %sum, %val
+  %next = add i64 %i, 1
+  %done = icmp eq i64 %next, %len
+  br i1 %done, label %exit, label %loop
+exit:
+  ret i32 %sum
+}
+\end{lstlisting}
+
+Use case: Hardware-accelerated memory safety on ARMv8.5+ processors with MTE support, providing low-overhead detection of spatial memory safety violations in production code.
+
+\textbf{sanitize\_realtime}
+
+This attribute indicates that RealtimeSanitizer checks (realtime safety analysis - no allocations, syscalls or exceptions) are enabled for this function.
+
+\begin{lstlisting}[style=ir]
+; Real-time audio processing function (must not block)
+define void @audio_callback(ptr %input, ptr %output, i32 %frames) sanitize_realtime {
+entry:
+  ; RTSan ensures no malloc, syscalls, or blocking operations
+  br label %loop
+loop:
+  %i = phi i32 [ 0, %entry ], [ %next, %loop ]
+  %in_ptr = getelementptr float, ptr %input, i32 %i
+  %out_ptr = getelementptr float, ptr %output, i32 %i
+  %sample = load float, ptr %in_ptr
+  %processed = fmul float %sample, 2.0
+  store float %processed, ptr %out_ptr
+  %next = add i32 %i, 1
+  %done = icmp eq i32 %next, %frames
+  br i1 %done, label %exit, label %loop
+exit:
+  ret void
+}
+\end{lstlisting}
+
+Use case: Ensuring real-time guarantees in audio processing, control systems, or other latency-sensitive code by detecting blocking operations that would violate real-time constraints.
+
+\textbf{sanitize\_realtime\_blocking}
+
+This attribute indicates that RealtimeSanitizer should error immediately if the attributed function is called during invocation of a function attributed with \texttt{sanitize\_realtime}.
+This attribute is incompatible with the \texttt{sanitize\_realtime} attribute.
+
+\begin{lstlisting}[style=ir]
+; Function that must never be called from real-time context
+define ptr @allocate_memory(i64 %size) sanitize_realtime_blocking {
+entry:
+  ; This will error if called from sanitize_realtime function
+  %mem = call ptr @malloc(i64 %size)
+  ret ptr %mem
+}
+
+; Logging function that performs I/O (not real-time safe)
+define void @log_message(ptr %msg) sanitize_realtime_blocking {
+entry:
+  ; RTSan will catch calls to this from RT contexts
+  call i32 @write(i32 2, ptr %msg, i64 100)
+  ret void
+}
+\end{lstlisting}
+
+Use case: Explicitly marking non-real-time-safe functions so they can be detected if accidentally called from real-time contexts, preventing subtle timing violations in critical systems.
+
+\textbf{sanitize\_alloc\_token}
+
+This attribute indicates that implicit allocation token instrumentation is enabled for this function.
+
+\begin{lstlisting}[style=ir]
+; Function with allocation tracking instrumentation
+define ptr @tracked_allocate(i64 %size) sanitize_alloc_token {
+entry:
+  ; Compiler adds token tracking for allocation analysis
+  %mem = call ptr @malloc(i64 %size)
+  ret ptr %mem
+}
+
+; Resource management with token tracking
+define void @manage_resources() sanitize_alloc_token {
+entry:
+  %res = call ptr @acquire_resource()
+  call void @use_resource(ptr %res)
+  call void @release_resource(ptr %res)
+  ret void
+}
+\end{lstlisting}
+
+Use case: Advanced memory allocation tracking and profiling, enabling detailed analysis of allocation patterns, lifetime tracking, and memory usage optimization in complex applications.
+
+\textbf{speculative\_load\_hardening}
+
+This attribute indicates that Speculative Load Hardening should be enabled for the function body.
+
+Speculative Load Hardening is a best-effort mitigation against information leak attacks that make use of control flow miss-speculation - specifically miss-speculation of whether a branch is taken or not.
+Typically vulnerabilities enabling such attacks are classified as "Spectre variant \#1".
+Notably, this does not attempt to mitigate against miss-speculation of branch target, classified as "Spectre variant \#2" vulnerabilities.
+
+\begin{lstlisting}[style=ir]
+; Security-sensitive function protected against Spectre v1
+define i32 @bounds_checked_load(ptr %array, i64 %index, i64 %len)
+  speculative_load_hardening {
+entry:
+  %in_bounds = icmp ult i64 %index, %len
+  br i1 %in_bounds, label %safe_load, label %error
+safe_load:
+  ; Speculation hardening prevents speculative out-of-bounds access
+  %ptr = getelementptr i32, ptr %array, i64 %index
+  %val = load i32, ptr %ptr
+  ret i32 %val
+error:
+  ret i32 -1
+}
+
+; Cryptographic key access with speculation protection
+define void @get_secret_key(i64 %key_id, ptr %output) speculative_load_hardening {
+entry:
+  %valid = icmp ult i64 %key_id, 16
+  br i1 %valid, label %load_key, label %error
+load_key:
+  ; Prevents speculative execution from leaking key data
+  %key_ptr = getelementptr [16 x i64], ptr @secret_keys, i64 0, i64 %key_id
+  %key = load i64, ptr %key_ptr
+  store i64 %key, ptr %output
+  ret void
+error:
+  ret void
+}
+\end{lstlisting}
+
+Use case: Protecting security-sensitive code against Spectre variant 1 attacks, essential for cryptographic operations, security boundaries, and privileged code that handles sensitive data.
+
+\textbf{speculatable}
+
+This function attribute indicates that the function does not have any effects besides calculating its result and does not have undefined behavior.
+Note that \texttt{speculatable} is not enough to conclude that along any particular execution path the number of calls to this function will not be externally observable.
+This attribute is only valid on functions and declarations, not on individual call sites.
+If a function is incorrectly marked as \texttt{speculatable} and really does exhibit undefined behavior, the undefined behavior may be observed even if the call site is dead code.
+
+\begin{lstlisting}[style=ir]
+; Pure mathematical function with no side effects
+define double @compute_sqrt(double %x) speculatable {
+entry:
+  %result = call double @llvm.sqrt.f64(double %x)
+  ret double %result
+}
+
+; Trigonometric function safe to speculate
+define float @sin_approximation(float %angle) speculatable {
+entry:
+  ; Taylor series approximation - no side effects
+  %x2 = fmul float %angle, %angle
+  %x3 = fmul float %x2, %angle
+  %term1 = fdiv float %x3, 6.0
+  %result = fsub float %angle, %term1
+  ret float %result
+}
+\end{lstlisting}
+
+Use case: Allowing aggressive optimization of pure mathematical functions, enabling the compiler to reorder, eliminate, or duplicate calls for better performance without changing program semantics.
+
+\textbf{ssp}
+
+This attribute indicates that the function should emit a stack smashing protector.
+It is in the form of a "canary" — a random value placed on the stack before the local variables that's checked upon return from the function to see if it has been overwritten.
+A heuristic is used to determine if a function needs stack protectors or not.
+The heuristic used will enable protectors for functions with:
+
+\begin{itemize}
+\item Character arrays larger than \texttt{ssp-buffer-size} (default 8).
+\item Aggregates containing character arrays larger than \texttt{ssp-buffer-size}.
+\item Calls to \texttt{alloca()} with variable sizes or constant sizes greater than \texttt{ssp-buffer-size}.
 \end{itemize}
+
+Variables that are identified as requiring a protector will be arranged on the stack such that they are adjacent to the stack protector guard.
+
+If a function with an \texttt{ssp} attribute is inlined into a calling function, the attribute is not carried over to the calling function.
+
+\begin{lstlisting}[style=ir]
+; Function processing user input with basic stack protection
+define void @process_input(ptr %input) ssp {
+entry:
+  ; Canary placed before this buffer
+  %buffer = alloca [256 x i8]
+  call void @strcpy(ptr %buffer, ptr %input)
+  call void @validate(ptr %buffer)
+  ret void
+}
+
+; String manipulation with stack protection
+define i32 @parse_string(ptr %str) ssp {
+entry:
+  %local = alloca [128 x i8]
+  call void @process(ptr %str, ptr %local)
+  %result = call i32 @convert(ptr %local)
+  ret i32 %result
+}
+\end{lstlisting}
+
+Use case: Basic stack overflow protection for functions handling buffers, strings, or variable-size allocations, defending against common buffer overflow attacks with minimal overhead.
+
+\textbf{sspstrong}
+
+This attribute indicates that the function should emit a stack smashing protector.
+This attribute causes a strong heuristic to be used when determining if a function needs stack protectors.
+The strong heuristic will enable protectors for functions with:
+
+\begin{itemize}
+\item Arrays of any size and type
+\item Aggregates containing an array of any size and type.
+\item Calls to \texttt{alloca()}.
+\item Local variables that have had their address taken.
+\end{itemize}
+
+Variables that are identified as requiring a protector will be arranged on the stack such that they are adjacent to the stack protector guard.
+The specific layout rules are:
+
+\begin{itemize}
+\item Large arrays and structures containing large arrays ($\geq$ \texttt{ssp-buffer-size}) are closest to the stack protector.
+\item Small arrays and structures containing small arrays ($<$ \texttt{ssp-buffer-size}) are 2nd closest to the protector.
+\item Variables that have had their address taken are 3rd closest to the protector.
+\end{itemize}
+
+This overrides the \texttt{ssp} function attribute.
+
+If a function with an \texttt{sspstrong} attribute is inlined into a calling function which has an \texttt{ssp} attribute, the calling function's attribute will be upgraded to \texttt{sspstrong}.
+
+\begin{lstlisting}[style=ir]
+; Function with comprehensive stack protection
+define void @handle_network_data(ptr %packet) sspstrong {
+entry:
+  ; All arrays protected, regardless of size
+  %headers = alloca [16 x i8]
+  %payload = alloca [1024 x i8]
+  %metadata = alloca { i32, i64, ptr }
+
+  ; Address-taken variables also protected
+  call void @extract_headers(ptr %packet, ptr %headers)
+  call void @extract_payload(ptr %packet, ptr %payload)
+
+  ret void
+}
+
+; Parser with strong protection for all buffers
+define i32 @parse_protocol(ptr %data, i64 %len) sspstrong {
+entry:
+  %temp = alloca [32 x i8]
+  %flags = alloca i32
+  %flag_ptr = alloca ptr
+  store ptr %flags, ptr %flag_ptr
+
+  %result = call i32 @decode(ptr %data, ptr %temp)
+  ret i32 %result
+}
+\end{lstlisting}
+
+Use case: Enhanced security for network-facing code, parsers, and security-critical functions where comprehensive stack protection is required despite higher overhead.
+
+\textbf{sspreq}
+
+This attribute indicates that the function should always emit a stack smashing protector.
+This overrides the \texttt{ssp} and \texttt{sspstrong} function attributes.
+
+Variables that are identified as requiring a protector will be arranged on the stack such that they are adjacent to the stack protector guard.
+The specific layout rules are:
+
+\begin{itemize}
+\item Large arrays and structures containing large arrays ($\geq$ \texttt{ssp-buffer-size}) are closest to the stack protector.
+\item Small arrays and structures containing small arrays ($<$ \texttt{ssp-buffer-size}) are 2nd closest to the protector.
+\item Variables that have had their address taken are 3rd closest to the protector.
+\end{itemize}
+
+If a function with an \texttt{sspreq} attribute is inlined into a calling function which has an \texttt{ssp} or \texttt{sspstrong} attribute, the calling function's attribute will be upgraded to \texttt{sspreq}.
+
+\begin{lstlisting}[style=ir]
+; Authentication function requiring mandatory protection
+define i32 @verify_credentials(ptr %username, ptr %password) sspreq {
+entry:
+  ; Stack protector required even without heuristic triggers
+  %hash = alloca [32 x i8]
+  call void @compute_hash(ptr %password, ptr %hash)
+  %valid = call i32 @check_hash(ptr %username, ptr %hash)
+  ret i32 %valid
+}
+
+; Cryptographic operation with mandatory stack protection
+define void @decrypt_secret(ptr %ciphertext, ptr %key, ptr %output) sspreq {
+entry:
+  ; Always protected regardless of buffer sizes
+  %iv = alloca [16 x i8]
+  %state = alloca { i32, i32, i32, i32 }
+
+  call void @init_cipher(ptr %key, ptr %iv)
+  call void @decrypt_block(ptr %ciphertext, ptr %state, ptr %output)
+
+  ret void
+}
+\end{lstlisting}
+
+Use case: Maximum security for authentication, cryptographic, and privilege-escalation code where stack protection must be guaranteed regardless of performance cost.
+
+\textbf{strictfp}
+
+This attribute indicates that the function was called from a scope that requires strict floating-point semantics.
+LLVM will not attempt any optimizations that require assumptions about the floating-point rounding mode or that might alter the state of floating-point status flags that might otherwise be set or cleared by calling this function.
+LLVM will not introduce any new floating-point instructions that may trap.
+
+\begin{lstlisting}[style=ir]
+; Financial calculation requiring exact FP semantics
+define double @calculate_interest(double %principal, double %rate, i32 %years) strictfp {
+entry:
+  ; No FP optimizations that change rounding behavior
+  %rate_decimal = fdiv double %rate, 100.0
+  %one_plus_rate = fadd double 1.0, %rate_decimal
+
+  br label %loop
+loop:
+  %i = phi i32 [ 0, %entry ], [ %next_i, %loop ]
+  %amount = phi double [ %principal, %entry ], [ %new_amount, %loop ]
+
+  %new_amount = fmul double %amount, %one_plus_rate
+  %next_i = add i32 %i, 1
+  %done = icmp eq i32 %next_i, %years
+  br i1 %done, label %exit, label %loop
+exit:
+  ret double %new_amount
+}
+
+; Scientific computation with strict IEEE 754 compliance
+define float @compute_tolerance(float %measured, float %expected) strictfp {
+entry:
+  ; Preserve exact FP exception behavior
+  %diff = fsub float %measured, %expected
+  %abs_diff = call float @llvm.fabs.f32(float %diff)
+  %rel_error = fdiv float %abs_diff, %expected
+  ret float %rel_error
+}
+\end{lstlisting}
+
+Use case: Financial calculations, scientific computing, and numerical analysis where IEEE 754 compliance and reproducible floating-point behavior across platforms is mandatory.
+
+\textbf{"denormal-fp-math"}
+
+This indicates the denormal (subnormal) handling that may be assumed for the default floating-point environment.
+This is a comma separated pair.
+The elements may be one of \texttt{"ieee"}, \texttt{"preserve-sign"}, \texttt{"positive-zero"}, or \texttt{"dynamic"}.
+The first entry indicates the flushing mode for the result of floating point operations.
+The second indicates the handling of denormal inputs to floating point instructions.
+For compatibility with older bitcode, if the second value is omitted, both input and output modes will assume the same mode.
+
+If this attribute is not specified, the default is \texttt{"ieee,ieee"}.
+
+If the output mode is \texttt{"preserve-sign"}, or \texttt{"positive-zero"}, denormal outputs may be flushed to zero by standard floating-point operations.
+It is not mandated that flushing to zero occurs, but if a denormal output is flushed to zero, it must respect the sign mode.
+Not all targets support all modes.
+
+If the mode is \texttt{"dynamic"}, the behavior is derived from the dynamic state of the floating-point environment.
+Transformations which depend on the behavior of denormal values should not be performed.
+
+While this indicates the expected floating point mode the function will be executed with, this does not make any attempt to ensure the mode is consistent.
+User or platform code is expected to set the floating point mode appropriately before function entry.
+
+If the input mode is \texttt{"preserve-sign"}, or \texttt{"positive-zero"}, a floating-point operation must treat any input denormal value as zero.
+In some situations, if an instruction does not respect this mode, the input may need to be converted to 0 as if by \texttt{@llvm.canonicalize} during lowering for correctness.
+
+\begin{lstlisting}[style=ir]
+; Standard IEEE 754 denormal handling (default)
+define float @ieee_denormals(float %x) "denormal-fp-math"="ieee,ieee" {
+entry:
+  %result = fmul float %x, 1.0e-40
+  ret float %result
+}
+
+; Flush denormals to positive zero for performance
+define float @ftz_denormals(float %x) "denormal-fp-math"="positive-zero,positive-zero" {
+entry:
+  ; Denormal results flushed to +0.0, denormal inputs treated as 0
+  %result = fmul float %x, 1.0e-40
+  ret float %result
+}
+
+; Preserve sign when flushing denormals
+define float @preserve_sign_denormals(float %x) "denormal-fp-math"="preserve-sign,ieee" {
+entry:
+  ; Denormal outputs preserve sign when flushed: -denormal -> -0.0
+  %result = fmul float %x, 1.0e-40
+  ret float %result
+}
+\end{lstlisting}
+
+Use case: High-performance computing where flushing denormals to zero improves performance on some architectures, or embedded systems requiring specific denormal handling for numerical stability.
+
+\textbf{"denormal-fp-math-f32"}
+
+Same as \texttt{"denormal-fp-math"}, but only controls the behavior of the 32-bit float type (or vectors of 32-bit floats).
+If both are present, this overrides \texttt{"denormal-fp-math"}.
+Not all targets support separately setting the denormal mode per type, and no attempt is made to diagnose unsupported uses.
+Currently this attribute is respected by the AMDGPU and NVPTX backends.
+
+\begin{lstlisting}[style=ir]
+; Different denormal handling for f32 vs f64 (GPU code)
+define float @gpu_float32_kernel(float %x)
+  "denormal-fp-math"="ieee,ieee"
+  "denormal-fp-math-f32"="positive-zero,positive-zero" {
+entry:
+  ; f32 operations flush denormals, f64 uses IEEE mode
+  %f32_result = fmul float %x, 1.0e-40
+  ret float %f32_result
+}
+
+; NVIDIA GPU kernel with FTZ for single precision
+define <4 x float> @simd_ftz(<4 x float> %v)
+  "denormal-fp-math-f32"="positive-zero,positive-zero" {
+entry:
+  ; Vector operations benefit from denormal flushing on GPU
+  %result = fmul <4 x float> %v, <float 1.0e-38, float 1.0e-38,
+                                    float 1.0e-38, float 1.0e-38>
+  ret <4 x float> %result
+}
+\end{lstlisting}
+
+Use case: GPU computing where single-precision performance is critical and double-precision needs full IEEE compliance, common in graphics and machine learning workloads.
+
+\textbf{"thunk"}
+
+This attribute indicates that the function will delegate to some other function with a tail call.
+The prototype of a thunk should not be used for optimization purposes.
+The caller is expected to cast the thunk prototype to match the thunk target prototype.
+
+\begin{lstlisting}[style=ir]
+; Thunk redirecting to actual implementation
+define void @interface_function(i32 %x) "thunk" {
+entry:
+  ; Tail call to the real implementation
+  tail call void @actual_implementation(i32 %x)
+  ret void
+}
+
+declare void @actual_implementation(i32)
+
+; Virtual function thunk with type adjustment
+define ptr @vtable_thunk(ptr %obj, i32 %arg) "thunk" {
+entry:
+  ; Adjust 'this' pointer and delegate
+  %adjusted = getelementptr i8, ptr %obj, i64 16
+  %result = tail call ptr @real_method(ptr %adjusted, i32 %arg)
+  ret ptr %result
+}
+
+declare ptr @real_method(ptr, i32)
+\end{lstlisting}
+
+Use case: C++ virtual function thunks, interface adapters, and delegation patterns where the thunk's only purpose is to forward calls, enabling compiler optimizations that avoid overhead.
+
+\textbf{uwtable[(sync|async)]}
+
+This attribute indicates that the ABI being targeted requires that an unwind table entry be produced for this function even if we can show that no exceptions pass by it.
+This is normally the case for the ELF x86-64 ABI, but it can be disabled for some compilation units.
+The optional parameter describes what kind of unwind tables to generate: \texttt{sync} for normal unwind tables, \texttt{async} for asynchronous (instruction precise) unwind tables.
+Without the parameter, the attribute \texttt{uwtable} is equivalent to \texttt{uwtable(async)}.
+
+\begin{lstlisting}[style=ir]
+; Function requiring synchronous unwind tables
+define void @cleanup_function(ptr %resource) uwtable(sync) {
+entry:
+  call void @acquire_lock(ptr %resource)
+  call void @process(ptr %resource)
+  call void @release_lock(ptr %resource)
+  ret void
+}
+
+; Asynchronous unwind table for precise unwinding
+define i32 @exception_safe(ptr %data) uwtable(async) {
+entry:
+  %result = call i32 @may_throw(ptr %data)
+  ret i32 %result
+}
+
+; Default uwtable (equivalent to async)
+define void @signal_handler() uwtable {
+entry:
+  ; Async unwind table allows unwinding from any instruction
+  call void @handle_signal()
+  ret void
+}
+\end{lstlisting}
+
+Use case: Exception handling in C++, signal handlers, and debuggers requiring stack unwinding information, with sync for standard exceptions and async for signal handling or profilers.
+
+\textbf{nocf\_check}
+
+This attribute indicates that no control-flow check will be performed on the attributed entity.
+It disables \texttt{-fcf-protection=<>} for a specific entity to fine grain the HW control flow protection mechanism.
+The flag is target independent and currently appertains to a function or function pointer.
+
+\begin{lstlisting}[style=ir]
+; JIT-generated code without control-flow protection
+define void @jit_compiled_code(ptr %func_ptr) nocf_check {
+entry:
+  ; Call through function pointer without CET checks
+  call void %func_ptr()
+  ret void
+}
+
+; Low-level runtime function bypassing CFI
+define void @bootstrap_init() nocf_check {
+entry:
+  ; Early initialization before CFI is ready
+  call void @setup_runtime()
+  ret void
+}
+
+; Trampoline function forwarding to dynamic target
+define i32 @trampoline(i64 %target) nocf_check {
+entry:
+  %func = inttoptr i64 %target to ptr
+  %result = call i32 %func()
+  ret i32 %result
+}
+\end{lstlisting}
+
+Use case: JIT compilers, dynamic code generation, and low-level runtime code where control-flow integrity checks are incompatible with dynamic dispatch or not yet initialized.
+
+\textbf{shadowcallstack}
+
+This attribute indicates that the ShadowCallStack checks are enabled for the function.
+The instrumentation checks that the return address for the function has not changed between the function prologue and epilogue.
+It is currently x86\_64-specific.
+
+\begin{lstlisting}[style=ir]
+; Security-sensitive function with shadow call stack protection
+define i32 @authenticate_user(ptr %credentials) shadowcallstack {
+entry:
+  ; Return address protected in separate shadow stack
+  %valid = call i32 @verify_credentials(ptr %credentials)
+  ret i32 %valid
+}
+
+; Cryptographic operation protected against ROP attacks
+define void @process_secure_data(ptr %input, ptr %output) shadowcallstack {
+entry:
+  ; Shadow stack prevents return address tampering
+  call void @decrypt(ptr %input, ptr %output)
+  call void @validate(ptr %output)
+  ret void
+}
+\end{lstlisting}
+
+Use case: Protecting against return-oriented programming (ROP) attacks in security-critical code by maintaining a separate shadow stack for return addresses, making exploitation significantly harder.
+
+\textbf{mustprogress}
+
+This attribute indicates that the function is required to return, unwind, or interact with the environment in an observable way e.g., via a volatile memory access, I/O, or other synchronization.
+The \texttt{mustprogress} attribute is intended to model the requirements of the first section of [intro.progress] of the C++ Standard.
+As a consequence, a loop in a function with the \texttt{mustprogress} attribute can be assumed to terminate if it does not interact with the environment in an observable way, and terminating loops without side-effects can be removed.
+If a \texttt{mustprogress} function does not satisfy this contract, the behavior is undefined.
+If a \texttt{mustprogress} function calls a function not marked \texttt{mustprogress}, and that function never returns, the program is well-defined even if there isn't any other observable progress.
+Note that \texttt{willreturn} implies \texttt{mustprogress}.
+
+\begin{lstlisting}[style=ir]
+; Function guaranteed to make observable progress
+define void @process_queue(ptr %queue) mustprogress {
+entry:
+  br label %loop
+loop:
+  ; Loop must either terminate or perform I/O
+  %empty = call i1 @queue_empty(ptr %queue)
+  br i1 %empty, label %exit, label %process
+process:
+  %item = call ptr @dequeue(ptr %queue)
+  call void @handle_item(ptr %item)  ; Observable side effect
+  br label %loop
+exit:
+  ret void
+}
+
+; Computation that must terminate or have side effects
+define i32 @find_solution(i32 %n) mustprogress {
+entry:
+  br label %loop
+loop:
+  %i = phi i32 [ 0, %entry ], [ %next, %loop ]
+  %found = call i1 @is_solution(i32 %i)
+  br i1 %found, label %exit, label %continue
+continue:
+  %next = add i32 %i, 1
+  br label %loop
+exit:
+  ret i32 %i
+}
+\end{lstlisting}
+
+Use case: Enabling compiler optimizations on loops in C++ code where the standard guarantees forward progress, allowing removal of infinite loops with no observable side effects.
+
+\textbf{"warn-stack-size"="<threshold>"}
+
+This attribute sets a threshold to emit diagnostics once the frame size is known should the frame size exceed the specified value.
+It takes one required integer value, which should be a non-negative integer, and less than UINT\_MAX.
+It's unspecified which threshold will be used when duplicate definitions are linked together with differing values.
+
+\begin{lstlisting}[style=ir]
+; Warn if stack frame exceeds 4KB
+define void @process_data(ptr %data) "warn-stack-size"="4096" {
+entry:
+  ; Compiler warns if local allocations exceed 4KB
+  %buffer = alloca [1024 x i32]
+  call void @process(ptr %buffer, ptr %data)
+  ret void
+}
+
+; Embedded system with strict stack limits
+define void @embedded_handler() "warn-stack-size"="512" {
+entry:
+  ; Warning issued if stack usage exceeds 512 bytes
+  %temp = alloca [64 x i8]
+  call void @handle(ptr %temp)
+  ret void
+}
+\end{lstlisting}
+
+Use case: Embedded systems and kernel code with strict stack size limits, enabling early detection of stack overflow risks during compilation rather than at runtime.
+
+\textbf{vscale\_range(<min>[, <max>])}
+
+This function attribute indicates vscale is a power-of-two within a specified range.
+\texttt{min} must be a power-of-two that is greater than 0.
+When specified, \texttt{max} must be a power-of-two greater-than-or-equal to \texttt{min} or 0 to signify an unbounded maximum.
+The syntax \texttt{vscale\_range(<val>)} can be used to set both min and max to the same value.
+Functions that don't include this attribute make no assumptions about the value of vscale.
+
+\begin{lstlisting}[style=ir]
+; ARM SVE function with known vscale range
+define <vscale x 4 x i32> @vector_add(<vscale x 4 x i32> %a, <vscale x 4 x i32> %b)
+  vscale_range(2, 16) {
+entry:
+  ; vscale is between 2 and 16 (vector length 128-1024 bits)
+  %result = add <vscale x 4 x i32> %a, %b
+  ret <vscale x 4 x i32> %result
+}
+
+; RISC-V vector function with fixed vscale
+define <vscale x 8 x float> @simd_multiply(<vscale x 8 x float> %v, float %scalar)
+  vscale_range(4) {
+entry:
+  ; vscale is exactly 4 (vector length is 256 bits)
+  %splat = insertelement <vscale x 8 x float> undef, float %scalar, i32 0
+  %vec = shufflevector <vscale x 8 x float> %splat,
+                        <vscale x 8 x float> undef,
+                        <vscale x 8 x i32> zeroinitializer
+  %result = fmul <vscale x 8 x float> %v, %vec
+  ret <vscale x 8 x float> %result
+}
+\end{lstlisting}
+
+Use case: Scalable vector architectures like ARM SVE and RISC-V V where vector length is runtime-determined, allowing compiler optimizations based on known vscale constraints.
+
+\textbf{"nooutline"}
+
+This attribute indicates that outlining passes should not modify the function.
+
+\begin{lstlisting}[style=ir]
+; Function that must not be outlined
+define void @critical_sequence() "nooutline" {
+entry:
+  ; This exact sequence must be preserved
+  call void @step1()
+  call void @step2()
+  call void @step3()
+  ret void
+}
+
+; Performance-critical hot path
+define i32 @inner_loop_body(i32 %x, i32 %y) "nooutline" {
+entry:
+  ; Keep inline, don't extract to separate function
+  %mul = mul i32 %x, %y
+  %add = add i32 %mul, 42
+  ret i32 %add
+}
+\end{lstlisting}
+
+Use case: Preventing code size optimizations that extract common code sequences into separate functions when keeping the code inline is critical for performance or correctness.
+
+\textbf{nocreateundeforpoison}
+
+This attribute indicates that the result of the function (prior to application of return attributes/metadata) will not be undef or poison if all arguments are not undef and not poison.
+Otherwise, it is undefined behavior.
+
+\begin{lstlisting}[style=ir]
+; Function guaranteed not to produce undef/poison from valid inputs
+define i32 @safe_arithmetic(i32 %a, i32 %b) nocreateundeforpoison {
+entry:
+  ; If a and b are not undef/poison, result won't be either
+  %result = add nsw i32 %a, %b
+  ret i32 %result
+}
+
+; Bitwise operation preserving definedness
+define i64 @bitwise_combine(i64 %x, i64 %y) nocreateundeforpoison {
+entry:
+  ; Bitwise ops don't create poison from valid inputs
+  %and = and i64 %x, %y
+  %or = or i64 %and, 255
+  ret i64 %or
+}
+\end{lstlisting}
+
+Use case: Enabling aggressive optimizations by guaranteeing that functions preserve the absence of undefined/poison values, allowing the compiler to reason about value definedness across function boundaries.
+
+\textbf{"modular-format"="<type>,<string\_idx>,<first\_arg\_idx>,<modular\_impl\_fn>,<impl\_name>,<aspects...>"}
+
+This attribute indicates that the implementation is modular on a particular format string argument.
+If the compiler can determine that not all aspects of the implementation are needed, it can report which aspects were needed and redirect the call to a modular implementation function instead.
+
+The compiler reports that an implementation aspect is needed by issuing a relocation for the symbol \texttt{<impl\_name>\_<aspect>}.
+This arranges for code and data needed to support the aspect of the implementation to be brought into the link to satisfy weak references in the modular implementation function.
+
+The first three arguments have the same semantics as the arguments to the C format attribute.
+
+The following aspects are currently supported:
+
+\begin{itemize}
+\item \textbf{float}: The call has a floating point argument
+\end{itemize}
+
+\begin{lstlisting}[style=ir]
+; Printf-like function with modular format support
+declare i32 @custom_printf(ptr, ...)
+  "modular-format"="printf,0,1,__custom_printf_modular,custom_printf_impl,float"
+
+; Only float formatting code linked if float is used
+define void @print_values(i32 %i, float %f) {
+entry:
+  ; Links custom_printf_impl_float if %f is used
+  call i32 (ptr, ...) @custom_printf(ptr @fmt_float, float %f)
+
+  ; Does not link float formatting code
+  call i32 (ptr, ...) @custom_printf(ptr @fmt_int, i32 %i)
+
+  ret void
+}
+
+@fmt_float = private constant [4 x i8] c"%f\0A\00"
+@fmt_int = private constant [4 x i8] c"%d\0A\00"
+\end{lstlisting}
+
+Use case: Reducing code size in embedded systems by linking only the formatting code actually needed, avoiding bloat from unused printf format specifiers in size-constrained environments.
