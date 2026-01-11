@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1768153081.18448 "handbook.tex" "handbook.pdf" "handbook" 1768153083.69875 0
+["pdflatex"] 1768153409.71268 "handbook.tex" "handbook.pdf" "handbook" 1768153412.38279 0
   "/etc/texmf/web2c/texmf.cnf" 1759695525.74988 475 c0e671620eb5563b2130f56340a5fde8 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecbi1095.tfm" 1136768653 3072 19a65fbc725cfc66f5a5fc183b9d418b ""
@@ -276,16 +276,16 @@
   "getting-started/installation.tex" 1767947384.36634 89 ab47090db54e89371d3313d4ac2d9d6a ""
   "getting-started/installation/installation.tex" 1765270683.96255 365 05ccf363479b43001ad6eb6fcc0b0157 ""
   "getting-started/part.tex" 1765270683.92482 49 bd7253ce91fdb359e57def0175070219 ""
-  "handbook.aux" 1768153083.52763 20623 496f56dc2894d142ad949f0e9e4ea9eb "pdflatex"
-  "handbook.out" 1768153083.52963 22134 ee670ed6208cfdd5583d027a7fe1f628 "pdflatex"
+  "handbook.aux" 1768153412.18449 20623 496f56dc2894d142ad949f0e9e4ea9eb "pdflatex"
+  "handbook.out" 1768153412.18649 22134 ee670ed6208cfdd5583d027a7fe1f628 "pdflatex"
   "handbook.tex" 1767952414.99597 2024 eaa0bd28d4ad9c93e6885ac9b8fb7c19 ""
-  "handbook.toc" 1768153083.52963 10799 dc47d6d66164589855d528aa33f26d34 "pdflatex"
+  "handbook.toc" 1768153412.18649 10799 dc47d6d66164589855d528aa33f26d34 "pdflatex"
   "introduction/part.tex" 1765270683.8031 21 7267ef387b932aa7af5083f5b4a8bc80 ""
   "introduction/what-is-llvm-ir.tex" 1767947352.99488 340 210d030c57a656ce86e2e70265fe1cb2 ""
   "introduction/what-is-llvm-ir/basic-blocks-labels.tex" 1768153012.44078 13859 046f55e8d5883949c10ea45875f08131 ""
   "introduction/what-is-llvm-ir/compiler-problem.tex" 1767948130.90826 25165 e5673e722fd89aac4775b1448e842edb ""
   "introduction/what-is-llvm-ir/core-concepts.tex" 1768153052.36158 765 2f4189a922a763e4a8536dc3d8354bec ""
-  "introduction/what-is-llvm-ir/functions.tex" 1768152913.32351 2511 13f143af327681d5b21b06ef557abada ""
+  "introduction/what-is-llvm-ir/functions.tex" 1768153408.73945 2568 aaac2e7650e2da455212b0ed6a16671a ""
   "introduction/what-is-llvm-ir/global-local-variables.tex" 1768152909.47358 4500 b431b4fbe1ac9a241ef66212d998d52e ""
   "introduction/what-is-llvm-ir/introduction.tex" 1765270683.79025 9166 37da3b520ae529a84ea76d2d00820ba8 ""
   "introduction/what-is-llvm-ir/llvm-dialects.tex" 1765925952.7324 12433 c06f9468f5c31b18ea695e24845977e4 ""
