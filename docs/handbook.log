@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2025.12.15)  11 JAN 2026 22:21
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2025.12.15)  12 JAN 2026 00:33
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -604,19 +604,19 @@ LaTeX Font Info:    ... okay on input line 12.
 *geometry* detected driver: pdftex
 *geometry* verbose mode - [ preamble ] result:
 * driver: pdftex
-* paper: a4paper
+* paper: a5paper
 * layout: <same size as paper>
 * layoutoffset:(h,v)=(0.0pt,0.0pt)
 * modes: 
-* h-part:(L,W,R)=(72.26999pt, 452.9679pt, 72.26999pt)
-* v-part:(T,H,B)=(72.26999pt, 700.50687pt, 72.26999pt)
-* \paperwidth=597.50787pt
-* \paperheight=845.04684pt
-* \textwidth=452.9679pt
-* \textheight=700.50687pt
-* \oddsidemargin=0.0pt
-* \evensidemargin=0.0pt
-* \topmargin=-31.8738pt
+* h-part:(L,W,R)=(54.2025pt, 312.69579pt, 54.2025pt)
+* v-part:(T,H,B)=(54.2025pt, 489.10287pt, 54.2025pt)
+* \paperwidth=421.10078pt
+* \paperheight=597.50787pt
+* \textwidth=312.69579pt
+* \textheight=489.10287pt
+* \oddsidemargin=-18.06749pt
+* \evensidemargin=-18.06749pt
+* \topmargin=-49.94128pt
 * \headheight=12.0pt
 * \headsep=19.8738pt
 * \topskip=11.0pt
@@ -751,18 +751,38 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has b
 <to be read again> 
                    \relax 
 l.1 \frontmatter
-                 [1 <./465218720_8763616726992194_1789456364342463852_n.jpg>] (./frontmatter/abbreviations.tex [1
+                 [1 <./465218720_8763616726992194_1789456364342463852_n.jpg>] [1
 
 
-] [2
+] (./frontmatter/abbreviations.tex [2] [3
 
-] [3]) [4] (./handbook.toc [5
+] [4]
+Underfull \hbox (badness 3407) in paragraph at lines 55--56
+   [] \T1/cmr/m/n/10.95 (+20) Left-to-right scan, Right-most deriva-tion
+ []
 
-] [6])
+[5] [6]
+Underfull \hbox (badness 2126) in paragraph at lines 91--92
+   [] \T1/cmr/m/n/10.95 (+20) In-tel/AMD pro-ces-sor ar-chi-tec-ture fam-ily
+ []
+
+) [7] (./handbook.toc [8
+
+]
+Underfull \hbox (badness 1264) in paragraph at lines 34--34
+ [][] [][][][][]\T1/cmr/m/n/10.95 (+20) SPIR[][]-V (Cross-Vendor Portable 
+ []
+
+[9]
+Overfull \hbox (1.53903pt too wide) in paragraph at lines 68--68
+ [][] [][][][][]\T1/cmr/m/n/10.95 (-20) AMD[][]: Com-pil-ing [][]AMDGPU[][] [][]IR[][] to [][]GCN[][]/[][]RDNA[][][][] [][]  
+ []
+
+[10] [11])
 \tf@toc=\write5
 \openout5 = `handbook.toc'.
 
- [7]) (./introduction/part.tex
+ [12]) (./introduction/part.tex
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
@@ -775,64 +795,414 @@ l.1 \part{Introduction}
 Chapter 1.
 (./introduction/what-is-llvm-ir/introduction.tex [2
 
-] [3]) (./introduction/what-is-llvm-ir/compiler-problem.tex [4] [5] [6] [7]
+] [3] [4] [5]) (./introduction/what-is-llvm-ir/compiler-problem.tex [6]
+Underfull \hbox (badness 1681) in paragraph at lines 11--12
+[]\T1/cmr/m/n/10.95 (+20) Since high-level pro-gram-ming lan-guages (C, Type-Script,
+ []
+
+[7] [8] [9] [10] [11] [12] [13]
 LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <10.95> not available
 (Font)              Font shape `T1/cmtt/m/n' tried instead on input line 38.
- [8]) (./introduction/what-is-llvm-ir/what-is-llvm-ir.tex [9] [10]) (./introduction/what-is-llvm-ir/core-concepts.tex (./introduction/what-is-llvm-ir/ssa-form.tex [11]) (./introduction/what-is-llvm-ir/modules-target-specification.tex [12{/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-ts1.enc}] [13] [14] [15] [16] [17]) (./introduction/what-is-llvm-ir/global-local-variables.tex [18]) (./introduction/what-is-llvm-ir/functions.tex [19] [20] [21] [22] [23] [24] [25] [26] [27] [28] [29] [30] [31] [32] [33] [34] [35] [36] [37] [38] [39] [40] [41] [42] [43] [44] [45] [46] [47] [48] [49] [50] [51] [52] [53] [54]
-Overfull \hbox (176.38441pt too wide) in paragraph at lines 2153--2154
+ [14]) (./introduction/what-is-llvm-ir/what-is-llvm-ir.tex [15] [16] [17]
+Underfull \hbox (badness 2608) in paragraph at lines 32--33
+[]\T1/cmr/m/n/10.95 (+20) Applies \T1/cmr/bx/n/10.95 (+20) fun-da-men-tal op-ti-miza-
+ []
+
+
+Underfull \hbox (badness 1107) in paragraph at lines 32--33
+\T1/cmr/m/n/10.95 (+20) con-stant ex-pres-sions at com-pile time, e.g., \T1/cmtt/m/n/10.95 x = 3 * 4
+ []
+
+[18] [19]) (./introduction/what-is-llvm-ir/core-concepts.tex [20] (./introduction/what-is-llvm-ir/ssa-form.tex [21{/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-ts1.enc}]) (./introduction/what-is-llvm-ir/modules-target-specification.tex
+Overfull \hbox (68.6364pt too wide) in paragraph at lines 21--22
+[]\T1/cmr/m/n/10.95 (-20) The \T1/cmr/bx/n/10.95 (-20) tar-get triple \T1/cmr/m/n/10.95 (-20) fol-lows the for-mat \T1/cmtt/m/n/10.95 architecture-vendor-os-environment
+ []
+
+[22] [23] [24] [25] [26] [27] [28]
+Overfull \hbox (10.15773pt too wide) in paragraph at lines 246--247
+[]\T1/cmr/m/n/10.95 (-20) The align-ment spec-i-fi-ca-tion for-mat is \T1/cmtt/m/n/10.95 i<size>:<abi>:<pref> \T1/cmr/m/n/10.95 (-20) [[]]: 
+ []
+
+[29] [30]) [31] (./introduction/what-is-llvm-ir/global-local-variables.tex
+Overfull \hbox (22.14627pt too wide) in paragraph at lines 5--6
+[]\T1/cmr/m/n/10.95 (-20) Identifiers come in two forms: \T1/cmr/bx/n/10.95 (-20) named \T1/cmr/m/n/10.95 (-20) (e.g., \T1/cmtt/m/n/10.95 %foo\T1/cmr/m/n/10.95 (-20) , \T1/cmtt/m/n/10.95 @DivisionByZero\T1/cmr/m/n/10.95 (-20) )
+ []
+
+[32] [33] [34]) (./introduction/what-is-llvm-ir/functions.tex [35] [36]
+Underfull \hbox (badness 2150) in paragraph at lines 85--89
+[]\T1/cmr/m/n/10.95 (+20) This in-di-cates which "fam-ily" an al-lo-ca-tor func-tion is
+ []
+
+
+Underfull \hbox (badness 3219) in paragraph at lines 85--89
+\T1/cmtt/m/n/10.95 "_ZnwmSt11align_val_t" \T1/cmr/m/n/10.95 (+20) for aligned \T1/cmtt/m/n/10.95 ::operator::new \T1/cmr/m/n/10.95 (+20) and
+ []
+
+[37] [38] [39] [40] [41]
+Underfull \hbox (badness 5133) in paragraph at lines 245--246
+[]\T1/cmr/m/n/10.95 (+20) The \T1/cmtt/m/n/10.95 disable_sanitizer_instrumentation \T1/cmr/m/n/10.95 (+20) at-tribute dis-
+ []
+
+[42] [43] [44] [45] [46]
+Overfull \hbox (2.20105pt too wide) in paragraph at lines 447--448
+[]\T1/cmtt/m/n/10.95 memory(argmem: read, inaccessiblemem: write)\T1/cmr/m/n/10.95 (-20) : May
+ []
+
+[47] [48] [49] [50] [51] [52] [53] [54] [55] [56] [57] [58] [59] [60] [61]
+Underfull \hbox (badness 3281) in paragraph at lines 946--947
+[]\T1/cmr/m/n/10.95 (+20) Use case: Elim-i-nates ex-cep-tion han-dling over-head in
+ []
+
+[62] [63] [64] [65] [66] [67] [68] [69] [70] [71] [72] [73] [74] [75] [76] [77] [78] [79] [80] [81]
+Underfull \hbox (badness 10000) in paragraph at lines 1614--1615
+[]\T1/cmr/m/n/10.95 (+20) Aggregates con-tain-ing char-ac-ter ar-rays larger than
+ []
+
+[82] [83] [84] [85] [86] [87] [88] [89] [90] [91] [92] [93] [94] [95] [96] [97]
+Overfull \hbox (316.65652pt too wide) in paragraph at lines 2153--2154
 []\T1/cmr/bx/n/10.95 (-20) "modular-format"="<type>,<string_idx>,<first_arg_idx>,<modular_impl_fn>,<impl_name>,<aspects...>" 
  []
 
-[55]) (./introduction/what-is-llvm-ir/type-system.tex [56] [57] [58]) (./introduction/what-is-llvm-ir/basic-blocks-labels.tex [59] [60] [61] [62]
-Overfull \hbox (32.73521pt too wide) in paragraph at lines 231--232
-[]\T1/cmtt/m/n/10.95 invoke <return_type> <function> (<args>) to label %normal unwind label %exception
+[98]) (./introduction/what-is-llvm-ir/type-system.tex [99]
+Overfull \hbox (5.26863pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 1.  WHAT IS [][]LLVM[][] [][]IR[][] AND WHY IS IT USEFUL? \T1/cmr/m/n/10.95 100
  []
 
-[63]
-Overfull \hbox (38.39359pt too wide) in paragraph at lines 237--238
-[]\T1/cmtt/m/n/10.95 callbr <return_type> <function> (<args>) to label %fallthrough [<indirect_labels>]
+[100]
+Overfull \hbox (5.26863pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 1.  WHAT IS [][]LLVM[][] [][]IR[][] AND WHY IS IT USEFUL? \T1/cmr/m/n/10.95 101
  []
 
-) (./introduction/what-is-llvm-ir/phi-instruction.tex [64])) (./introduction/what-is-llvm-ir/llvm-dialects.tex [65] [66]
-Overfull \hbox (83.95947pt too wide) in paragraph at lines 84--85
-[]\T1/cmr/bx/n/10.95 (-20) Intrinsic func-tions\T1/cmr/m/n/10.95 (-20) : Pro-vides hun-dreds of in-trin-sics for thread in-dex-ing (\T1/cmtt/m/n/10.95 llvm.nvvm.read.ptx.sreg.tid.x\T1/cmr/m/n/10.95 (-20) ),
+[101]
+Overfull \hbox (5.26863pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 1.  WHAT IS [][]LLVM[][] [][]IR[][] AND WHY IS IT USEFUL? \T1/cmr/m/n/10.95 102
  []
 
-[67])) (./introduction/why-llvm-for-typescript.tex [68]
+[102]
+Overfull \hbox (5.26863pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 1.  WHAT IS [][]LLVM[][] [][]IR[][] AND WHY IS IT USEFUL? \T1/cmr/m/n/10.95 103
+ []
+
+[103]
+Overfull \hbox (5.26863pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 1.  WHAT IS [][]LLVM[][] [][]IR[][] AND WHY IS IT USEFUL? \T1/cmr/m/n/10.95 104
+ []
+
+[104]) (./introduction/what-is-llvm-ir/basic-blocks-labels.tex
+Overfull \hbox (5.26863pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 1.  WHAT IS [][]LLVM[][] [][]IR[][] AND WHY IS IT USEFUL? \T1/cmr/m/n/10.95 105
+ []
+
+[105]
+Overfull \hbox (5.26863pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 1.  WHAT IS [][]LLVM[][] [][]IR[][] AND WHY IS IT USEFUL? \T1/cmr/m/n/10.95 106
+ []
+
+[106]
+Underfull \hbox (badness 10000) in paragraph at lines 50--50
+[][][]\T1/cmr/m/n/9 (+20) In the [][]LLVM[][] source tree, this is lo-cated at
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 50--50
+\T1/cmtt/m/n/9 llvm/include/llvm/IR/Instruction.def\T1/cmr/m/n/9 (+20) . On Ubuntu
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 50--50
+\T1/cmr/m/n/9 (+20) sys-tems with [][]LLVM[][] in-stalled, you can find it at
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 50--50
+\T1/cmtt/m/n/9 /usr/include/llvm-<version>/llvm/IR/Instruction.def \T1/cmr/m/n/9 (+20) (e.g.,
+ []
+
+
+Underfull \hbox (badness 3189) in paragraph at lines 50--50
+\T1/cmtt/m/n/9 /usr/include/llvm-18/llvm/IR/Instruction.def\T1/cmr/m/n/9 (+20) ). This file con-tains
+ []
+
+
+Underfull \hbox (badness 6842) in paragraph at lines 50--50
+\T1/cmr/m/n/9 (+20) can count all in-struc-tions on Linux with: \T1/cmtt/m/n/9 grep "HANDLE.*INST"
+ []
+
+
+Overfull \hbox (5.26863pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 1.  WHAT IS [][]LLVM[][] [][]IR[][] AND WHY IS IT USEFUL? \T1/cmr/m/n/10.95 107
+ []
+
+[107]
+Overfull \hbox (5.26863pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 1.  WHAT IS [][]LLVM[][] [][]IR[][] AND WHY IS IT USEFUL? \T1/cmr/m/n/10.95 108
+ []
+
+[108]
+Overfull \hbox (5.26863pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 1.  WHAT IS [][]LLVM[][] [][]IR[][] AND WHY IS IT USEFUL? \T1/cmr/m/n/10.95 109
+ []
+
+[109]
+Overfull \hbox (51.56937pt too wide) in paragraph at lines 118--119
+[]\T1/cmr/m/n/10.95 (-20) These in-trin-sics fol-low the nam-ing con-ven-tion \T1/cmtt/m/n/10.95 @llvm.<operation>.<type>\T1/cmr/m/n/10.95 (-20) ,
+ []
+
+
+Overfull \hbox (5.26863pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 1.  WHAT IS [][]LLVM[][] [][]IR[][] AND WHY IS IT USEFUL? \T1/cmr/m/n/10.95 110
+ []
+
+[110]
+Overfull \hbox (5.26863pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 1.  WHAT IS [][]LLVM[][] [][]IR[][] AND WHY IS IT USEFUL? \T1/cmr/m/n/10.95 111
+ []
+
+[111]
+Overfull \hbox (5.26863pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 1.  WHAT IS [][]LLVM[][] [][]IR[][] AND WHY IS IT USEFUL? \T1/cmr/m/n/10.95 112
+ []
+
+[112]
+Underfull \hbox (badness 10000) in paragraph at lines 229--230
+[]\T1/cmtt/m/n/10.95 switch <type> <value>, label <default> [ <cases> ]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 231--232
+[]\T1/cmtt/m/n/10.95 invoke <return_type> <function> (<args>) to label
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 233--234
+[]\T1/cmtt/m/n/10.95 catchswitch within <parent> [ <handlers> ] unwind
+ []
+
+
+Overfull \hbox (2.8536pt too wide) in paragraph at lines 235--236
+[]\T1/cmtt/m/n/10.95 cleanupret from <cleanuppad> unwind <destination> \T1/cmr/m/n/10.95 (-20) ---
+ []
+
+
+Overfull \hbox (5.26863pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 1.  WHAT IS [][]LLVM[][] [][]IR[][] AND WHY IS IT USEFUL? \T1/cmr/m/n/10.95 113
+ []
+
+[113]
+Underfull \hbox (badness 10000) in paragraph at lines 237--238
+[]\T1/cmtt/m/n/10.95 callbr <return_type> <function> (<args>) to label
+ []
+
+
+Underfull \hbox (badness 1117) in paragraph at lines 237--238
+\T1/cmtt/m/n/10.95 %fallthrough [<indirect_labels>] \T1/cmr/m/n/10.95 (+20) --- In-line as-sem-bly
+ []
+
+) (./introduction/what-is-llvm-ir/phi-instruction.tex
+Overfull \hbox (5.26863pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 1.  WHAT IS [][]LLVM[][] [][]IR[][] AND WHY IS IT USEFUL? \T1/cmr/m/n/10.95 114
+ []
+
+[114])) (./introduction/what-is-llvm-ir/llvm-dialects.tex
+Overfull \hbox (5.26863pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 1.  WHAT IS [][]LLVM[][] [][]IR[][] AND WHY IS IT USEFUL? \T1/cmr/m/n/10.95 115
+ []
+
+[115]
+Overfull \hbox (5.26863pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 1.  WHAT IS [][]LLVM[][] [][]IR[][] AND WHY IS IT USEFUL? \T1/cmr/m/n/10.95 116
+ []
+
+[116]
+Underfull \hbox (badness 10000) in paragraph at lines 27--28
+   [] \T1/cmr/m/n/10.95 (+20) 32-bit and 64-bit [][]ARM[][] ar-chi-tec-tures
+ []
+
+
+Overfull \hbox (5.26863pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 1.  WHAT IS [][]LLVM[][] [][]IR[][] AND WHY IS IT USEFUL? \T1/cmr/m/n/10.95 117
+ []
+
+[117]
+Overfull \hbox (5.26863pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 1.  WHAT IS [][]LLVM[][] [][]IR[][] AND WHY IS IT USEFUL? \T1/cmr/m/n/10.95 118
+ []
+
+[118]
+Underfull \hbox (badness 1163) in paragraph at lines 85--86
+[]\T1/cmr/bx/n/10.95 (+20) Calling con-ven-tions\T1/cmr/m/n/10.95 (+20) : Spe-cial con-ven-tions for ker-nel
+ []
+
+
+Overfull \hbox (5.26863pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 1.  WHAT IS [][]LLVM[][] [][]IR[][] AND WHY IS IT USEFUL? \T1/cmr/m/n/10.95 119
+ []
+
+[119]
+Overfull \hbox (50.60889pt too wide) in paragraph at lines 114--115
+[]\T1/cmr/bx/n/10.95 (-20) Intrinsics\T1/cmr/m/n/10.95 (-20) : [][]LLVM[][] in-trin-sics for wave op-er-a-tions (\T1/cmtt/m/n/10.95 llvm.amdgcn.wave.*\T1/cmr/m/n/10.95 (-20) ),
+ []
+
+
+Overfull \hbox (5.26863pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 1.  WHAT IS [][]LLVM[][] [][]IR[][] AND WHY IS IT USEFUL? \T1/cmr/m/n/10.95 120
+ []
+
+[120]
+Overfull \hbox (5.26863pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 1.  WHAT IS [][]LLVM[][] [][]IR[][] AND WHY IS IT USEFUL? \T1/cmr/m/n/10.95 121
+ []
+
+[121])) (./introduction/why-llvm-for-typescript.tex
+Overfull \hbox (5.26863pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 1.  WHAT IS [][]LLVM[][] [][]IR[][] AND WHY IS IT USEFUL? \T1/cmr/m/n/10.95 122
+ []
+
+[122]
 Chapter 2.
-(./introduction/why-llvm-for-typescript/rise-of-performance.tex) (./introduction/why-llvm-for-typescript/why-not-cpp-rust.tex) (./introduction/why-llvm-for-typescript/llvm-backend.tex [69
+(./introduction/why-llvm-for-typescript/rise-of-performance.tex
+Overfull \hbox (18.52814pt too wide) in paragraph at lines 1--1
+|[]\T1/cmr/bx/n/14.4 (-20) The Rise of Performance-Critical JavaScript| 
+ []
 
-]) (./introduction/why-llvm-for-typescript/use-cases.tex [70]) (./introduction/why-llvm-for-typescript/typescript-api.tex) (./introduction/why-llvm-for-typescript/design-philosophy.tex) (./introduction/why-llvm-for-typescript/summary.tex [71])) (./getting-started/part.tex [72] [73
+) (./introduction/why-llvm-for-typescript/why-not-cpp-rust.tex [123
+
+]) (./introduction/why-llvm-for-typescript/llvm-backend.tex
+Overfull \hbox (137.69551pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 2.  WHY [][]LLVM[][] FOR THE TYPESCRIPT AND JAVASCRIPT ECOSYSTEM? \T1/cmr/m/n/10.95 124
+ []
+
+[124]
+Overfull \hbox (25.71439pt too wide) in alignment at lines 34--50
+ [] [] 
+ []
+
+
+Overfull \hbox (137.69551pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 2.  WHY [][]LLVM[][] FOR THE TYPESCRIPT AND JAVASCRIPT ECOSYSTEM? \T1/cmr/m/n/10.95 125
+ []
+
+[125]) (./introduction/why-llvm-for-typescript/use-cases.tex) (./introduction/why-llvm-for-typescript/typescript-api.tex
+Overfull \hbox (137.69551pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 2.  WHY [][]LLVM[][] FOR THE TYPESCRIPT AND JAVASCRIPT ECOSYSTEM? \T1/cmr/m/n/10.95 126
+ []
+
+[126]) (./introduction/why-llvm-for-typescript/design-philosophy.tex) (./introduction/why-llvm-for-typescript/summary.tex
+Overfull \hbox (137.69551pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 2.  WHY [][]LLVM[][] FOR THE TYPESCRIPT AND JAVASCRIPT ECOSYSTEM? \T1/cmr/m/n/10.95 127
+ []
+
+[127])) (./getting-started/part.tex
+Overfull \hbox (137.69551pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 2.  WHY [][]LLVM[][] FOR THE TYPESCRIPT AND JAVASCRIPT ECOSYSTEM? \T1/cmr/m/n/10.95 128
+ []
+
+[128] [129
 
 ]) (./getting-started/installation.tex
 Chapter 3.
-(./getting-started/installation/installation.tex)) (./getting-started/implementing-functions.tex [74
+(./getting-started/installation/installation.tex)) (./getting-started/implementing-functions.tex [130
 
 ]
 Chapter 4.
-(./getting-started/implementing-functions/introduction.tex) (./getting-started/implementing-functions/simple-arithmetic.tex [75
+(./getting-started/implementing-functions/introduction.tex) (./getting-started/implementing-functions/simple-arithmetic.tex [131
 
-]) (./getting-started/implementing-functions/conditional-logic.tex [76] [77]) (./getting-started/implementing-functions/loops-phi-nodes.tex [78] [79]) (./getting-started/implementing-functions/type-shortcuts.tex [80])) (./multi-arch/part.tex [81] [82
+]
+Overfull \hbox (72.31024pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 4.  IMPLEMENTING TYPESCRIPT FUNCTIONS AS [][]LLVM[][] [][]IR[][] \T1/cmr/m/n/10.95 132
+ []
+
+[132]) (./getting-started/implementing-functions/conditional-logic.tex
+Overfull \hbox (72.31024pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 4.  IMPLEMENTING TYPESCRIPT FUNCTIONS AS [][]LLVM[][] [][]IR[][] \T1/cmr/m/n/10.95 133
+ []
+
+[133]
+Overfull \hbox (72.31024pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 4.  IMPLEMENTING TYPESCRIPT FUNCTIONS AS [][]LLVM[][] [][]IR[][] \T1/cmr/m/n/10.95 134
+ []
+
+[134]) (./getting-started/implementing-functions/loops-phi-nodes.tex
+Overfull \hbox (72.31024pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 4.  IMPLEMENTING TYPESCRIPT FUNCTIONS AS [][]LLVM[][] [][]IR[][] \T1/cmr/m/n/10.95 135
+ []
+
+[135]
+Overfull \hbox (72.31024pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 4.  IMPLEMENTING TYPESCRIPT FUNCTIONS AS [][]LLVM[][] [][]IR[][] \T1/cmr/m/n/10.95 136
+ []
+
+[136]
+Overfull \hbox (72.31024pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 4.  IMPLEMENTING TYPESCRIPT FUNCTIONS AS [][]LLVM[][] [][]IR[][] \T1/cmr/m/n/10.95 137
+ []
+
+[137]
+Overfull \hbox (72.31024pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 4.  IMPLEMENTING TYPESCRIPT FUNCTIONS AS [][]LLVM[][] [][]IR[][] \T1/cmr/m/n/10.95 138
+ []
+
+[138]) (./getting-started/implementing-functions/type-shortcuts.tex)) (./multi-arch/part.tex
+Overfull \hbox (72.31024pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 4.  IMPLEMENTING TYPESCRIPT FUNCTIONS AS [][]LLVM[][] [][]IR[][] \T1/cmr/m/n/10.95 139
+ []
+
+[139] [140
 
 ]) (./multi-arch/compiling-architectures.tex
 Chapter 5.
-(./multi-arch/compiling-architectures/target-triples.tex) (./multi-arch/compiling-architectures/compiling-with-llc.tex [83
+(./multi-arch/compiling-architectures/target-triples.tex [141
 
-]) (./multi-arch/compiling-architectures/architecture-specific-code.tex) (./multi-arch/compiling-architectures/data-layout.tex) (./multi-arch/compiling-architectures/cross-compilation.tex [84])) (./multi-arch/gpu-programming.tex [85]
+]) (./multi-arch/compiling-architectures/compiling-with-llc.tex) (./multi-arch/compiling-architectures/architecture-specific-code.tex
+Overfull \hbox (106.77922pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 5.  COMPILING [][]LLVM[][] [][]IR[][] FOR DIFFERENT [][]CPU[][] ARCHITECTURES \T1/cmr/m/n/10.95 142
+ []
+
+[142]) (./multi-arch/compiling-architectures/data-layout.tex
+Overfull \hbox (106.77922pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 5.  COMPILING [][]LLVM[][] [][]IR[][] FOR DIFFERENT [][]CPU[][] ARCHITECTURES \T1/cmr/m/n/10.95 143
+ []
+
+[143]) (./multi-arch/compiling-architectures/cross-compilation.tex
+Overfull \hbox (106.77922pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 5.  COMPILING [][]LLVM[][] [][]IR[][] FOR DIFFERENT [][]CPU[][] ARCHITECTURES \T1/cmr/m/n/10.95 144
+ []
+
+[144])) (./multi-arch/gpu-programming.tex
+Overfull \hbox (106.77922pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 5.  COMPILING [][]LLVM[][] [][]IR[][] FOR DIFFERENT [][]CPU[][] ARCHITECTURES \T1/cmr/m/n/10.95 145
+ []
+
+[145]
 Chapter 6.
-(./multi-arch/gpu-programming/introduction.tex) (./multi-arch/gpu-programming/nvidia-cuda.tex [86
+(./multi-arch/gpu-programming/introduction.tex) (./multi-arch/gpu-programming/nvidia-cuda.tex [146
 
 ]
-Overfull \hbox (14.57593pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 6.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS ALL ARCHITECTURES \T1/cmr/m/n/10.95 87
+Overfull \hbox (160.29198pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 6.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS ALL ARCHITECTURES \T1/cmr/m/n/10.95 147
  []
 
-[87]) (./multi-arch/gpu-programming/amd-rocm.tex) (./multi-arch/gpu-programming/intel-opencl.tex
-Overfull \hbox (14.57593pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 6.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS ALL ARCHITECTURES \T1/cmr/m/n/10.95 88
+[147]
+Overfull \hbox (160.29198pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 6.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS ALL ARCHITECTURES \T1/cmr/m/n/10.95 148
  []
 
-[88]
+[148]) (./multi-arch/gpu-programming/amd-rocm.tex
+Overfull \hbox (160.29198pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 6.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS ALL ARCHITECTURES \T1/cmr/m/n/10.95 149
+ []
+
+[149]) (./multi-arch/gpu-programming/intel-opencl.tex
+Overfull \hbox (160.29198pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 6.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS ALL ARCHITECTURES \T1/cmr/m/n/10.95 150
+ []
+
+[150]
+Underfull \hbox (badness 5475) in paragraph at lines 29--30
+[]\T1/cmtt/m/n/10.95 SPIRVCodegen.opencl.getGlobalIdX/Y/Z\T1/cmr/m/n/10.95 (+20) : Global work-
+ []
+
+
 Underfull \hbox (badness 10000) in paragraph at lines 39--39
 []|\T1/cmr/bx/n/10.95 (+20) NVIDIA
  []
@@ -857,17 +1227,37 @@ Underfull \hbox (badness 10000) in paragraph at lines 53--53
 []|\T1/cmtt/m/n/10.95 __shared__ \T1/cmr/m/n/10.95 (+20) (addr
  []
 
-) (./multi-arch/gpu-programming/gpu-compilation.tex
-Overfull \hbox (14.57593pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 6.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS ALL ARCHITECTURES \T1/cmr/m/n/10.95 89
+
+Overfull \hbox (121.41637pt too wide) in alignment at lines 37--55
+ [] [] [] [] 
  []
 
-[89]
-Overfull \hbox (14.57593pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 6.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS ALL ARCHITECTURES \T1/cmr/m/n/10.95 90
+
+Overfull \hbox (160.29198pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 6.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS ALL ARCHITECTURES \T1/cmr/m/n/10.95 151
  []
 
-[90]
+[151]) (./multi-arch/gpu-programming/gpu-compilation.tex
+Overfull \hbox (160.29198pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 6.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS ALL ARCHITECTURES \T1/cmr/m/n/10.95 152
+ []
+
+[152]
+Overfull \hbox (5.4601pt too wide) in paragraph at lines 40--40
+|[][][]\T1/cmr/bx/n/12 (-20) AMD[][]: Com-pil-ing [][]AMDGPU[][] [][]IR[][] to [][]GCN[][]/[][]RDNA[][]| 
+ []
+
+
+Overfull \hbox (160.29198pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 6.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS ALL ARCHITECTURES \T1/cmr/m/n/10.95 153
+ []
+
+[153]
+Overfull \hbox (160.29198pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 6.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS ALL ARCHITECTURES \T1/cmr/m/n/10.95 154
+ []
+
+[154]
 Underfull \hbox (badness 10000) in paragraph at lines 113--114
 []|\T1/cmtt/m/n/10.95 llc -march=nvptx64 -mcpu=sm_XX
  []
@@ -882,12 +1272,17 @@ Underfull \hbox (badness 10000) in paragraph at lines 117--118
 []|\T1/cmtt/m/n/10.95 llc -march=spir64 | llvm-spirv
  []
 
-)) (./reference/part.tex
-Overfull \hbox (14.57593pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 6.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS ALL ARCHITECTURES \T1/cmr/m/n/10.95 91
+
+Overfull \hbox (94.79pt too wide) in alignment at lines 109--119
+ [] [] [] 
  []
 
-[91] [92
+)) (./reference/part.tex
+Overfull \hbox (160.29198pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 6.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS ALL ARCHITECTURES \T1/cmr/m/n/10.95 155
+ []
+
+[155] [156
 
 ]) (./reference/instruction-reference.tex
 Chapter 7.
@@ -942,6 +1337,13 @@ Underfull \hbox (badness 10000) in paragraph at lines 20--20
  []
 
 
+Overfull \hbox (94.79001pt too wide) in alignment at lines 4--22
+ [] [] [] 
+ []
+
+[157
+
+]
 Underfull \hbox (badness 10000) in paragraph at lines 29--29
 []|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
  []
@@ -966,9 +1368,12 @@ Underfull \hbox (badness 10000) in paragraph at lines 37--37
 []|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
  []
 
-[93
 
-]) (./reference/instruction-reference/bitwise-operations.tex
+Overfull \hbox (94.79001pt too wide) in alignment at lines 25--39
+ [] [] [] 
+ []
+
+) (./reference/instruction-reference/bitwise-operations.tex
 Underfull \hbox (badness 10000) in paragraph at lines 7--7
 []|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
  []
@@ -998,6 +1403,11 @@ Underfull \hbox (badness 10000) in paragraph at lines 17--17
 []|\T1/cmtt/m/n/10.95 BinaryInst{opcode:
  []
 
+
+Overfull \hbox (94.79001pt too wide) in alignment at lines 3--19
+ [] [] [] 
+ []
+
 ) (./reference/instruction-reference/comparison-operations.tex
 Underfull \hbox (badness 10000) in paragraph at lines 22--22
 []|\T1/cmr/m/n/10.95 (+20) Unsigned
@@ -1009,11 +1419,21 @@ Underfull \hbox (badness 7888) in paragraph at lines 26--26
  []
 
 
+Overfull \hbox (80.56361pt too wide) in alignment at lines 4--28
+ [] [] [] 
+ []
+
+[158]
 Underfull \hbox (badness 10000) in paragraph at lines 45--45
 []|\T1/cmr/m/n/10.95 (+20) Ordered
  []
 
-[94]) (./reference/instruction-reference/memory-operations.tex) (./reference/instruction-reference/control-flow.tex [95]) (./reference/instruction-reference/type-conversions.tex
+
+Overfull \hbox (80.56361pt too wide) in alignment at lines 31--49
+ [] [] [] 
+ []
+
+) (./reference/instruction-reference/memory-operations.tex [159] [160]) (./reference/instruction-reference/control-flow.tex [161]) (./reference/instruction-reference/type-conversions.tex
 Underfull \hbox (badness 10000) in paragraph at lines 13--14
 []|\T1/cmtt/m/n/10.95 %r = fptrunc double %a to
  []
@@ -1028,75 +1448,180 @@ Underfull \hbox (badness 10000) in paragraph at lines 17--18
 []|\T1/cmtt/m/n/10.95 %r = bitcast i32 %a to
  []
 
-[96]) (./reference/instruction-reference/function-calls.tex) (./reference/instruction-reference/vector-operations.tex [97]) (./reference/instruction-reference/atomic-operations.tex)) (./reference/memory-model.tex [98]
-Chapter 8.
-(./reference/memory-model/stack-vs-heap.tex) (./reference/memory-model/alignment.tex [99
 
-]) (./reference/memory-model/address-spaces.tex
+Overfull \hbox (94.79001pt too wide) in alignment at lines 3--19
+ [] [] [] 
+ []
+
+[162]) (./reference/instruction-reference/function-calls.tex) (./reference/instruction-reference/vector-operations.tex [163]) (./reference/instruction-reference/atomic-operations.tex [164])) (./reference/memory-model.tex [165]
+Chapter 8.
+(./reference/memory-model/stack-vs-heap.tex [166
+
+]) (./reference/memory-model/alignment.tex
+Overfull \hbox (94.79pt too wide) in alignment at lines 24--44
+ [] [] [] 
+ []
+
+[167]) (./reference/memory-model/address-spaces.tex
 Underfull \hbox (badness 10000) in paragraph at lines 13--13
 []|\T1/cmr/m/n/10.95 (+20) Shared
  []
 
-[100]) (./reference/memory-model/getelementptr.tex) (./reference/memory-model/volatile-access.tex [101]) (./reference/memory-model/atomic-operations.tex)) (./reference/type-system.tex [102]
-Chapter 9.
-(./reference/type-system/introduction.tex) (./reference/type-system/integer-types.tex) (./reference/type-system/floating-point-types.tex [103
 
-]) (./reference/type-system/pointer-types.tex) (./reference/type-system/array-types.tex) (./reference/type-system/struct-types.tex [104]) (./reference/type-system/vector-types.tex) (./reference/type-system/function-types.tex [105]) (./reference/type-system/void-type.tex) (./reference/type-system/type-compatibility.tex)) (./advanced/part.tex [106] [107
+Overfull \hbox (107.18999pt too wide) in alignment at lines 5--19
+ [] [] [] [] 
+ []
+
+[168]) (./reference/memory-model/getelementptr.tex [169]) (./reference/memory-model/volatile-access.tex) (./reference/memory-model/atomic-operations.tex [170])) (./reference/type-system.tex [171]
+Chapter 9.
+(./reference/type-system/introduction.tex) (./reference/type-system/integer-types.tex [172
+
+]) (./reference/type-system/floating-point-types.tex) (./reference/type-system/pointer-types.tex [173]) (./reference/type-system/array-types.tex) (./reference/type-system/struct-types.tex [174]) (./reference/type-system/vector-types.tex [175]) (./reference/type-system/function-types.tex [176]) (./reference/type-system/void-type.tex) (./reference/type-system/type-compatibility.tex [177])) (./advanced/part.tex [178] [179
 
 ]) (./advanced/gpu-memory.tex
 Chapter 10.
-(./advanced/gpu-memory/gpu-memory-hierarchy.tex) (./advanced/gpu-memory/global-memory.tex) (./advanced/gpu-memory/shared-memory.tex [108
+(./advanced/gpu-memory/gpu-memory-hierarchy.tex
+Overfull \hbox (107.18999pt too wide) in alignment at lines 7--21
+ [] [] [] [] 
+ []
 
-]) (./advanced/gpu-memory/constant-memory.tex) (./advanced/gpu-memory/thread-synchronization.tex [109]) (./advanced/gpu-memory/memory-fences.tex [110]) (./advanced/gpu-memory/tiled-matrix-multiplication.tex [111] [112]) (./advanced/gpu-memory/key-takeaways.tex)) (./advanced/future-work.tex [113]
+) (./advanced/gpu-memory/global-memory.tex [180
+
+]) (./advanced/gpu-memory/shared-memory.tex
+Overfull \hbox (127.32407pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 10.  [][]GPU[][] MEMORY HIERARCHIES AND THREAD SYNCHRONIZATION \T1/cmr/m/n/10.95 181
+ []
+
+[181]) (./advanced/gpu-memory/constant-memory.tex) (./advanced/gpu-memory/thread-synchronization.tex
+Overfull \hbox (127.32407pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 10.  [][]GPU[][] MEMORY HIERARCHIES AND THREAD SYNCHRONIZATION \T1/cmr/m/n/10.95 182
+ []
+
+[182]
+Overfull \hbox (127.32407pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 10.  [][]GPU[][] MEMORY HIERARCHIES AND THREAD SYNCHRONIZATION \T1/cmr/m/n/10.95 183
+ []
+
+[183]) (./advanced/gpu-memory/memory-fences.tex
+Overfull \hbox (127.32407pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 10.  [][]GPU[][] MEMORY HIERARCHIES AND THREAD SYNCHRONIZATION \T1/cmr/m/n/10.95 184
+ []
+
+[184]
+Overfull \hbox (127.32407pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 10.  [][]GPU[][] MEMORY HIERARCHIES AND THREAD SYNCHRONIZATION \T1/cmr/m/n/10.95 185
+ []
+
+[185]) (./advanced/gpu-memory/tiled-matrix-multiplication.tex
+Overfull \hbox (127.32407pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 10.  [][]GPU[][] MEMORY HIERARCHIES AND THREAD SYNCHRONIZATION \T1/cmr/m/n/10.95 186
+ []
+
+[186]
+Overfull \hbox (127.32407pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 10.  [][]GPU[][] MEMORY HIERARCHIES AND THREAD SYNCHRONIZATION \T1/cmr/m/n/10.95 187
+ []
+
+[187]) (./advanced/gpu-memory/key-takeaways.tex)) (./advanced/future-work.tex
+Overfull \hbox (127.32407pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 10.  [][]GPU[][] MEMORY HIERARCHIES AND THREAD SYNCHRONIZATION \T1/cmr/m/n/10.95 188
+ []
+
+[188]
 Chapter 11.
-(./advanced/future-work/current-state.tex) (./advanced/future-work/apple-gpu-challenge.tex) (./advanced/future-work/typescript-developers.tex [114
+(./advanced/future-work/current-state.tex) (./advanced/future-work/apple-gpu-challenge.tex [189
 
-]) (./advanced/future-work/pytorch-tensorflow.tex
-Overfull \hbox (1.31586pt too wide) in paragraph at lines 3--4
-\T1/cmr/m/n/10.95 (-20) Frameworks like Py-Torch don't gen-er-ate Metal code ei-ther. In-stead, they use [][]\T1/cmr/bx/n/10.95 (-20) MPS[][]\T1/cmr/m/n/10.95 (-20) [[]][[]]^^VApple's
+]) (./advanced/future-work/typescript-developers.tex
+Overfull \hbox (38.30794pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 11.  FUTURE WORK: APPLE SILICON [][]GPU[][] SUPPORT \T1/cmr/m/n/10.95 190
  []
 
-) (./advanced/future-work/waiting-for.tex) (./advanced/future-work/current-workarounds.tex [115]) (./advanced/future-work/unified-memory.tex) (./advanced/future-work/timeline.tex) (./advanced/future-work/community-contributions.tex [116]
-Underfull \hbox (badness 2326) in paragraph at lines 35--36
-[]\T1/cmr/m/n/10.95 (+20) Apple Inc. \T1/cmr/m/it/10.95 (+20) Metal Pro-gram-ming Guide\T1/cmr/m/n/10.95 (+20) . Ap-ple De-vel-oper Doc-u-men-ta-tion Archive,
+[190]) (./advanced/future-work/pytorch-tensorflow.tex) (./advanced/future-work/waiting-for.tex
+Overfull \hbox (36.61633pt too wide) in paragraph at lines 18--19
+[]\T1/cmr/m/n/10.95 (-20) Alternatively, we could gen-er-ate \T1/cmtt/m/n/10.95 .metal \T1/cmr/m/n/10.95 (-20) source files programmatically[[]]: 
  []
 
 
-Underfull \hbox (badness 3769) in paragraph at lines 38--39
-[]\T1/cmr/m/n/10.95 (+20) Apple Inc. \T1/cmr/m/it/10.95 (+20) Metal Shad-ing Lan-guage Spec-i-fi-ca-tion, Ver-sion 4\T1/cmr/m/n/10.95 (+20) . Ap-ple De-vel-oper
+Overfull \hbox (38.30794pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 11.  FUTURE WORK: APPLE SILICON [][]GPU[][] SUPPORT \T1/cmr/m/n/10.95 191
+ []
+
+[191]) (./advanced/future-work/current-workarounds.tex) (./advanced/future-work/unified-memory.tex) (./advanced/future-work/timeline.tex
+Overfull \hbox (38.30794pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 11.  FUTURE WORK: APPLE SILICON [][]GPU[][] SUPPORT \T1/cmr/m/n/10.95 192
+ []
+
+[192]) (./advanced/future-work/community-contributions.tex
+Overfull \hbox (38.30794pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 11.  FUTURE WORK: APPLE SILICON [][]GPU[][] SUPPORT \T1/cmr/m/n/10.95 193
+ []
+
+[193]
+Underfull \hbox (badness 1867) in paragraph at lines 35--36
+\T1/cmr/m/n/10.95 (+20) Doc-u-men-ta-tion Archive, 2024. Avail-able at: [][]$\T1/cmtt/m/n/10.95 https : / /
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 35--36
+\T1/cmtt/m/n/10.95 developer . apple . com / library / archive / documentation /
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 38--39
-\T1/cmr/m/n/10.95 (+20) Doc-u-men-ta-tion, 2025. Avail-able at: [][]$\T1/cmtt/m/n/10.95 https : / / developer . apple . com / metal /
+[]\T1/cmr/m/n/10.95 (+20) Apple Inc. \T1/cmr/m/it/10.95 (+20) Metal Shad-ing Lan-guage Spec-i-fi-ca-tion,
  []
 
-[117
+
+Underfull \hbox (badness 10000) in paragraph at lines 38--39
+\T1/cmr/m/it/10.95 (+20) Ver-sion 4\T1/cmr/m/n/10.95 (+20) . Ap-ple De-vel-oper Doc-u-men-ta-tion, 2025.
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 38--39
+\T1/cmr/m/n/10.95 (+20) Avail-able at: [][]$\T1/cmtt/m/n/10.95 https : / / developer . apple . com / metal /
+ []
+
+[194
 
 
 ]
+Underfull \hbox (badness 10000) in paragraph at lines 44--45
+[]\T1/cmr/m/n/10.95 (+20) ApsarasX. \T1/cmr/m/it/10.95 (+20) llvm-bindings: [][]LLVM[][] bind-ings for
+ []
+
+[195]
 Underfull \hbox (badness 10000) in paragraph at lines 68--69
-[]\T1/cmr/m/n/10.95 (+20) SamoZ256. \T1/cmr/m/it/10.95 (+20) Break-ing down Metal's in-ter-me-di-ate rep-re-sen-ta-tion for-
+[]\T1/cmr/m/n/10.95 (+20) SamoZ256. \T1/cmr/m/it/10.95 (+20) Break-ing down Metal's in-ter-me-
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 68--69
-\T1/cmr/m/it/10.95 (+20) mat\T1/cmr/m/n/10.95 (+20) . Medium, 2024. Avail-able at: [][]$\T1/cmtt/m/n/10.95 https : / / medium . com / @samuliak /
+\T1/cmr/m/it/10.95 (+20) di-ate rep-re-sen-ta-tion for-mat\T1/cmr/m/n/10.95 (+20) . Medium, 2024.
  []
 
-)) (./backcover.tex [118]
+
+Underfull \hbox (badness 10000) in paragraph at lines 68--69
+\T1/cmr/m/n/10.95 (+20) Avail-able at: [][]$\T1/cmtt/m/n/10.95 https : / / medium . com / @samuliak /
+ []
+
+
+Overfull \hbox (97.48851pt too wide) in paragraph at lines 68--69
+\T1/cmtt/m/n/10.95 breaking-[]down-[]metals-[]intermediate-[]representation-[]format-[]41827022489c$[][] 
+ []
+
+)) (./backcover.tex [196]
 *geometry* verbose mode - [ newgeometry ] result:
 * driver: pdftex
-* paper: a4paper
+* paper: a5paper
 * layout: <same size as paper>
 * layoutoffset:(h,v)=(0.0pt,0.0pt)
 * modes: 
-* h-part:(L,W,R)=(0.0pt, 597.50787pt, 0.0pt)
-* v-part:(T,H,B)=(0.0pt, 845.04684pt, 0.0pt)
-* \paperwidth=597.50787pt
-* \paperheight=845.04684pt
-* \textwidth=597.50787pt
-* \textheight=845.04684pt
+* h-part:(L,W,R)=(0.0pt, 421.10078pt, 0.0pt)
+* v-part:(T,H,B)=(0.0pt, 597.50787pt, 0.0pt)
+* \paperwidth=421.10078pt
+* \paperheight=597.50787pt
+* \textwidth=421.10078pt
+* \textheight=597.50787pt
 * \oddsidemargin=-72.26999pt
 * \evensidemargin=-72.26999pt
 * \topmargin=-104.14378pt
@@ -1117,7 +1642,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 68--69
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
- [119
+ [197
 
 
 ]) (./handbook.aux)
@@ -1134,18 +1659,18 @@ Package rerunfilecheck Info: File `handbook.out' has not changed.
 (rerunfilecheck)             Checksum: ADDAFCF1D584B5530425CBCCABA7B2A5;22305.
  ) 
 Here is how much of TeX's memory you used:
- 31609 strings out of 475656
- 574884 string characters out of 5787140
- 2400975 words of memory out of 5000000
- 49095 multiletter control sequences out of 15000+600000
- 600824 words of font info for 294 fonts, out of 8000000 for 9000
+ 31741 strings out of 475656
+ 576102 string characters out of 5787140
+ 2248975 words of memory out of 5000000
+ 49101 multiletter control sequences out of 15000+600000
+ 604128 words of font info for 317 fonts, out of 8000000 for 9000
  430 hyphenation exceptions out of 8191
- 89i,8n,90p,7237b,2025s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbi1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx0900.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx1200.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx1440.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx2074.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx2488.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx3583.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm0600.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm0800.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm0900.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1200.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1440.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfsl1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfti0900.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfti1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfti1728.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt0900.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt1200.pfb>
-Output written on handbook.pdf (128 pages, 1516026 bytes).
+ 89i,8n,90p,7237b,2027s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbi1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx0800.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx0900.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx1200.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx1440.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx2074.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx2488.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx3583.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm0600.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm0800.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm0900.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1200.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1440.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfsl1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfti0900.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfti1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfti1728.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt0800.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt0900.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt1200.pfb>
+Output written on handbook.pdf (211 pages, 1685045 bytes).
 PDF statistics:
- 6379 PDF objects out of 7423 (max. 8388607)
- 6096 compressed objects within 61 object streams
- 3388 named destinations out of 3580 (max. 500000)
- 68692 words of extra memory for PDF output out of 74296 (max. 10000000)
+ 6910 PDF objects out of 7423 (max. 8388607)
+ 6534 compressed objects within 66 object streams
+ 3471 named destinations out of 3580 (max. 500000)
+ 73300 words of extra memory for PDF output out of 74296 (max. 10000000)
 
