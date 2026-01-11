@@ -361,13 +361,7 @@ Identifiers come in two forms: \textbf{named} (e.g., \texttt{\%foo}, \texttt{@Di
 @external_array = external global [100 x i32]
 \end{lstlisting}
 
-Global variables use the \texttt{@} prefix and have linkage specifiers:
-\begin{itemize}[noitemsep]
-  \item \texttt{global} --- Mutable global variable
-  \item \texttt{constant} --- Immutable global constant
-  \item \texttt{external} --- Declared elsewhere (no initializer)
-  \item \texttt{internal} --- Private to the module
-\end{itemize}
+Global variables use the \texttt{@} prefix and have linkage specifiers: \textbf{\textit{global}} (mutable global variable), \textbf{\textit{constant}} (immutable global constant), \textbf{\textit{external}} (declared elsewhere, no initializer), and \textbf{\textit{internal}} (private to the module). See section \ref{sec:type-system} for more details.
 
 \textbf{Local variables} (virtual registers) use the \texttt{\%} prefix and exist only within a function:
 
@@ -511,6 +505,7 @@ Common attributes:
 \end{itemize}
 
 \subsection{Type System}
+\label{sec:type-system}
 
 \acr{LLVM} \acr{IR} is strongly typed. Every value has an explicit type, and type mismatches are compile-time errors. The type system includes primitive types, aggregate types, and pointer types.
 
