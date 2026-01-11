@@ -1,0 +1,46 @@
+\subsection{Type System}
+\label{sec:type-system}
+
+\acr{LLVM} \acr{IR} is strongly typed. Every value has an explicit type, and type mismatches are compile-time errors. The type system includes primitive types, aggregate types, and pointer types.
+
+\textbf{Primitive types:}
+
+\begin{itemize}[noitemsep]
+  \item \textbf{Integer types}: \texttt{i1} (boolean), \texttt{i8}, \texttt{i16}, \texttt{i32}, \texttt{i64}, \texttt{i128} (arbitrary-width integers like \texttt{i7} or \texttt{i256} are also valid)
+  \item \textbf{Floating-point types}: \texttt{half} (16-bit), \texttt{float} (32-bit), \texttt{double} (64-bit), \texttt{fp128} (quad-precision)
+  \item \textbf{Void type}: \texttt{void} (used only for function return types, not for values)
+\end{itemize}
+
+\textbf{Aggregate types:}
+
+\begin{lstlisting}[style=ir]
+; Array: [length x element_type]
+[10 x i32]                    ; Array of 10 i32 values
+[3 x float]                   ; Array of 3 floats
+
+; Structure: { type1, type2, ... }
+{ i32, float, ptr }           ; Unpacked struct
+<{ i8, i32 }>                ; Packed struct (no padding)
+
+; Vector: <length x element_type>
+<4 x float>                   ; SIMD vector (SSE, NEON)
+<16 x i8>                     ; 128-bit packed integer vector
+\end{lstlisting}
+
+\textbf{Pointer type}: \texttt{ptr} (opaque pointer, introduced in \acr{LLVM} 15):
+
+\begin{lstlisting}[style=ir]
+%heap_ptr = call ptr @malloc(i64 64)
+store i32 42, ptr %heap_ptr
+%value = load i32, ptr %heap_ptr
+\end{lstlisting}
+
+Older \acr{LLVM} versions used typed pointers (\texttt{i32*}, \texttt{float*}), but modern \acr{LLVM} uses opaque \texttt{ptr} to simplify the type system and improve optimization.
+
+\textbf{Function types} specify signatures:
+
+\begin{lstlisting}[style=ir]
+; Function type: return_type (param_types)
+i32 (i32, i32)                ; Takes two i32, returns i32
+void (ptr, i64)               ; Takes pointer and i64, returns void
+\end{lstlisting}

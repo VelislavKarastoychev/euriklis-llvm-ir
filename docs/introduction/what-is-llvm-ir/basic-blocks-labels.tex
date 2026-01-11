@@ -1,0 +1,240 @@
+\subsection{Basic Blocks and Labels}
+
+\acr{LLVM} organizes function bodies into \textbf{basic blocks}---straight-line sequences of instructions with no branches except at the end. This structure is fundamental to control flow analysis and optimization.
+
+\begin{lstlisting}[style=ir]
+define i32 @max(i32 %a, i32 %b) {
+entry:
+  %cmp = icmp sgt i32 %a, %b  ; Compare: a > b?
+  br i1 %cmp, label %if.then, label %if.else
+
+if.then:
+  ret i32 %a
+
+if.else:
+  ret i32 %b
+}
+\end{lstlisting}
+
+Each basic block has three essential properties: \textbf{\textit{unique label}}, \textbf{\textit{sequential instructions}}, and \textbf{\textit{terminator instruction}}. We examine each of these properties below.
+
+\subsubsection{Unique Label}
+
+Every basic block has a name (\texttt{entry}, \texttt{if.then}, \texttt{if.else}) that serves as a branch target. The label identifies the block and allows other instructions to reference it as a control flow destination. Labels must be unique within a function---if two labels with the same name appear in the same function, the compiler will reject the code with a redefinition error. Note that labels in different functions can share the same name, as label scope is local to each function. By convention, the first basic block is named \texttt{entry}.
+
+Each instruction in a function must belong to a labeled basic block---there cannot be instructions floating outside of blocks. After a label, each instruction must appear on a new line; instructions cannot be placed on the same line as the label itself. While not syntactically required, instructions are typically indented below their block's label (usually with two spaces) to improve readability and visually distinguish labels from their instructions.
+
+\begin{lstlisting}[style=ir]
+entry:
+  %x = add i32 1, 2        ; New line, indented (typical style)
+  %y = mul i32 %x, 3
+  br label %next
+
+next:
+%z = sub i32 %y, 1         ; New line, not indented (valid but unusual)
+ret i32 %z
+\end{lstlisting}
+
+\subsubsection{Instructions and Opcodes}
+
+No control flow transfers occur in the middle of a basic block. Once execution enters a block at its label, all instructions execute sequentially from top to bottom until the terminator is reached. This property---single entry, single exit---is fundamental to control flow analysis and enables many compiler optimizations by simplifying data flow analysis.
+
+\acr{LLVM} instructions are the fundamental operations that manipulate values. While the exact syntax varies by instruction type, most instructions share a common structure consisting of an \textbf{optional result variable}, an \textbf{opcode} (operation name), \textbf{type information}, and \textbf{operands}. The typical form for binary operations is:
+
+\begin{lstlisting}[style=ir]
+%result = opcode type operand1, operand2
+\end{lstlisting}
+
+For example, \texttt{\%sum = add i32 \%a, \%b} follows this pattern. However, different instruction families have variations: comparison instructions include a \textit{predicate} (\texttt{\%cmp = icmp eq i32 \%a, \%b}), memory operations use explicit pointer types (\texttt{\%val = load i32, ptr \%ptr}), and side-effecting instructions like \texttt{store} produce no result. Despite these variations, all instructions combine an operation identifier with typed operands to perform their specific computation or effect.
+
+The complete and authoritative documentation for all \acr{LLVM} \acr{IR} instructions, including detailed syntax, semantics, and behavior specifications, is provided in the \textbf{\acr{LLVM} Language Reference Manual}, the official documentation maintained by the \acr{LLVM} Project\footnote{Available online at \url{https://llvm.org/docs/LangRef.html}}. This comprehensive reference covers every instruction opcode, from basic arithmetic operations to advanced vector manipulations and atomic operations. The canonical instruction enumeration is maintained in the \acr{LLVM} Project source code in the file \texttt{Instruction.def}\footnote{In the \acr{LLVM} source tree, this is located at \texttt{llvm/include/llvm/IR/Instruction.def}. On Ubuntu systems with \acr{LLVM} installed, you can find it at \texttt{/usr/include/llvm-<version>/llvm/IR/Instruction.def} (e.g., \texttt{/usr/include/llvm-18/llvm/IR/Instruction.def}). This file contains C++ macro definitions that enumerate all instruction opcodes. You can count all instructions on Linux with: \texttt{grep "HANDLE.*INST" /usr/include/llvm-18/llvm/IR/Instruction.def | wc -l}}. Note that unlike assembly languages for specific architectures, \acr{LLVM} does not provide a command-line tool to enumerate all opcodes---the Language Reference Manual serves as the definitive catalog. What follows is a concise overview of the most commonly used instruction categories with representative examples to illustrate typical usage patterns.
+
+\textbf{Arithmetic instructions:}
+
+\begin{lstlisting}[style=ir]
+%sum = add i32 %a, %b         ; Integer addition
+%diff = sub i32 %a, %b        ; Integer subtraction
+%prod = mul i32 %a, %b        ; Integer multiplication
+%quot = sdiv i32 %a, %b       ; Signed division
+%rem = srem i32 %a, %b        ; Signed remainder
+
+%fsum = fadd float %x, %y     ; 32-bit float addition
+%fdiff = fsub float %x, %y    ; 32-bit float subtraction
+%fprod = fmul float %x, %y    ; 32-bit float multiplication
+%fquot = fdiv float %x, %y    ; 32-bit float division
+
+%dsum = fadd double %x, %y    ; 64-bit double addition
+%ddiff = fsub double %x, %y   ; 64-bit double subtraction
+%dprod = fmul double %x, %y   ; 64-bit double multiplication
+%dquot = fdiv double %x, %y   ; 64-bit double division
+\end{lstlisting}
+
+Note that floating-point opcodes (\texttt{fadd}, \texttt{fsub}, \texttt{fmul}, \texttt{fdiv}) work for all floating-point types---the type specifier (\texttt{float}, \texttt{double}, \texttt{half}, \texttt{fp128}) determines the precision.
+
+\textbf{Advanced arithmetic operations:}
+
+For transcendental functions and advanced mathematical operations, \acr{LLVM} provides intrinsic functions. These are built-in functions prefixed with \texttt{llvm.} that map to efficient hardware instructions or optimized library implementations.
+
+\begin{lstlisting}[style=ir]
+; Trigonometric functions (arguments in radians)
+%s = call float @llvm.sin.f32(float %angle)
+%c = call double @llvm.cos.f64(double %angle)
+%t = call float @llvm.tan.f32(float %x)
+
+; Inverse trigonometric functions
+%asin = call float @llvm.asin.f32(float %x)
+%acos = call double @llvm.acos.f64(double %x)
+%atan = call float @llvm.atan.f32(float %x)
+%atan2 = call double @llvm.atan2.f64(double %y, double %x)
+
+; Hyperbolic functions
+%sinh = call float @llvm.sinh.f32(float %x)
+%cosh = call double @llvm.cosh.f64(double %x)
+%tanh = call float @llvm.tanh.f32(float %x)
+
+; Exponential and logarithmic functions
+%exp = call float @llvm.exp.f32(float %x)       ; e^x
+%exp2 = call double @llvm.exp2.f64(double %x)   ; 2^x
+%exp10 = call float @llvm.exp10.f32(float %x)   ; 10^x
+%log = call double @llvm.log.f64(double %x)     ; natural log (ln)
+%log2 = call float @llvm.log2.f32(float %x)     ; log base 2
+%log10 = call double @llvm.log10.f64(double %x) ; log base 10
+
+; Power and root functions
+%sqrt = call float @llvm.sqrt.f32(float %x)
+%pow = call double @llvm.pow.f64(double %base, double %exp)
+%powi = call float @llvm.powi.f32(float %base, i32 %exp)
+
+; Rounding and absolute value
+%floor = call float @llvm.floor.f32(float %x)
+%ceil = call double @llvm.ceil.f64(double %x)
+%round = call float @llvm.round.f32(float %x)
+%abs = call double @llvm.fabs.f64(double %x)
+
+; Fused multiply-add (a * b + c in one operation)
+%fma = call float @llvm.fma.f32(float %a, float %b, float %c)
+\end{lstlisting}
+
+These intrinsics follow the naming convention \texttt{@llvm.<operation>.<type>}, where the type suffix indicates the floating-point precision (\texttt{f32} for \texttt{float}, \texttt{f64} for \texttt{double}, \texttt{f16} for \texttt{half}). Note that all trigonometric functions operate in radians, not degrees.
+
+For mathematical functions not provided as \acr{LLVM} intrinsics, you must declare and call external library functions from the C math library. Notably, while hyperbolic functions (\texttt{sinh}, \texttt{cosh}, \texttt{tanh}) are available as intrinsics, their inverses (\texttt{asinh}, \texttt{acosh}, \texttt{atanh}) are not:
+
+\begin{lstlisting}[style=ir]
+; Declare external inverse hyperbolic functions
+declare float @asinhf(float)
+declare double @asinh(double)
+declare float @acoshf(float)
+declare double @acosh(double)
+declare float @atanhf(float)
+declare double @atanh(double)
+
+; Call the external functions
+%result_f = call float @asinhf(float %x)
+%result_d = call double @asinh(double %x)
+%acosh_result = call double @acosh(double %x)
+%atanh_result = call float @atanhf(float %x)
+\end{lstlisting}
+
+The \texttt{declare} statement tells \acr{LLVM} that these functions exist externally, but they are not implemented in your \acr{IR} code. At link time, you must link against the C math library (\texttt{libm}) to resolve these function references. For example, when compiling to an executable:
+
+\begin{lstlisting}[style=ir]
+# Compile LLVM IR to object file
+llc -filetype=obj myfile.ll -o myfile.o
+
+# Link with math library (-lm flag)
+clang myfile.o -lm -o myprogram
+\end{lstlisting}
+
+Or directly with \texttt{clang}:
+
+\begin{lstlisting}[style=ir]
+clang myfile.ll -lm -o myprogram
+\end{lstlisting}
+
+The \texttt{-lm} flag instructs the linker to include the math library where the implementations of \texttt{asinh}, \texttt{acosh}, \texttt{atanh}, and other standard math functions are found.
+
+\textbf{Bitwise operations:}
+
+\begin{lstlisting}[style=ir]
+%and_result = and i32 %a, %b  ; Bitwise AND
+%or_result = or i32 %a, %b    ; Bitwise OR
+%xor_result = xor i32 %a, %b  ; Bitwise XOR
+%shift_left = shl i32 %a, 2   ; Shift left by 2 bits
+%shift_right = lshr i32 %a, 2 ; Logical shift right
+%arith_shift = ashr i32 %a, 2 ; Arithmetic shift right (sign-extend)
+\end{lstlisting}
+
+\textbf{Comparison instructions:}
+
+\begin{lstlisting}[style=ir]
+; Integer comparisons (icmp)
+%eq = icmp eq i32 %a, %b      ; Equal
+%ne = icmp ne i32 %a, %b      ; Not equal
+%gt = icmp sgt i32 %a, %b     ; Signed greater than
+%lt = icmp slt i32 %a, %b     ; Signed less than
+%uge = icmp uge i32 %a, %b    ; Unsigned greater or equal
+
+; Floating-point comparisons (fcmp)
+%feq = fcmp oeq float %x, %y  ; Ordered equal
+%fgt = fcmp ogt float %x, %y  ; Ordered greater than
+%fne = fcmp une float %x, %y  ; Unordered or not equal
+\end{lstlisting}
+
+\textbf{Memory operations:}
+
+\begin{lstlisting}[style=ir]
+%ptr = alloca i32             ; Stack allocation
+store i32 42, ptr %ptr        ; Write to memory
+%val = load i32, ptr %ptr     ; Read from memory
+
+; Pointer arithmetic with getelementptr (GEP)
+%array_ptr = getelementptr [10 x i32], ptr %base, i64 0, i64 3
+; Access element 3 of array at %base
+\end{lstlisting}
+
+\textbf{Type conversion instructions:}
+
+\begin{lstlisting}[style=ir]
+%ext = zext i32 %a to i64     ; Zero-extend to wider type
+%trunc = trunc i64 %b to i32  ; Truncate to narrower type
+%fp_to_int = fptosi float %x to i32  ; Float to signed int
+%int_to_fp = sitofp i32 %y to float  ; Signed int to float
+%bitcast = bitcast i32 %z to float   ; Reinterpret bits
+\end{lstlisting}
+
+\textbf{Function calls:}
+
+\begin{lstlisting}[style=ir]
+%result = call i32 @compute(i32 %x, i32 %y)
+call void @print_value(i32 %result)
+\end{lstlisting}
+
+\textbf{Vector operations (\acr{SIMD}):}
+
+\begin{lstlisting}[style=ir]
+%vec_a = <4 x float> <float 1.0, float 2.0, float 3.0, float 4.0>
+%vec_b = <4 x float> <float 5.0, float 6.0, float 7.0, float 8.0>
+%vec_sum = fadd <4 x float> %vec_a, %vec_b
+\end{lstlisting}
+
+\subsubsection{Terminator Instructions}
+
+Every basic block must end with exactly one terminator that transfers control to another block or exits the function. The terminator determines where execution continues after the current block completes. The complete list of terminator instructions is:
+
+\begin{itemize}[noitemsep]
+  \item \texttt{ret <type> <value>} --- Return from function with a value
+  \item \texttt{ret void} --- Return from function without a value
+  \item \texttt{br label \%dest} --- Unconditional jump to a basic block
+  \item \texttt{br i1 \%cond, label \%true, label \%false} --- Conditional branch based on boolean condition
+  \item \texttt{switch <type> <value>, label <default> [ <cases> ]} --- Multi-way branch (jump table) that dispatches based on integer value
+  \item \texttt{indirectbr <type> <address>, [ <labels> ]} --- Indirect branch through a computed address (used for computed gotos and jump tables)
+  \item \texttt{invoke <return\_type> <function> (<args>) to label \%normal unwind label \%exception} --- Function call with exception handling support; transfers to \texttt{\%normal} on success or \texttt{\%exception} on exception
+  \item \texttt{resume <type> <value>} --- Resume exception propagation (used in exception handling to re-throw)
+  \item \texttt{catchswitch within <parent> [ <handlers> ] unwind <default>} --- Exception catch dispatch that transfers control to appropriate catch handler
+  \item \texttt{catchret from <catchpad> to label <successor>} --- Return from catch handler to normal control flow
+  \item \texttt{cleanupret from <cleanuppad> unwind <destination>} --- Return from cleanup handler (finally block) to either normal flow or exception propagation
+  \item \texttt{unreachable} --- Marks code paths that should never be reached; enables optimizations by indicating dead code
+  \item \texttt{callbr <return\_type> <function> (<args>) to label \%fallthrough [<indirect\_labels>]} --- Inline assembly call with multiple possible successors (supports \texttt{asm goto})
+\end{itemize}
+
+The first basic block in every function is conventionally named \texttt{entry} and serves as the function's entry point.

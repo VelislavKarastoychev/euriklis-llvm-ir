@@ -1,0 +1,23 @@
+\subsection{Static Single Assignment (\acr{SSA}) Form}
+
+\acr{SSA} is a property where each variable is assigned exactly once and every use refers to a specific definition. This constraint makes data flow explicit and enables powerful compiler optimizations by simplifying the analysis of how values propagate through the program.
+
+\textbf{Non-\acr{SSA} code:}
+\begin{lstlisting}[style=ir]
+x = 1
+x = x + 2  // x is assigned twice (not SSA)
+\end{lstlisting}
+
+\textbf{\acr{SSA} code:}
+\begin{lstlisting}[style=ir]
+%x1 = 1
+%x2 = add i32 %x1, 2  // Each value has unique name
+\end{lstlisting}
+
+The benefits of \acr{SSA} form include:
+\begin{itemize}[noitemsep]
+  \item \textbf{Constant propagation}: The value of \texttt{\%x2} is provably 3, enabling compile-time evaluation
+  \item \textbf{Dead code elimination}: Unused definitions can be safely removed without complex liveness analysis
+  \item \textbf{Register allocation}: Clear lifetime of each value simplifies mapping virtual registers to physical registers
+  \item \textbf{Simplified dependency tracking}: Each definition has a unique name, making def-use chains trivial to construct
+\end{itemize}

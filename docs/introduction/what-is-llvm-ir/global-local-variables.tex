@@ -1,0 +1,90 @@
+\subsection{Global and Local Variables}
+
+\acr{LLVM} distinguishes between global variables (module-level storage) and local variables (function-level virtual registers). In \acr{LLVM} terminology, these constructs are called \textbf{identifiers}. Global identifiers (functions, global variables) begin with the \texttt{@} character, while local identifiers (virtual registers, local names) begin with the \texttt{\%} character. This prefix-based naming scheme serves a crucial design purpose: it prevents conflicts with reserved words (such as opcodes like \texttt{add}, \texttt{mul}, or type names like \texttt{i32}, \texttt{void}). Since reserved words in \acr{LLVM} never start with \texttt{@} or \texttt{\%}, identifiers can never clash with them. This design provides flexibility\,---\,\acr{LLVM} can expand its set of reserved words in future versions without breaking existing code, as no valid identifier can conflict with a reserved word.
+
+Identifiers come in two forms: \textbf{named} (e.g., \texttt{\%foo}, \texttt{@DivisionByZero}) and \textbf{unnamed} (e.g., \texttt{\%12}, \texttt{@2}). Named identifiers follow the regular expression pattern \texttt{[-a-zA-Z\$.\allowbreak\_][-a-zA-Z\$.\allowbreak\_0-9]*}. Unnamed identifiers allow compilers to quickly generate temporary values without symbol table lookups.
+
+\textbf{Global variables} are declared outside functions and persist for the program's lifetime:
+
+\begin{lstlisting}[style=ir]
+@global_counter = global i32 0
+@constant_pi = constant float 3.14159
+@external_array = external global [100 x i32]
+\end{lstlisting}
+
+Global variables use the \texttt{@} prefix and have linkage specifiers: \textbf{\textit{global}} (mutable global variable), \textbf{\textit{constant}} (immutable global constant), \textbf{\textit{external}} (declared elsewhere, no initializer), and \textbf{\textit{internal}} (private to the module). See section \ref{sec:type-system} for more details.
+
+\textbf{Local variables} (virtual registers) use the \texttt{\%} prefix and exist only within a function:
+
+\begin{lstlisting}[style=ir]
+define i32 @compute(i32 %x) {
+entry:
+  %temp1 = add i32 %x, 5
+  %temp2 = mul i32 %temp1, 2
+  ret i32 %temp2
+}
+\end{lstlisting}
+
+In \acr{SSA} form, each local variable is assigned exactly once. For mutable variables (stack allocations), \acr{LLVM} uses memory operations:
+
+\begin{lstlisting}[style=ir]
+define void @mutable_example() {
+entry:
+  %ptr = alloca i32              ; Allocate stack space
+  store i32 42, ptr %ptr         ; Write to memory
+  %val = load i32, ptr %ptr      ; Read from memory
+  ret void
+}
+\end{lstlisting}
+
+\subsubsection*{SSA Values vs. Memory Locations}
+
+Understanding the distinction between \acr{SSA} values and memory locations is crucial:
+
+\textbf{SSA values} (virtual registers with \texttt{\%} prefix) can only be assigned \textbf{once}:
+
+\begin{lstlisting}[style=ir]
+%x = add i32 1, 2      ; %x = 3
+%x = mul i32 4, 5      ; ERROR: Cannot reassign %x (violates SSA)
+\end{lstlisting}
+
+Each new value requires a new variable name:
+
+\begin{lstlisting}[style=ir]
+%x = add i32 1, 2      ; %x = 3
+%y = mul i32 %x, 5     ; %y = 15 (new variable name)
+%z = add i32 %y, 1     ; %z = 16 (new variable name)
+\end{lstlisting}
+
+\textbf{Memory locations} (globals and \texttt{alloca}) can be stored to \textbf{multiple times}:
+
+\begin{lstlisting}[style=ir]
+@global_var = global i32 0
+
+define void @modify_memory() {
+  %local_ptr = alloca i32
+
+  ; Multiple stores to global memory
+  store i32 10, ptr @global_var
+  store i32 20, ptr @global_var    ; OK: Overwrites previous value
+  store i32 30, ptr @global_var    ; OK: Overwrites again
+
+  ; Multiple stores to local memory
+  store i32 100, ptr %local_ptr
+  store i32 200, ptr %local_ptr    ; OK: Overwrites previous value
+
+  ret void
+}
+\end{lstlisting}
+
+\textbf{Key distinction}: The pointer variable (\texttt{\%local\_ptr}) is assigned once (the \texttt{alloca} result), but the \textbf{memory location} it points to can be modified multiple times. Each \texttt{load} creates a new \acr{SSA} value:
+
+\begin{lstlisting}[style=ir]
+%ptr = alloca i32              ; %ptr assigned once (address)
+store i32 10, ptr %ptr
+%val1 = load i32, ptr %ptr     ; %val1 = 10 (new SSA value)
+store i32 20, ptr %ptr         ; Modify memory
+%val2 = load i32, ptr %ptr     ; %val2 = 20 (new SSA value)
+\end{lstlisting}
+
+This pattern allows mutable variables while maintaining \acr{SSA} form: the pointer names follow \acr{SSA} rules, but the memory they point to can change.

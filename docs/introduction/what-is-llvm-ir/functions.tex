@@ -1,0 +1,65 @@
+\subsection{Functions}
+
+Functions are the primary units of executable code in \acr{LLVM} \acr{IR}. A function declaration consists of:
+
+\begin{lstlisting}[style=ir]
+define <return_type> @function_name(<param_type> %param1, ...) {
+  ; function body
+}
+\end{lstlisting}
+
+The observant reader has probably noticed that the naming convention for functions in \acr{LLVM} matches that of global variables---both use the \texttt{@} prefix. This similarity is not coincidental: \textbf{functions are global values} in \acr{LLVM} \acr{IR}. Like global variables, functions are:
+
+\begin{itemize}[noitemsep]
+  \item Declared at \textbf{module scope} (not inside other functions)
+  \item Visible across the entire module
+  \item Have \textbf{addresses} that can be referenced and stored
+  \item Support \textbf{linkage types} controlling visibility and linking behavior
+\end{itemize}
+
+Functions can be treated as values and stored in function pointers:
+
+\begin{lstlisting}[style=ir]
+define i32 @my_function(i32 %x) {
+  %result = add i32 %x, 1
+  ret i32 %result
+}
+
+@function_ptr = global ptr @my_function  ; Store function address
+
+define void @call_via_pointer() {
+  %fptr = load ptr, ptr @function_ptr
+  %result = call i32 %fptr(i32 42)       ; Call through pointer
+  ret void
+}
+\end{lstlisting}
+
+In \acr{LLVM}'s type hierarchy, both \texttt{Function} and \texttt{GlobalVariable} inherit from \texttt{GlobalValue}, making them module-level entities with global visibility.
+
+\textbf{Linkage types} control visibility and linking behavior:
+
+\begin{itemize}[noitemsep]
+  \item \texttt{define} --- Default linkage (internal to module unless exported)
+  \item \texttt{define external} --- Exported symbol, visible to other modules
+  \item \texttt{define internal} --- Private to the module (similar to C \texttt{static})
+  \item \texttt{define weak} --- Can be overridden by other definitions
+  \item \texttt{declare} --- External function (declaration only, no body)
+\end{itemize}
+
+\textbf{Function attributes} modify compilation behavior:
+
+\begin{lstlisting}[style=ir]
+define i32 @pure_function(i32 %x) nounwind readnone {
+  %result = mul i32 %x, %x
+  ret i32 %result
+}
+\end{lstlisting}
+
+Common attributes:
+\begin{itemize}[noitemsep]
+  \item \texttt{nounwind} --- Function never throws exceptions
+  \item \texttt{readnone} --- Pure function, no memory access
+  \item \texttt{readonly} --- Function only reads memory
+  \item \texttt{alwaysinline} --- Force inlining
+  \item \texttt{noinline} --- Prevent inlining
+\end{itemize}

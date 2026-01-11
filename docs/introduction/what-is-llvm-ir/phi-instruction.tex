@@ -1,0 +1,59 @@
+\subsection{The \acr{PHI} Instruction}
+
+When control flow merges from multiple basic blocks, \acr{SSA} form requires a mechanism to select the appropriate value based on which predecessor block was executed. The \texttt{phi} instruction serves this purpose.
+
+\begin{lstlisting}[style=ir]
+define i32 @abs(i32 %x) {
+entry:
+  %is_neg = icmp slt i32 %x, 0
+  br i1 %is_neg, label %negate, label %done
+
+negate:
+  %neg = sub i32 0, %x
+  br label %done
+
+done:
+  %result = phi i32 [ %x, %entry ], [ %neg, %negate ]
+  ret i32 %result
+}
+\end{lstlisting}
+
+The \texttt{phi} instruction syntax is:
+
+\begin{lstlisting}[style=ir]
+%result = phi <type> [ <value1>, %block1 ], [ <value2>, %block2 ], ...
+\end{lstlisting}
+
+Semantics: "If control flow arrived from \texttt{\%block1}, use \texttt{<value1>}; if from \texttt{\%block2}, use \texttt{<value2>}."
+
+\textbf{Why \texttt{phi} is necessary:}
+
+Without \texttt{phi}, we cannot maintain \acr{SSA} form when values merge from different control paths. Consider this invalid attempt:
+
+\begin{lstlisting}[style=ir]
+; INVALID: Cannot assign to %result in multiple blocks
+entry:
+  %result = ... ; First assignment
+  br ...
+
+other_block:
+  %result = ... ; ERROR: violates SSA (redefinition)
+\end{lstlisting}
+
+The \texttt{phi} instruction solves this by creating a single assignment point that selects from multiple incoming values.
+
+\textbf{Multiple \texttt{phi} nodes:}
+
+A block can have multiple \texttt{phi} instructions. All \texttt{phi} instructions in a block are conceptually executed simultaneously before any other instructions:
+
+\begin{lstlisting}[style=ir]
+loop:
+  %i = phi i32 [ 0, %entry ], [ %i_next, %loop ]
+  %sum = phi i32 [ 0, %entry ], [ %sum_next, %loop ]
+  %i_next = add i32 %i, 1
+  %sum_next = add i32 %sum, %i
+  %cond = icmp slt i32 %i_next, 10
+  br i1 %cond, label %loop, label %exit
+\end{lstlisting}
+
+This example implements a loop that sums integers from 0 to 9, demonstrating how \texttt{phi} enables iterative control flow in \acr{SSA} form.
