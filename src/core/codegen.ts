@@ -23,6 +23,9 @@ export class LLVMCodegen {
     float: Types.float,
     double: Types.double,
     ptr: Types.ptr,
+    // Factory methods for arbitrary-width types
+    int: (bitWidth: Types.TSInteger) => new Types.IntType(bitWidth),
+    floatType: (kind: "half" | "float" | "double" | "fp128" | "x86_fp80" | "ppc_fp128") => new Types.FloatType(kind),
   };
 
   // Static opcode constants for IntelliSense
