@@ -22,8 +22,13 @@ export class VoidType extends LLVMType {
 export class IntType extends LLVMType {
   private bitWidth: number;
 
-  constructor(bitWidth: number) {
+  constructor(bitWidth: TSInteger) {
     super();
+    // check if the bitWidth is really an integer:
+    if (!Number.isInteger(bitWidth) || bitWidth <= 0) {
+      throw new Error(`Bit width must be a positive integer, got ${bitWidth}.`);
+    }
+
     this.bitWidth = bitWidth;
   }
 
@@ -40,9 +45,17 @@ export class IntType extends LLVMType {
  * Floating point type (half, float, double, fp128, etc.)
  */
 export class FloatType extends LLVMType {
-  private kind: "half" | "float" | "double" | "fp128" | "x86_fp80" | "ppc_fp128";
+  private kind:
+    | "half"
+    | "float"
+    | "double"
+    | "fp128"
+    | "x86_fp80"
+    | "ppc_fp128";
 
-  constructor(kind: "half" | "float" | "double" | "fp128" | "x86_fp80" | "ppc_fp128") {
+  constructor(
+    kind: "half" | "float" | "double" | "fp128" | "x86_fp80" | "ppc_fp128",
+  ) {
     super();
     this.kind = kind;
   }
@@ -68,7 +81,9 @@ export class PointerType extends LLVMType {
   toString(): string {
     // Modern LLVM uses opaque pointers (just "ptr")
     if (!this.pointeeType) {
-      return this.addressSpace === 0 ? "ptr" : `ptr addrspace(${this.addressSpace})`;
+      return this.addressSpace === 0
+        ? "ptr"
+        : `ptr addrspace(${this.addressSpace})`;
     }
     // Legacy typed pointers
     return this.addressSpace === 0
@@ -103,7 +118,11 @@ export class VectorType extends LLVMType {
   private numElements: number;
   private scalable: boolean;
 
-  constructor(elementType: LLVMType, numElements: number, scalable: boolean = false) {
+  constructor(
+    elementType: LLVMType,
+    numElements: number,
+    scalable: boolean = false,
+  ) {
     super();
     this.elementType = elementType;
     this.numElements = numElements;
@@ -124,7 +143,11 @@ export class StructType extends LLVMType {
   private packed: boolean;
   private name?: string;
 
-  constructor(elementTypes: LLVMType[], packed: boolean = false, name?: string) {
+  constructor(
+    elementTypes: LLVMType[],
+    packed: boolean = false,
+    name?: string,
+  ) {
     super();
     this.elementTypes = elementTypes;
     this.packed = packed;
@@ -136,7 +159,7 @@ export class StructType extends LLVMType {
       return `%${this.name}`;
     }
 
-    const types = this.elementTypes.map(t => t.toString()).join(", ");
+    const types = this.elementTypes.map((t) => t.toString()).join(", ");
     if (this.packed) {
       return `<{ ${types} }>`;
     }
@@ -152,7 +175,11 @@ export class FunctionType extends LLVMType {
   private paramTypes: LLVMType[];
   private isVarArg: boolean;
 
-  constructor(returnType: LLVMType, paramTypes: LLVMType[], isVarArg: boolean = false) {
+  constructor(
+    returnType: LLVMType,
+    paramTypes: LLVMType[],
+    isVarArg: boolean = false,
+  ) {
     super();
     this.returnType = returnType;
     this.paramTypes = paramTypes;
@@ -160,7 +187,7 @@ export class FunctionType extends LLVMType {
   }
 
   toString(): string {
-    const params = this.paramTypes.map(t => t.toString()).join(", ");
+    const params = this.paramTypes.map((t) => t.toString()).join(", ");
     const vararg = this.isVarArg ? ", ..." : "";
     return `${this.returnType.toString()} (${params}${vararg})`;
   }
@@ -180,3 +207,6 @@ export const double = new FloatType("double");
 
 export const voidType = new VoidType();
 export const ptr = new PointerType();
+// not a type but just note that the type
+// number has to be integer (simulation of int type in ts)
+export type TSInteger = number;
