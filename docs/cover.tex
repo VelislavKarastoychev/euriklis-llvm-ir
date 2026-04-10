@@ -18,14 +18,14 @@
     \fill[accentgold,opacity=0.9]
         ([yshift=2.2cm]current page.south west) rectangle ([yshift=2cm]current page.south east);
 
-    % Central decorative frame
+    % Central decorative frame (full size to match page borders)
     \draw[accentgold,line width=2pt,opacity=0.8]
-        ([shift={(2cm,4cm)}]current page.south west) rectangle ([shift={(-2cm,-4cm)}]current page.north east);
+        ([shift={(2cm,2cm)}]current page.south west) rectangle ([shift={(-2cm,-2cm)}]current page.north east);
     \draw[white,line width=0.5pt,opacity=0.6]
-        ([shift={(2.1cm,4.1cm)}]current page.south west) rectangle ([shift={(-2.1cm,-4.1cm)}]current page.north east);
+        ([shift={(2.1cm,2.1cm)}]current page.south west) rectangle ([shift={(-2.1cm,-2.1cm)}]current page.north east);
 
-    % Technology Stack Diagram
-    \begin{scope}[shift={(current page.center)}, yshift=-6.5cm]
+    % Technology Stack Diagram (shifted up more)
+    \begin{scope}[shift={(current page.center)}, yshift=-5cm]
         % Define colors for each technology
         \definecolor{tsblue}{RGB}{0,122,204}
         \definecolor{llvmred}{RGB}{194,66,52}
@@ -63,30 +63,32 @@
     \end{scope}
 \end{tikzpicture}
 
-\vspace*{3cm}
+\vspace*{2cm}
 \begin{center}
     % Author name at top
-    {\LARGE\itshape\color{white}Velislav S. Karastoychev\par}
+    {\Large\itshape\color{white}Velislav S. Karastoychev\par}
 
-    \vspace{3cm}
+    \vspace{1.0cm}
 
     % Title
-    {\fontsize{40}{48}\selectfont\bfseries\color{white}
-    Programming LLVM IR\\[0.5cm]
+    {\fontsize{15}{20}\selectfont\bfseries\color{white}
+    Programming LLVM IR\\[0.2cm]
     with TypeScript\par}
 
-    \vspace{0.8cm}
+    \vspace{0.3cm}
 
     % Decorative line
-    {\color{accentgold}\rule{10cm}{2pt}}
+    {\color{accentgold}\rule{6cm}{2pt}}
 
-    \vspace{0.8cm}
+    \vspace{0.3cm}
 
     % Subtitle
-    {\Large\color{white!90}
-    A Practical Handbook for Cross-Platform and Multi-Architecture Code Generation\par}
+    {\small\color{white!90}
+    A Practical Handbook for\\[0.15cm]
+    Cross-Platform and Multi-Architecture\\[0.15cm]
+    Code Generation\par}
 
-    \vfill
+    \vspace{1cm}
 \end{center}
 \end{titlepage}
 \nopagecolor
@@ -95,7 +97,7 @@
 \newpage
 \thispagestyle{empty}
 \begin{center}
-    \vspace*{3cm}
+    \vspace*{2cm}
 
     % Book title
     {\Large\bfseries Programming \acr{LLVM} \acr{IR} with TypeScript\par}

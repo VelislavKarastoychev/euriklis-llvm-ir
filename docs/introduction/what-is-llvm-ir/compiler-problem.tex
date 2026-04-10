@@ -11,6 +11,7 @@ The assembly language is architecture-specific: x86-64 assembly differs fundamen
 Since high-level programming languages (C, TypeScript, Python, etc.) provide abstractions far removed from machine instructions, there must exist a mechanism to translate source code into executable machine code for the target architecture. This translation is performed by specialized software systems:
 
 \subsection{Compiler}
+\label{subsec:compiler-phases}
 A compiler translates the entire source program into native machine code (or assembly) \textit{before execution}. The canonical compiler architecture, established by Aho, Sethi, Ullman, and Lam~\cite{dragon2006} in their seminal work \textit{Compilers: Principles, Techniques, and Tools} (the "Dragon Book"), organizes compilation into distinct phases:
 
   \begin{enumerate}[leftmargin=2cm,itemsep=0.2cm]
