@@ -3,11 +3,11 @@
 \chapter*{Preface}
 \addcontentsline{toc}{chapter}{Preface}
 
-The purpose of this handbook is to provide a comprehensive explanation of how to use the \texttt{@euriklis/llvm-ir} library for programmatic generation of \acr{LLVM} intermediate representation targeting \acr{CPU}s and \acr{GPU}s from TypeScript and JavaScript.
+This work investigates the theoretical foundations and practical implementation of programmatic \acr{LLVM} intermediate representation generation from TypeScript, with particular emphasis on heterogeneous computing architectures spanning both \acr{CPU}s and \acr{GPU}s. It presents the \texttt{@euriklis/llvm-ir} library as a case study in bridging high-level dynamic language ecosystems with low-level compilation infrastructure.
 
-We have chosen a pedagogical approach that emphasizes \textbf{learning through examples}. This methodology is particularly well-suited for a handbook intended as a practical guide. Rather than starting with abstract theory, we demonstrate concepts through working code that readers can immediately understand, modify, and experiment with. Each example builds upon previous ones, gradually introducing complexity while maintaining clarity.
+The research methodology employed integrates formal theoretical analysis with empirical case studies. While compiler theory and intermediate representation design demand rigorous mathematical formalization—including static single assignment form, control flow graphs, and type system semantics—the practical application of these concepts requires concrete instantiation. Consequently, each theoretical construct is accompanied by its corresponding implementation, demonstrating the translation from abstract specification to executable code generation.
 
-However, given the inherent theoretical complexity of \acr{LLVM} \acr{IR}, compiler design, and heterogeneous computing, we also provide comprehensive theoretical foundations. The handbook includes formal \acr{LLVM} definitions, detailed explanations of all instructions in the intermediate language, memory models, type systems, and architecture-specific intrinsics. This dual approach—practical examples supported by rigorous theory—ensures the handbook serves both as a tutorial for beginners and as a reference for experienced developers.
+The structure of this work reflects this dual perspective. Part~I establishes the theoretical foundations of \acr{LLVM} \acr{IR} and its formal syntax. Part~II develops a systematic methodology for code generation, examining the semantic mappings between TypeScript language constructs and their intermediate representation. Parts~III through~VI extend this analysis to cross-platform compilation, heterogeneous computing architectures, and complete compiler design. Throughout, the exposition maintains formal rigor while providing sufficient implementation detail to support reproducibility and further research.
 
 \subsection*{Acknowledgments}
 

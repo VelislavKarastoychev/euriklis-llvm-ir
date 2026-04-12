@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.1.29)  7 APR 2026 23:52
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.1.29)  11 APR 2026 14:05
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -679,32 +679,32 @@ Package hyperref Info: Link coloring ON on input line 12.
 \openout4 = `handbook.out'.
 
  (./cover.tex
-<typescript.png, id=523, 256.96pt x 256.96pt>
+<typescript.png, id=519, 256.96pt x 256.96pt>
 File: typescript.png Graphic file (type png)
 <use typescript.png>
 Package pdftex.def Info: typescript.png  used on input line 37.
 (pdftex.def)             Requested size: 56.9055pt x 56.90385pt.
-<LLVM_logo.png, id=525, 200.24812pt x 125.46875pt>
+<LLVM_logo.png, id=521, 200.24812pt x 125.46875pt>
 File: LLVM_logo.png Graphic file (type png)
 <use LLVM_logo.png>
 Package pdftex.def Info: LLVM_logo.png  used on input line 40.
 (pdftex.def)             Requested size: 56.9055pt x 35.65366pt.
-<Nvidia_logo.svg.png, id=526, 704.6325pt x 518.93875pt>
+<Nvidia_logo.svg.png, id=522, 704.6325pt x 518.93875pt>
 File: Nvidia_logo.svg.png Graphic file (type png)
 <use Nvidia_logo.svg.png>
 Package pdftex.def Info: Nvidia_logo.svg.png  used on input line 46.
 (pdftex.def)             Requested size: 39.83368pt x 29.32959pt.
-<amd-logo-wallpaper.jpg, id=527, 271.0125pt x 165.61874pt>
+<amd-logo-wallpaper.jpg, id=523, 271.0125pt x 165.61874pt>
 File: amd-logo-wallpaper.jpg Graphic file (type jpg)
 <use amd-logo-wallpaper.jpg>
 Package pdftex.def Info: amd-logo-wallpaper.jpg  used on input line 49.
 (pdftex.def)             Requested size: 39.83368pt x 24.34135pt.
-<spirv.png, id=528, 319.1925pt x 159.59625pt>
+<spirv.png, id=524, 319.1925pt x 159.59625pt>
 File: spirv.png Graphic file (type png)
 <use spirv.png>
 Package pdftex.def Info: spirv.png  used on input line 52.
 (pdftex.def)             Requested size: 39.83368pt x 19.91537pt.
-<ARM.png, id=529, 386.44376pt x 131.49126pt>
+<ARM.png, id=525, 386.44376pt x 131.49126pt>
 File: ARM.png Graphic file (type png)
 <use ARM.png>
 Package pdftex.def Info: ARM.png  used on input line 55.
@@ -722,7 +722,7 @@ LaTeX Font Warning: Font shape `T1/cmr/bx/n' in size <15> not available
 
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-t1.enc} <./typescript.png> <./LLVM_logo.png> <./Nvidia_logo.svg.png> <./amd-logo-wallpaper.jpg> <./spirv.png> <./ARM.png>]
-<465218720_8763616726992194_1789456364342463852_n.jpg, id=545, 1084.05pt x 1084.05pt>
+<465218720_8763616726992194_1789456364342463852_n.jpg, id=541, 1084.05pt x 1084.05pt>
 File: 465218720_8763616726992194_1789456364342463852_n.jpg Graphic file (type jpg)
 <use 465218720_8763616726992194_1789456364342463852_n.jpg>
 Package pdftex.def Info: 465218720_8763616726992194_1789456364342463852_n.jpg  used on input line 113.
@@ -774,7 +774,7 @@ Underfull \hbox (badness 1264) in paragraph at lines 22--22
  []
 
 [9]
-Overfull \hbox (1.53903pt too wide) in paragraph at lines 68--68
+Overfull \hbox (1.53903pt too wide) in paragraph at lines 67--67
  [][] [][][][][]\T1/cmr/m/n/10.95 (-20) AMD[][]: Com-pil-ing [][]AMDGPU[][] [][]IR[][] to [][]GCN[][]/[][]RDNA[][][][] [][]  
  []
 
@@ -978,12 +978,12 @@ Overfull \hbox (173.94814pt too wide) has occurred while \output is active
 \T1/cmr/m/sl/10.95 CHAPTER 1.  MODERN CHALLENGES IN PROGRAMMING LANGUAGES AND PARADIGMS \T1/cmr/m/n/10.95 31
  []
 
-[31]) (./introduction/why-llvm-for-typescript/summary.tex
+[31]) (./introduction/why-llvm-for-typescript/installation.tex) (./introduction/why-llvm-for-typescript/summary.tex
 Overfull \hbox (173.94814pt too wide) has occurred while \output is active
 \T1/cmr/m/sl/10.95 CHAPTER 1.  MODERN CHALLENGES IN PROGRAMMING LANGUAGES AND PARADIGMS \T1/cmr/m/n/10.95 32
  []
 
-[32]) (./getting-started/installation/installation.tex)) (./introduction/core-concepts-llvm-syntax.tex
+[32])) (./introduction/core-concepts-llvm-syntax.tex
 Overfull \hbox (173.94814pt too wide) has occurred while \output is active
 \T1/cmr/m/sl/10.95 CHAPTER 1.  MODERN CHALLENGES IN PROGRAMMING LANGUAGES AND PARADIGMS \T1/cmr/m/n/10.95 33
  []
@@ -1589,96 +1589,115 @@ Chapter 3.
 (./getting-started/implementing-functions/introduction.tex) (./getting-started/implementing-functions/simple-arithmetic.tex [130
 
 ]
-Overfull \hbox (72.31024pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 3.  IMPLEMENTING TYPESCRIPT FUNCTIONS AS [][]LLVM[][] [][]IR[][] \T1/cmr/m/n/10.95 131
+Overfull \hbox (211.0912pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 3.  CODE GENERATION TECHNIQUES FOR TYPESCRIPT TO [][]LLVM[][] [][]IR[][] TRANSLATION \T1/cmr/m/n/10.95 131
  []
 
 [131]) (./getting-started/implementing-functions/conditional-logic.tex
-Overfull \hbox (72.31024pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 3.  IMPLEMENTING TYPESCRIPT FUNCTIONS AS [][]LLVM[][] [][]IR[][] \T1/cmr/m/n/10.95 132
+Overfull \hbox (211.0912pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 3.  CODE GENERATION TECHNIQUES FOR TYPESCRIPT TO [][]LLVM[][] [][]IR[][] TRANSLATION \T1/cmr/m/n/10.95 132
  []
 
 [132]
-Overfull \hbox (72.31024pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 3.  IMPLEMENTING TYPESCRIPT FUNCTIONS AS [][]LLVM[][] [][]IR[][] \T1/cmr/m/n/10.95 133
+Overfull \hbox (211.0912pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 3.  CODE GENERATION TECHNIQUES FOR TYPESCRIPT TO [][]LLVM[][] [][]IR[][] TRANSLATION \T1/cmr/m/n/10.95 133
  []
 
-[133]) (./getting-started/implementing-functions/loops-phi-nodes.tex
-Overfull \hbox (72.31024pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 3.  IMPLEMENTING TYPESCRIPT FUNCTIONS AS [][]LLVM[][] [][]IR[][] \T1/cmr/m/n/10.95 134
+[133]
+Overfull \hbox (211.0912pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 3.  CODE GENERATION TECHNIQUES FOR TYPESCRIPT TO [][]LLVM[][] [][]IR[][] TRANSLATION \T1/cmr/m/n/10.95 134
  []
 
-[134]
-Overfull \hbox (72.31024pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 3.  IMPLEMENTING TYPESCRIPT FUNCTIONS AS [][]LLVM[][] [][]IR[][] \T1/cmr/m/n/10.95 135
+[134]) (./getting-started/implementing-functions/loops-phi-nodes.tex
+Overfull \hbox (211.0912pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 3.  CODE GENERATION TECHNIQUES FOR TYPESCRIPT TO [][]LLVM[][] [][]IR[][] TRANSLATION \T1/cmr/m/n/10.95 135
  []
 
 [135]
-Overfull \hbox (72.31024pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 3.  IMPLEMENTING TYPESCRIPT FUNCTIONS AS [][]LLVM[][] [][]IR[][] \T1/cmr/m/n/10.95 136
+Overfull \hbox (211.0912pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 3.  CODE GENERATION TECHNIQUES FOR TYPESCRIPT TO [][]LLVM[][] [][]IR[][] TRANSLATION \T1/cmr/m/n/10.95 136
  []
 
 [136]
-Overfull \hbox (72.31024pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 3.  IMPLEMENTING TYPESCRIPT FUNCTIONS AS [][]LLVM[][] [][]IR[][] \T1/cmr/m/n/10.95 137
+Overfull \hbox (211.0912pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 3.  CODE GENERATION TECHNIQUES FOR TYPESCRIPT TO [][]LLVM[][] [][]IR[][] TRANSLATION \T1/cmr/m/n/10.95 137
  []
 
-[137]) (./getting-started/implementing-functions/type-shortcuts.tex)) (./multi-arch/part.tex
-Overfull \hbox (72.31024pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 3.  IMPLEMENTING TYPESCRIPT FUNCTIONS AS [][]LLVM[][] [][]IR[][] \T1/cmr/m/n/10.95 138
+[137]
+
+./getting-started/implementing-functions/loops-phi-nodes.tex:137: LaTeX Error: Unicode character ⇄ (U+21C4)
+               not set up for use with LaTeX.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.137 ...ode (\texttt{entry} → \texttt{loop} ⇄
+                                                   \texttt{loop} → \texttt...
+You may provide a definition with
+\DeclareUnicodeCharacter 
+
+) (./getting-started/implementing-functions/type-shortcuts.tex
+Overfull \hbox (211.0912pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 3.  CODE GENERATION TECHNIQUES FOR TYPESCRIPT TO [][]LLVM[][] [][]IR[][] TRANSLATION \T1/cmr/m/n/10.95 138
  []
 
-[138] [139
+[138])) (./multi-arch/part.tex
+Overfull \hbox (211.0912pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 3.  CODE GENERATION TECHNIQUES FOR TYPESCRIPT TO [][]LLVM[][] [][]IR[][] TRANSLATION \T1/cmr/m/n/10.95 139
+ []
+
+[139] [140
 
 ]) (./multi-arch/compiling-architectures.tex
 Chapter 4.
-(./multi-arch/compiling-architectures/target-triples.tex [140
+(./multi-arch/compiling-architectures/target-triples.tex [141
 
 ]) (./multi-arch/compiling-architectures/compiling-with-llc.tex) (./multi-arch/compiling-architectures/architecture-specific-code.tex
-Overfull \hbox (106.77922pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 4.  COMPILING [][]LLVM[][] [][]IR[][] FOR DIFFERENT [][]CPU[][] ARCHITECTURES \T1/cmr/m/n/10.95 141
+Overfull \hbox (140.57657pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 4.  TARGET-SPECIFIC CODE GENERATION FOR [][]CPU[][] ARCHITECTURES \T1/cmr/m/n/10.95 142
  []
 
-[141]) (./multi-arch/compiling-architectures/data-layout.tex
-Overfull \hbox (106.77922pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 4.  COMPILING [][]LLVM[][] [][]IR[][] FOR DIFFERENT [][]CPU[][] ARCHITECTURES \T1/cmr/m/n/10.95 142
+[142]) (./multi-arch/compiling-architectures/data-layout.tex
+Overfull \hbox (140.57657pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 4.  TARGET-SPECIFIC CODE GENERATION FOR [][]CPU[][] ARCHITECTURES \T1/cmr/m/n/10.95 143
  []
 
-[142]) (./multi-arch/compiling-architectures/cross-compilation.tex
-Overfull \hbox (106.77922pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 4.  COMPILING [][]LLVM[][] [][]IR[][] FOR DIFFERENT [][]CPU[][] ARCHITECTURES \T1/cmr/m/n/10.95 143
+[143]) (./multi-arch/compiling-architectures/cross-compilation.tex
+Overfull \hbox (140.57657pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 4.  TARGET-SPECIFIC CODE GENERATION FOR [][]CPU[][] ARCHITECTURES \T1/cmr/m/n/10.95 144
  []
 
-[143])) (./multi-arch/gpu-programming.tex
-Overfull \hbox (106.77922pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 4.  COMPILING [][]LLVM[][] [][]IR[][] FOR DIFFERENT [][]CPU[][] ARCHITECTURES \T1/cmr/m/n/10.95 144
+[144])) (./multi-arch/gpu-programming.tex
+Overfull \hbox (140.57657pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 4.  TARGET-SPECIFIC CODE GENERATION FOR [][]CPU[][] ARCHITECTURES \T1/cmr/m/n/10.95 145
  []
 
-[144]
+[145]
 Chapter 5.
-(./multi-arch/gpu-programming/introduction.tex) (./multi-arch/gpu-programming/nvidia-cuda.tex [145
+(./multi-arch/gpu-programming/introduction.tex) (./multi-arch/gpu-programming/nvidia-cuda.tex [146
 
 ]
-Overfull \hbox (160.29198pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 5.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS ALL ARCHITECTURES \T1/cmr/m/n/10.95 146
+Overfull \hbox (233.37492pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 5.  UNIFIED [][]GPU[][] PROGRAMMING MODEL ACROSS HETEROGENEOUS ARCHITECTURES \T1/cmr/m/n/10.95 147
  []
 
-[146]
-Overfull \hbox (160.29198pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 5.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS ALL ARCHITECTURES \T1/cmr/m/n/10.95 147
+[147]
+Overfull \hbox (233.37492pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 5.  UNIFIED [][]GPU[][] PROGRAMMING MODEL ACROSS HETEROGENEOUS ARCHITECTURES \T1/cmr/m/n/10.95 148
  []
 
-[147]) (./multi-arch/gpu-programming/amd-rocm.tex
-Overfull \hbox (160.29198pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 5.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS ALL ARCHITECTURES \T1/cmr/m/n/10.95 148
+[148]) (./multi-arch/gpu-programming/amd-rocm.tex
+Overfull \hbox (233.37492pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 5.  UNIFIED [][]GPU[][] PROGRAMMING MODEL ACROSS HETEROGENEOUS ARCHITECTURES \T1/cmr/m/n/10.95 149
  []
 
-[148]) (./multi-arch/gpu-programming/intel-opencl.tex
-Overfull \hbox (160.29198pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 5.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS ALL ARCHITECTURES \T1/cmr/m/n/10.95 149
+[149]) (./multi-arch/gpu-programming/intel-opencl.tex
+Overfull \hbox (233.37492pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 5.  UNIFIED [][]GPU[][] PROGRAMMING MODEL ACROSS HETEROGENEOUS ARCHITECTURES \T1/cmr/m/n/10.95 150
  []
 
-[149]
+[150]
 Underfull \hbox (badness 5475) in paragraph at lines 29--30
 []\T1/cmtt/m/n/10.95 SPIRVCodegen.opencl.getGlobalIdX/Y/Z\T1/cmr/m/n/10.95 (+20) : Global work-
  []
@@ -1714,31 +1733,31 @@ Overfull \hbox (121.41637pt too wide) in alignment at lines 37--55
  []
 
 
-Overfull \hbox (160.29198pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 5.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS ALL ARCHITECTURES \T1/cmr/m/n/10.95 150
+Overfull \hbox (233.37492pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 5.  UNIFIED [][]GPU[][] PROGRAMMING MODEL ACROSS HETEROGENEOUS ARCHITECTURES \T1/cmr/m/n/10.95 151
  []
 
-[150]) (./multi-arch/gpu-programming/gpu-compilation.tex
-Overfull \hbox (160.29198pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 5.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS ALL ARCHITECTURES \T1/cmr/m/n/10.95 151
+[151]) (./multi-arch/gpu-programming/gpu-compilation.tex
+Overfull \hbox (233.37492pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 5.  UNIFIED [][]GPU[][] PROGRAMMING MODEL ACROSS HETEROGENEOUS ARCHITECTURES \T1/cmr/m/n/10.95 152
  []
 
-[151]
+[152]
 Overfull \hbox (5.4601pt too wide) in paragraph at lines 40--40
 |[][][]\T1/cmr/bx/n/12 (-20) AMD[][]: Com-pil-ing [][]AMDGPU[][] [][]IR[][] to [][]GCN[][]/[][]RDNA[][]| 
  []
 
 
-Overfull \hbox (160.29198pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 5.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS ALL ARCHITECTURES \T1/cmr/m/n/10.95 152
- []
-
-[152]
-Overfull \hbox (160.29198pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 5.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS ALL ARCHITECTURES \T1/cmr/m/n/10.95 153
+Overfull \hbox (233.37492pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 5.  UNIFIED [][]GPU[][] PROGRAMMING MODEL ACROSS HETEROGENEOUS ARCHITECTURES \T1/cmr/m/n/10.95 153
  []
 
 [153]
+Overfull \hbox (233.37492pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 5.  UNIFIED [][]GPU[][] PROGRAMMING MODEL ACROSS HETEROGENEOUS ARCHITECTURES \T1/cmr/m/n/10.95 154
+ []
+
+[154]
 Underfull \hbox (badness 10000) in paragraph at lines 113--114
 []|\T1/cmtt/m/n/10.95 llc -march=nvptx64 -mcpu=sm_XX
  []
@@ -1759,11 +1778,11 @@ Overfull \hbox (94.79pt too wide) in alignment at lines 109--119
  []
 
 )) (./reference/part.tex
-Overfull \hbox (160.29198pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 5.  [][]GPU[][] PROGRAMMING: SAME FUNCTION ACROSS ALL ARCHITECTURES \T1/cmr/m/n/10.95 154
+Overfull \hbox (233.37492pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 5.  UNIFIED [][]GPU[][] PROGRAMMING MODEL ACROSS HETEROGENEOUS ARCHITECTURES \T1/cmr/m/n/10.95 155
  []
 
-[154] [155
+[155] [156
 
 ]) (./reference/instruction-reference.tex
 Chapter 6.
@@ -1822,7 +1841,7 @@ Overfull \hbox (94.79001pt too wide) in alignment at lines 4--22
  [] [] [] 
  []
 
-[156
+[157
 
 ]
 Underfull \hbox (badness 10000) in paragraph at lines 29--29
@@ -1904,7 +1923,7 @@ Overfull \hbox (80.56361pt too wide) in alignment at lines 4--28
  [] [] [] 
  []
 
-[157]
+[158]
 Underfull \hbox (badness 10000) in paragraph at lines 45--45
 []|\T1/cmr/m/n/10.95 (+20) Ordered
  []
@@ -1914,7 +1933,7 @@ Overfull \hbox (80.56361pt too wide) in alignment at lines 31--49
  [] [] [] 
  []
 
-) (./reference/instruction-reference/memory-operations.tex [158] [159]) (./reference/instruction-reference/control-flow.tex [160]) (./reference/instruction-reference/type-conversions.tex
+) (./reference/instruction-reference/memory-operations.tex [159] [160]) (./reference/instruction-reference/control-flow.tex [161]) (./reference/instruction-reference/type-conversions.tex
 Underfull \hbox (badness 10000) in paragraph at lines 13--14
 []|\T1/cmtt/m/n/10.95 %r = fptrunc double %a to
  []
@@ -1934,16 +1953,16 @@ Overfull \hbox (94.79001pt too wide) in alignment at lines 3--19
  [] [] [] 
  []
 
-[161]) (./reference/instruction-reference/function-calls.tex) (./reference/instruction-reference/vector-operations.tex [162]) (./reference/instruction-reference/atomic-operations.tex [163])) (./reference/memory-model.tex [164]
+[162]) (./reference/instruction-reference/function-calls.tex) (./reference/instruction-reference/vector-operations.tex [163]) (./reference/instruction-reference/atomic-operations.tex [164])) (./reference/memory-model.tex [165]
 Chapter 7.
-(./reference/memory-model/stack-vs-heap.tex [165
+(./reference/memory-model/stack-vs-heap.tex [166
 
 ]) (./reference/memory-model/alignment.tex
 Overfull \hbox (94.79pt too wide) in alignment at lines 24--44
  [] [] [] 
  []
 
-[166]) (./reference/memory-model/address-spaces.tex
+[167]) (./reference/memory-model/address-spaces.tex
 Underfull \hbox (badness 10000) in paragraph at lines 13--13
 []|\T1/cmr/m/n/10.95 (+20) Shared
  []
@@ -1953,11 +1972,11 @@ Overfull \hbox (107.18999pt too wide) in alignment at lines 5--19
  [] [] [] [] 
  []
 
-[167]) (./reference/memory-model/getelementptr.tex [168]) (./reference/memory-model/volatile-access.tex) (./reference/memory-model/atomic-operations.tex [169])) (./reference/type-system.tex [170]
+[168]) (./reference/memory-model/getelementptr.tex [169]) (./reference/memory-model/volatile-access.tex) (./reference/memory-model/atomic-operations.tex [170])) (./reference/type-system.tex [171]
 Chapter 8.
-(./reference/type-system/introduction.tex) (./reference/type-system/integer-types.tex [171
+(./reference/type-system/introduction.tex) (./reference/type-system/integer-types.tex [172
 
-]) (./reference/type-system/floating-point-types.tex) (./reference/type-system/pointer-types.tex [172]) (./reference/type-system/array-types.tex) (./reference/type-system/struct-types.tex [173]) (./reference/type-system/vector-types.tex [174]) (./reference/type-system/function-types.tex [175]) (./reference/type-system/void-type.tex) (./reference/type-system/type-compatibility.tex [176])) (./advanced/part.tex [177] [178
+]) (./reference/type-system/floating-point-types.tex) (./reference/type-system/pointer-types.tex [173]) (./reference/type-system/array-types.tex) (./reference/type-system/struct-types.tex [174]) (./reference/type-system/vector-types.tex [175]) (./reference/type-system/function-types.tex [176]) (./reference/type-system/void-type.tex) (./reference/type-system/type-compatibility.tex [177])) (./advanced/part.tex [178] [179
 
 ]) (./advanced/gpu-memory.tex
 Chapter 9.
@@ -1966,104 +1985,104 @@ Overfull \hbox (107.18999pt too wide) in alignment at lines 7--21
  [] [] [] [] 
  []
 
-) (./advanced/gpu-memory/global-memory.tex [179
+) (./advanced/gpu-memory/global-memory.tex [180
 
 ]) (./advanced/gpu-memory/shared-memory.tex
-Overfull \hbox (121.88013pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 9.  [][]GPU[][] MEMORY HIERARCHIES AND THREAD SYNCHRONIZATION \T1/cmr/m/n/10.95 180
- []
-
-[180]) (./advanced/gpu-memory/constant-memory.tex) (./advanced/gpu-memory/thread-synchronization.tex
 Overfull \hbox (121.88013pt too wide) has occurred while \output is active
 \T1/cmr/m/sl/10.95 CHAPTER 9.  [][]GPU[][] MEMORY HIERARCHIES AND THREAD SYNCHRONIZATION \T1/cmr/m/n/10.95 181
  []
 
-[181]
+[181]) (./advanced/gpu-memory/constant-memory.tex) (./advanced/gpu-memory/thread-synchronization.tex
 Overfull \hbox (121.88013pt too wide) has occurred while \output is active
 \T1/cmr/m/sl/10.95 CHAPTER 9.  [][]GPU[][] MEMORY HIERARCHIES AND THREAD SYNCHRONIZATION \T1/cmr/m/n/10.95 182
  []
 
-[182]) (./advanced/gpu-memory/memory-fences.tex
+[182]
 Overfull \hbox (121.88013pt too wide) has occurred while \output is active
 \T1/cmr/m/sl/10.95 CHAPTER 9.  [][]GPU[][] MEMORY HIERARCHIES AND THREAD SYNCHRONIZATION \T1/cmr/m/n/10.95 183
  []
 
-[183]
+[183]) (./advanced/gpu-memory/memory-fences.tex
 Overfull \hbox (121.88013pt too wide) has occurred while \output is active
 \T1/cmr/m/sl/10.95 CHAPTER 9.  [][]GPU[][] MEMORY HIERARCHIES AND THREAD SYNCHRONIZATION \T1/cmr/m/n/10.95 184
  []
 
-[184]) (./advanced/gpu-memory/tiled-matrix-multiplication.tex
+[184]
 Overfull \hbox (121.88013pt too wide) has occurred while \output is active
 \T1/cmr/m/sl/10.95 CHAPTER 9.  [][]GPU[][] MEMORY HIERARCHIES AND THREAD SYNCHRONIZATION \T1/cmr/m/n/10.95 185
  []
 
-[185]
+[185]) (./advanced/gpu-memory/tiled-matrix-multiplication.tex
 Overfull \hbox (121.88013pt too wide) has occurred while \output is active
 \T1/cmr/m/sl/10.95 CHAPTER 9.  [][]GPU[][] MEMORY HIERARCHIES AND THREAD SYNCHRONIZATION \T1/cmr/m/n/10.95 186
  []
 
-[186]) (./advanced/gpu-memory/key-takeaways.tex)) (./advanced/future-work.tex
+[186]
 Overfull \hbox (121.88013pt too wide) has occurred while \output is active
 \T1/cmr/m/sl/10.95 CHAPTER 9.  [][]GPU[][] MEMORY HIERARCHIES AND THREAD SYNCHRONIZATION \T1/cmr/m/n/10.95 187
  []
 
-[187]
-Chapter 10.
-(./advanced/future-work/current-state.tex) (./advanced/future-work/apple-gpu-challenge.tex [188
-
-]) (./advanced/future-work/typescript-developers.tex
-Overfull \hbox (38.30794pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 10.  FUTURE WORK: APPLE SILICON [][]GPU[][] SUPPORT \T1/cmr/m/n/10.95 189
+[187]) (./advanced/gpu-memory/key-takeaways.tex)) (./advanced/future-work.tex
+Overfull \hbox (121.88013pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 9.  [][]GPU[][] MEMORY HIERARCHIES AND THREAD SYNCHRONIZATION \T1/cmr/m/n/10.95 188
  []
 
-[189]) (./advanced/future-work/pytorch-tensorflow.tex) (./advanced/future-work/waiting-for.tex
+[188]
+Chapter 10.
+(./advanced/future-work/current-state.tex) (./advanced/future-work/apple-gpu-challenge.tex [189
+
+]) (./advanced/future-work/typescript-developers.tex
+Overfull \hbox (113.6657pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 10.  RESEARCH DIRECTIONS: APPLE SILICON [][]GPU[][] INTEGRATION \T1/cmr/m/n/10.95 190
+ []
+
+[190]) (./advanced/future-work/pytorch-tensorflow.tex) (./advanced/future-work/waiting-for.tex
 Overfull \hbox (36.61633pt too wide) in paragraph at lines 18--19
 []\T1/cmr/m/n/10.95 (-20) Alternatively, we could gen-er-ate \T1/cmtt/m/n/10.95 .metal \T1/cmr/m/n/10.95 (-20) source files programmatically[[]]: 
  []
 
 
-Overfull \hbox (38.30794pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 10.  FUTURE WORK: APPLE SILICON [][]GPU[][] SUPPORT \T1/cmr/m/n/10.95 190
+Overfull \hbox (113.6657pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 10.  RESEARCH DIRECTIONS: APPLE SILICON [][]GPU[][] INTEGRATION \T1/cmr/m/n/10.95 191
  []
 
-[190]) (./advanced/future-work/current-workarounds.tex) (./advanced/future-work/unified-memory.tex) (./advanced/future-work/timeline.tex
-Overfull \hbox (38.30794pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 10.  FUTURE WORK: APPLE SILICON [][]GPU[][] SUPPORT \T1/cmr/m/n/10.95 191
+[191]) (./advanced/future-work/current-workarounds.tex) (./advanced/future-work/unified-memory.tex) (./advanced/future-work/timeline.tex
+Overfull \hbox (113.6657pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 10.  RESEARCH DIRECTIONS: APPLE SILICON [][]GPU[][] INTEGRATION \T1/cmr/m/n/10.95 192
  []
 
-[191]) (./advanced/future-work/community-contributions.tex)) (./compiler/part.tex
-Overfull \hbox (38.30794pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 10.  FUTURE WORK: APPLE SILICON [][]GPU[][] SUPPORT \T1/cmr/m/n/10.95 192
+[192]) (./advanced/future-work/community-contributions.tex)) (./compiler/part.tex
+Overfull \hbox (113.6657pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 10.  RESEARCH DIRECTIONS: APPLE SILICON [][]GPU[][] INTEGRATION \T1/cmr/m/n/10.95 193
  []
 
-[192] [193
+[193] [194
 
 ]) (./compiler/typescript-to-gpu-compiler.tex
 Chapter 11.
-(./compiler/building-strategy-and-main-concepts.tex [194
+(./compiler/building-strategy-and-main-concepts.tex [195
 
 ]
-Overfull \hbox (29.76569pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 11.  BUILDING A TYPESCRIPT TO GPU COMPILER \T1/cmr/m/n/10.95 195
- []
-
-[195]
-Overfull \hbox (29.76569pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 11.  BUILDING A TYPESCRIPT TO GPU COMPILER \T1/cmr/m/n/10.95 196
+Overfull \hbox (171.10507pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 11.  COMPILER DESIGN: TYPESCRIPT TO [][]GPU[][] TRANSLATION FRAMEWORK \T1/cmr/m/n/10.95 196
  []
 
 [196]
-Overfull \hbox (29.76569pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 11.  BUILDING A TYPESCRIPT TO GPU COMPILER \T1/cmr/m/n/10.95 197
+Overfull \hbox (171.10507pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 11.  COMPILER DESIGN: TYPESCRIPT TO [][]GPU[][] TRANSLATION FRAMEWORK \T1/cmr/m/n/10.95 197
  []
 
-[197])) (./bibliography.tex
-Overfull \hbox (29.76569pt too wide) has occurred while \output is active
-\T1/cmr/m/sl/10.95 CHAPTER 11.  BUILDING A TYPESCRIPT TO GPU COMPILER \T1/cmr/m/n/10.95 198
+[197]
+Overfull \hbox (171.10507pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 11.  COMPILER DESIGN: TYPESCRIPT TO [][]GPU[][] TRANSLATION FRAMEWORK \T1/cmr/m/n/10.95 198
  []
 
-[198]
+[198])) (./bibliography.tex
+Overfull \hbox (171.10507pt too wide) has occurred while \output is active
+\T1/cmr/m/sl/10.95 CHAPTER 11.  COMPILER DESIGN: TYPESCRIPT TO [][]GPU[][] TRANSLATION FRAMEWORK \T1/cmr/m/n/10.95 199
+ []
+
+[199]
 Underfull \hbox (badness 1867) in paragraph at lines 23--24
 \T1/cmr/m/n/10.95 (+20) Doc-u-men-ta-tion Archive, 2024. Avail-able at: [][]$\T1/cmtt/m/n/10.95 https : / /
  []
@@ -2088,7 +2107,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 26--27
 \T1/cmr/m/n/10.95 (+20) Avail-able at: [][]$\T1/cmtt/m/n/10.95 https : / / developer . apple . com / metal /
  []
 
-[199
+[200
 
 
 ]
@@ -2096,7 +2115,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 32--33
 []\T1/cmr/m/n/10.95 (+20) ApsarasX. \T1/cmr/m/it/10.95 (+20) llvm-bindings: [][]LLVM[][] bind-ings for
  []
 
-[200]
+[201]
 Underfull \hbox (badness 10000) in paragraph at lines 56--57
 []\T1/cmr/m/n/10.95 (+20) SamoZ256. \T1/cmr/m/it/10.95 (+20) Break-ing down Metal's in-ter-me-
  []
@@ -2116,7 +2135,7 @@ Overfull \hbox (97.48851pt too wide) in paragraph at lines 56--57
 \T1/cmtt/m/n/10.95 breaking-[]down-[]metals-[]intermediate-[]representation-[]format-[]41827022489c$[][] 
  []
 
-) (./backcover.tex [201]
+) (./backcover.tex [202]
 *geometry* verbose mode - [ newgeometry ] result:
 * driver: pdftex
 * paper: a5paper
@@ -2149,7 +2168,7 @@ Overfull \hbox (97.48851pt too wide) in paragraph at lines 56--57
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
- [202
+ [203
 
 
 ]) (./handbook.aux)
@@ -2163,14 +2182,14 @@ LaTeX Font Warning: Size substitutions with differences
 (Font)              up to 0.6pt have occurred.
 
 Package rerunfilecheck Info: File `handbook.out' has not changed.
-(rerunfilecheck)             Checksum: E673200813231B2B98F02A4CFE0E5D33;23500.
+(rerunfilecheck)             Checksum: CC55EB326D9247E720529F90D21CE9AB;24518.
  ) 
 Here is how much of TeX's memory you used:
- 31750 strings out of 475583
- 576688 string characters out of 5785559
- 2251975 words of memory out of 5000000
+ 31755 strings out of 475583
+ 576751 string characters out of 5785559
+ 2252975 words of memory out of 5000000
  49115 multiletter control sequences out of 15000+600000
- 602189 words of font info for 309 fonts, out of 8000000 for 9000
+ 602400 words of font info for 312 fonts, out of 8000000 for 9000
  475 hyphenation exceptions out of 8191
  89i,8n,90p,7237b,2027s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
@@ -2180,10 +2199,10 @@ pdfTeX warning (dest): name{abbr:GIL} has been referenced but does not exist, re
 pdfTeX warning (dest): name{abbr:NVIDIA} has been referenced but does not exist, replaced by a fixed one
 
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbi1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx0800.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx0900.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx1200.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx1440.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx2074.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx2488.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm0600.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm0800.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm0900.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1200.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1440.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfsl1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfti0900.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfti1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfti1440.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt0800.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt0900.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt1200.pfb>
-Output written on handbook.pdf (216 pages, 1701429 bytes).
+Output written on handbook.pdf (217 pages, 1704469 bytes).
 PDF statistics:
- 6942 PDF objects out of 7423 (max. 8388607)
- 6561 compressed objects within 66 object streams
+ 6941 PDF objects out of 7423 (max. 8388607)
+ 6559 compressed objects within 66 object streams
  3482 named destinations out of 3580 (max. 500000)
- 69228 words of extra memory for PDF output out of 74296 (max. 10000000)
+ 69220 words of extra memory for PDF output out of 74296 (max. 10000000)
 

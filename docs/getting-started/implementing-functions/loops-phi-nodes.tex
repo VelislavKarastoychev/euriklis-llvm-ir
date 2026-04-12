@@ -1,4 +1,4 @@
-\section{Example 3: Loops with \acr{PHI} Nodes}
+\section{Case Study 3: Iterative Control Flow and \acr{PHI} Node Semantics}
 
 \textbf{TypeScript equivalent:}
 \begin{lstlisting}[style=ts]
@@ -131,11 +131,11 @@ exit:
 }
 \end{lstlisting}
 
-\textbf{Key concepts:}
+\textbf{Analysis:}
 \begin{itemize}[noitemsep]
-  \item \texttt{PhiInst}: Merge values from different control flow paths
-  \item Loop structure: \texttt{entry} → \texttt{loop} → (\texttt{loop} or \texttt{exit})
-  \item \acr{SSA} form maintained: \texttt{i}, \texttt{i.next}, \texttt{total}, \texttt{total.next} are all unique
-  \item Back-edge: \texttt{loop} can branch to itself
+  \item \texttt{PhiInst}: Value merging operator for convergent control flow paths in \acr{SSA} form
+  \item Loop control flow graph: Cyclic structure with entry node, loop header, and exit node (\texttt{entry} → \texttt{loop} ⇄ \texttt{loop} → \texttt{exit})
+  \item \acr{SSA} invariant preservation: Distinct register naming for loop variables (\texttt{i}, \texttt{i.next}, \texttt{total}, \texttt{total.next})
+  \item Back-edge representation: Self-referential branch from \texttt{loop} to \texttt{loop} implements iteration
 \end{itemize}
 

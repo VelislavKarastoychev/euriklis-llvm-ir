@@ -1,4 +1,4 @@
-\section{Example 1: Simple Arithmetic}
+\section{Case Study 1: Binary Arithmetic Operations}
 
 \textbf{TypeScript equivalent:}
 \begin{lstlisting}[style=ts]
@@ -64,12 +64,12 @@ entry:
 }
 \end{lstlisting}
 
-\textbf{Key concepts:}
+\textbf{Analysis:}
 \begin{itemize}[noitemsep]
-  \item \texttt{LLVMFunction}: Defines function signature
-  \item \texttt{Parameter}: Typed function argument (automatically prefixed with \texttt{\%})
-  \item \texttt{BasicBlock}: Container for instructions (must end with terminator)
-  \item \texttt{BinaryInst}: Arithmetic operation (add, sub, mul, etc.)
-  \item \texttt{RetInst}: Return value (terminates basic block)
+  \item \texttt{LLVMFunction}: Encapsulates function signature and type information
+  \item \texttt{Parameter}: Represents typed function arguments with automatic SSA register prefixing (\texttt{\%})
+  \item \texttt{BasicBlock}: Provides instruction sequencing container with mandatory terminator semantics
+  \item \texttt{BinaryInst}: Models binary arithmetic operations (addition, subtraction, multiplication)
+  \item \texttt{RetInst}: Implements control flow termination with return value semantics
 \end{itemize}
 

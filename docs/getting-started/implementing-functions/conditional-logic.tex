@@ -1,4 +1,4 @@
-\section{Example 2: Conditional Logic (if-else)}
+\section{Case Study 2: Control Flow and Conditional Branching}
 
 \textbf{TypeScript equivalent:}
 \begin{lstlisting}[style=ts]
@@ -93,11 +93,11 @@ if.else:
 }
 \end{lstlisting}
 
-\textbf{Key concepts:}
+\textbf{Analysis:}
 \begin{itemize}[noitemsep]
-  \item \texttt{ICmpInst}: Integer comparison (returns \texttt{i1} boolean)
-  \item \texttt{BrInst}: Conditional branch (if-else in \acr{LLVM})
-  \item Multiple basic blocks: Each path gets its own block
-  \item Control flow graph: \texttt{entry} → \texttt{if.then} or \texttt{if.else}
+  \item \texttt{ICmpInst}: Integer comparison operation producing boolean (\texttt{i1}) result
+  \item \texttt{BrInst}: Conditional branch instruction implementing binary control flow
+  \item Basic block decomposition: Each execution path represented as distinct basic block
+  \item Control flow graph structure: Single entry node (\texttt{entry}) with divergent successors (\texttt{if.then}, \texttt{if.else})
 \end{itemize}
 
